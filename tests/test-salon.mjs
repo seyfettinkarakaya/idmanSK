@@ -41,6 +41,11 @@ t('payload: ortalama, Setler açıklaması, süre, Vücut, süreli hareket, baş
   assert.equal(p.hareketler.length, 2);
   assert.deepEqual(p.hareketler[0], { hareket: 'Standard Pull-up', set: 3, tekrar: 9.67, agirlik: 'Vücut', nabiz: 142, rpe: 9.5, msi: 1, aciklama: 'Setler: 11-9-9. Omuz hassas', sure: '05:08' });
   assert.deepEqual(p.hareketler[1], { hareket: 'Plank', set: 1, tekrar: 45, agirlik: '', nabiz: '', rpe: '', msi: '', aciklama: 'Setler: 45 sn', sure: '00:45' });
+  // 13.4: karaSeans — idman süresi (ilk setten son bitişe) ve seans RPE/MSI/yer/not
+  const st2 = S.replay([...ses.events, { t: 'son', ts: 450000 }], H); // özet ekranında idman bitmiştir
+  assert.deepEqual(S.payload(ses, st2).seans, { sure: '0:07:30', rpe: '', msi: '', yer: '', aciklama: '' });
+  ses.seans = { rpe: 7, msi: 0.5, yer: 'Ev', not: ' iyi ' };
+  assert.deepEqual(S.payload(ses, st2).seans, { sure: '0:07:30', rpe: 7, msi: 0.5, yer: 'Ev', aciklama: 'iyi' });
 });
 
 t('parseSetler / isTimed / fromHistory / lastWorkout', () => {

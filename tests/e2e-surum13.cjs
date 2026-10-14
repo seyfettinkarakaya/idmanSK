@@ -84,13 +84,13 @@ sc('Salon programı: haftalık görünüm; boş güne planla → "Programa yaz" 
   await p.click('#home-gym'); await s.waitScreen('salon-start');
   await p.click('[data-ss="prog"]'); await s.waitScreen('salon-prog');
   assert.match(await txt(s, '#pg-title'), /21 Eylül Pazartesi – 27 Eylül Pazar/);
-  assert.match(await txt(s, '#pg-body'), /salonPlan sayfası gerekir/);
+  assert.match(await txt(s, '#pg-body'), /karaPlan sayfası gerekir/);
   assert.match(await txt(s, '[data-pg-gun="2026-09-23"]'), /Çarşamba.*🏊 yüzme/);
   await p.click('[data-pg="planla"][data-t="2026-09-24"]'); await s.waitScreen('salon-plan');
   await p.click('[data-sp-grup="Shoulders"]'); await p.click('#sp-next');
   await p.click('[data-sp-ex="Band External Rotation"]'); await p.click('[data-sp-ex="Dumbbell Shoulder Press"]');
   await p.click('#sp-next');
-  assert.match(await txt(s, '#sp-body .sp-note'), /Plana yaz.*salonPlan.*\(24 Eylül/); // 13.3: "Programa yaz" → alt çubukta "Plana yaz"
+  assert.match(await txt(s, '#sp-body .sp-note'), /Plana yaz.*karaPlan.*\(24 Eylül/); // 13.3: "Programa yaz" → alt çubukta "Plana yaz"
   await p.click('#sp-save'); await s.waitScreen('salon-prog');
   const plan = s.envs.SALON.sheets.plan;
   assert.ok(plan, 'plan sayfası açıldı');
@@ -119,8 +119,8 @@ sc('Salon programı: bugünün programı tabloda varsa ana sayfa salon kartında
   ]);
   const s = await launch({ salonSheets: sh, ref: true }); const p = s.page;
   await s.waitScreen('home');
-  await p.waitForFunction(() => !document.getElementById('home-gym-go').hidden && /salonPlan/.test(document.getElementById('home-gym-go').textContent));
-  assert.match(await txt(s, '#home-gym-go'), /Bugün · Çarşamba 23 Eylül.*Band Bent Over Row\s*4×12 · 20 kg.*Front Plank\s*3×45 sn\s*salonPlan · tablodan/);
+  await p.waitForFunction(() => !document.getElementById('home-gym-go').hidden && /karaPlan/.test(document.getElementById('home-gym-go').textContent));
+  assert.match(await txt(s, '#home-gym-go'), /Bugün · Çarşamba 23 Eylül.*Band Bent Over Row\s*4×12 · 20 kg.*Front Plank\s*3×45 sn\s*karaPlan · tablodan/);
   await gymBasla(s, 'Hiçbiri'); // 13.3: planda artış önerisi sorulur; Hiçbiri → plandaki değerler
   const ses = await s.ls('ysk.salonSession');
   assert.equal(ses.programTarih, '2026-09-23');
@@ -326,7 +326,7 @@ sc('13.2.0 yüzme: geçerli CSS yoksa uyarı ve bölge yok; çok kısa tekrar so
 sc('13.2.0 salon: artış önerisinde "Hiçbiri" plandaki değerlerle başlar; biten setlerin tekrarı ve ağırlığı sonradan düzeltilir', async ({ launch }) => {
   const s = await launch({ salonSheets: bugunPlanli(salonV12()), ref: true }); const p = s.page;
   await s.waitScreen('home');
-  await p.waitForFunction(() => /salonPlan/.test(document.getElementById('home-gym-go').textContent));
+  await p.waitForFunction(() => /karaPlan/.test(document.getElementById('home-gym-go').textContent));
   await p.click('#home-gym-start'); await s.waitModal('Artış önerisi · 2 hareket');
   assert.match(await txt(s, '#modal-body'), /Dumbbell Shoulder Press\s*12,5 kg → 15 kg.*Band Bent Over Row\s*15 → 16 tekrar/);
   await s.modalClick('Hiçbiri'); await s.waitScreen('salon');

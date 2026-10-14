@@ -23,7 +23,7 @@ class Sheet {
   }; }
 }
 // idmanSK (13.2): betikler yeni sayfa adlarını kullanır; test kurguları eski adlarla yazılmıştır → eşleme.
-const ALIAS = { havuzPlan: 'Plan', havuzVeri: 'eski', havuzSeans: 'seans', salonVeri: 'idman', salonPlan: 'plan', salonHar: 'H', salonHKEtki: 'hkEtki', faz: 'fazBilgi' };
+const ALIAS = { yuzmePlan: 'Plan', yuzmeVeri: 'eski', yuzmeSeans: 'seans', karaVeri: 'idman', karaPlan: 'plan', havuzPlan: 'Plan', havuzVeri: 'eski', havuzSeans: 'seans', salonVeri: 'idman', salonPlan: 'plan', salonHar: 'H', salonHKEtki: 'hkEtki', faz: 'fazBilgi' };
 function makeEnv(sheets, token='secret', file='idman.gs', { alias = true } = {}) {
   const ss = { getSheetByName: n => sheets[n] || (alias && ALIAS[n] && sheets[ALIAS[n]]) || null, getSpreadsheetTimeZone: ()=>'UTC', insertSheet: n => { if (ss.failInsert) throw new Error('insert failed'); return (sheets[alias && ALIAS[n] ? ALIAS[n] : n] = new Sheet(n, [])); } };
   const pad=n=>String(n).padStart(2,'0');

@@ -267,7 +267,7 @@ const server = http.createServer((req, res) => {
   const seans = env.sheets.seans.data[1];
   assert.deepStrictEqual([seans[2], seans[3], seans[4], seans[5], seans[6]], [600, 50, 8, 'sag omuz 1; bel 0.5', 'Ana set iyi geçti']);
   assert.strictEqual(env.sheets.Plan.data.length, 3);
-  assert.match(await page.textContent('#done-text'), /havuzVeri sayfasına yazıldı, 8 satır havuzPlan'dan silindi.*telefonda da saklandı/); // 13.2: arşiv yok
+  assert.match(await page.textContent('#done-text'), /yuzmeVeri sayfasına yazıldı, 8 satır yuzmePlan'dan silindi.*telefonda da saklandı/); // 13.2: arşiv yok
   assert.ok(!env.sheets.arsiv);
 
   // Çevrimdışı: kuyruk

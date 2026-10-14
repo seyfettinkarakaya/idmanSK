@@ -98,6 +98,7 @@ async function launch(opts = {}) {
   if (salonSheets) {
     giris.idman = salonSheets.idman;
     if (salonSheets.plan) giris.plan = salonSheets.plan;
+    if (salonSheets.karaSeans) giris.karaSeans = salonSheets.karaSeans; // 13.4
     if (salonSheets.H) refSheets.H = salonSheets.H;
     if (salonSheets.hkEtki) refSheets.hkEtki = salonSheets.hkEtki;
     if (salonSheets.ref) refSheets.bilgi = bilgiBw(salonSheets.ref, refSheets.bilgi);

@@ -103,6 +103,18 @@ t('yük: yüzme + salon seansları, telefon/tablo birleşimi, kas yükü', () =>
   assert.ok(Math.abs(L[2].kas['Sırt'] - 40 * 0.8) < 1e-9 && Math.abs(L[2].kas.Biseps - 40 * 0.2 / 3) < 1e-9, 'Arms üç gruba bölünür');
 });
 
+t('13.4 yük: karaSeans (ya da telefondaki seans özeti) varsa gerçek süre × idman RPE; yoksa hareket toplamı × ortalama', () => {
+  const salonGecmis = [{ tarih: '2026-10-01', hareket: 'Row', set: 4, tekrar: 12, rpe: 7, sure: '10:00', msi: 1 }, { tarih: '2026-10-02', hareket: 'Row', set: 4, tekrar: 12, rpe: 7, sure: '10:00' }];
+  const hist = [{ tur: 'salon', tarih: '2026-10-03', endedAt: 1, hareketler: [{ hareket: 'Row', set: 3, tekrar: 10, rpe: 8, sure: '05:00' }], seans: { sure: '0:40:00', rpe: 6, msi: '', yer: 'Ev', aciklama: '' } }];
+  const salonSeans = [{ tarih: '2026-10-01', sure: '0:50:00', rpe: 8, msi: 0, yer: 'Salon' }, { tarih: '2026-10-02', sure: '0:45:00', rpe: null }];
+  const L = Y.seanslar({ hist, salonGecmis, salonSeans });
+  const by = Object.fromEntries(L.map((x) => [x.tarih, x]));
+  assert.deepEqual([by['2026-10-01'].dk, by['2026-10-01'].rpe, by['2026-10-01'].yuk], [50, 8, 400], 'karaSeans: 50 dk × RPE 8');
+  assert.deepEqual([by['2026-10-02'].dk, by['2026-10-02'].rpe, by['2026-10-02'].yuk], [45, 7, 315], 'RPE boşsa hareket ortalaması, süre seanstan');
+  assert.deepEqual([by['2026-10-03'].dk, by['2026-10-03'].rpe, by['2026-10-03'].yuk], [40, 6, 240], 'telefondaki seans özeti');
+  assert.equal(Y.seanslar({ salonGecmis }).find((x) => x.tarih === '2026-10-01').yuk, 70, 'seans yoksa eskisi gibi');
+});
+
 t('yük: form eğrisi, oran, toparlanma, BR payı, haftalık gün', () => {
   const g = {};
   for (let i = 0; i < 28; i++) g[Y.gunEkle('2026-09-10', i)] = i % 2 ? 0 : 400;

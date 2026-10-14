@@ -84,8 +84,8 @@ sc('Ana sayfa salon kartı: bugünün salonPlan planı (metro + liste) → Planl
   const sh = bugunPlanli(salonV12());
   const s = await launch({ salonSheets: sh, ref: true, viewport: { width: 390, height: 844 } }); const p = s.page;
   await s.waitScreen('home');
-  await p.waitForFunction(() => /salonPlan/.test(document.getElementById('home-gym-go').textContent));
-  assert.match(await txt(s, '#home-gym-go'), /Bugün · Çarşamba 23 Eylül\s*2 hareket · 6 set · ~\d+ dk\s*Dumbbell Shoulder Press\s*3×10 · 12,5 kg\s*Band Bent Over Row\s*3×15 · 15 kg\s*salonPlan · tablodan\s*İdmanı aç\s*Takvim\s*＋ Planla/);
+  await p.waitForFunction(() => /karaPlan/.test(document.getElementById('home-gym-go').textContent));
+  assert.match(await txt(s, '#home-gym-go'), /Bugün · Çarşamba 23 Eylül\s*2 hareket · 6 set · ~\d+ dk\s*Dumbbell Shoulder Press\s*3×10 · 12,5 kg\s*Band Bent Over Row\s*3×15 · 15 kg\s*karaPlan · tablodan\s*İdmanı aç\s*Takvim\s*＋ Planla/);
   assert.equal(await p.$$eval('#home-gym-metro .metro circle', (c) => c.length), 2, 'durak = hareket');
   // Planla → Omuz → hareket → Plana yaz → Yarın
   await p.click('#home-gym-planla'); await s.waitScreen('salon-plan');
@@ -113,8 +113,8 @@ sc('Ana sayfa salon kartı: bugün plan yok → sıradaki gün ("Bu planla başl
   const sh = bugunPlanli(salonV12(), [[D('2026-09-25'), 1, 'Dumbbell Shoulder Press', 3, 10, 15, '', 90, '', '', ''], [D('2026-09-20'), 1, 'Front Plank', 3, 1, 'Vücut', 45, 60, '', '', '']]);
   const s = await launch({ salonSheets: sh, ref: true }); const p = s.page;
   await s.waitScreen('home');
-  await p.waitForFunction(() => /salonPlan/.test(document.getElementById('home-gym-go').textContent));
-  assert.match(await txt(s, '#home-gym-go'), /Cuma · 25 Eylül\s*1 hareket · 3 set.*Dumbbell Shoulder Press\s*3×10 · 15 kg\s*salonPlan · bugün plan yok, sıradaki gün\s*Bu planla başla\s*Takvim\s*＋ Bugün için planla/);
+  await p.waitForFunction(() => /karaPlan/.test(document.getElementById('home-gym-go').textContent));
+  assert.match(await txt(s, '#home-gym-go'), /Cuma · 25 Eylül\s*1 hareket · 3 set.*Dumbbell Shoulder Press\s*3×10 · 15 kg\s*karaPlan · bugün plan yok, sıradaki gün\s*Bu planla başla\s*Takvim\s*＋ Bugün için planla/);
   await p.click('#home-gym-start'); await s.waitScreen('salon'); // 15 kg planda: +2,5 kg önerisi sorulmaz
   const ses = await s.ls('ysk.salonSession');
   assert.equal(ses.tarih, '2026-09-23'); assert.equal(ses.programTarih, '2026-09-25'); assert.equal(ses.hareketler[0].agirlik, 15);
@@ -544,7 +544,7 @@ sc('Planı düzenle: Salon ekranında salonPlan günü → Düzenle → planın 
   const sh = bugunPlanli(salonV12());
   const s = await launch({ salonSheets: sh, ref: true }); const p = s.page;
   await s.waitScreen('home');
-  await p.waitForFunction(() => /salonPlan/.test(document.getElementById('home-gym-go').textContent));
+  await p.waitForFunction(() => /karaPlan/.test(document.getElementById('home-gym-go').textContent));
   await p.click('#home-gym'); await s.waitScreen('salon-start');
   assert.match(await txt(s, '#ss-body'), /23 EYLÜL.*BUGÜN · 2 HAREKET.*Dumbbell Shoulder Press\s*3 × 10 · 12,5 kg.*Band Bent Over Row.*İdmanı aç\s*Düzenle\s*＋ Yeni idman planla/);
   assert.doesNotMatch(await txt(s, '#ss-body'), /SON İDMAN|Son idmanı/, 'salonVeri şablonu yok');

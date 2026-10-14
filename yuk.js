@@ -58,7 +58,7 @@ export function setMetre(set) {
  * hist: ysk.history kayıtları; salonGecmis: SalonTakip idman satırları; etkiPay(ad) → { tabloGrubu: pay }.
  * Aynı gün salon hem telefonda hem tabloda varsa tablodaki kullanılır.
  */
-export function seanslar({ hist = [], salonGecmis = [], etkiPay = () => ({}), katsayi = YUZME_KAS } = {}) {
+export function seanslar({ hist = [], salonGecmis = [], salonSeans = [], etkiPay = () => ({}), katsayi = YUZME_KAS } = {}) {
   const out = [];
   for (const r of hist) {
     if (!r || r.tur === 'salon') continue;
@@ -87,6 +87,10 @@ export function seanslar({ hist = [], salonGecmis = [], etkiPay = () => ({}), ka
   // Salon: tablodaki geçmiş günlere göre; telefonda olup tabloda olmayan günler telefondan.
   const byDate = {};
   for (const g of salonGecmis || []) (byDate[g.tarih] = byDate[g.tarih] || []).push({ hareket: g.hareket, set: g.set, tekrar: g.tekrar, rpe: g.rpe, sure: g.sure, msi: g.msi });
+  // 13.4: seans özeti (karaSeans; yoksa telefondaki kayıt): gerçek süre ve idmanın geneli için RPE
+  const ozet = {};
+  for (const r of hist) if (r && r.tur === 'salon' && r.seans) ozet[r.tarih] = r.seans;
+  for (const k of salonSeans || []) if (k && k.tarih) ozet[k.tarih] = k;
   for (const r of hist) {
     if (!r || r.tur !== 'salon' || byDate[r.tarih]) continue;
     byDate[r.tarih] = (r.hareketler || []).map((x) => ({ hareket: x.hareket, set: x.set, tekrar: x.tekrar, rpe: x.rpe === '' ? null : x.rpe, sure: x.sure, msi: x.msi === '' ? null : x.msi, _ts: r.endedAt }));
@@ -100,8 +104,11 @@ export function seanslar({ hist = [], salonGecmis = [], etkiPay = () => ({}), ka
       sn += s || (Number(x.set) || 1) * ((Number(x.tekrar) || 10) * 3 + 60);
       if (x.rpe != null && x.rpe !== '' && Number.isFinite(Number(x.rpe))) rpes.push(Number(x.rpe));
     }
-    const dk = sn / 60;
-    const rpe = rpes.length ? rpes.reduce((a, b) => a + b, 0) / rpes.length : null;
+    const oz = ozet[tarih];
+    const ozSn = oz ? sureSn(oz.sure) : 0;
+    const ozRpe = oz && oz.rpe !== '' && oz.rpe != null && Number.isFinite(Number(oz.rpe)) ? Number(oz.rpe) : null;
+    const dk = (ozSn || sn) / 60;
+    const rpe = ozRpe != null ? ozRpe : rpes.length ? rpes.reduce((a, b) => a + b, 0) / rpes.length : null;
     const yuk = Math.round(dk * (rpe == null ? 6 : rpe));
     const setTop = rows.reduce((a, x) => a + (Number(x.set) || 1), 0) || 1;
     for (const x of rows) {

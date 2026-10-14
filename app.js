@@ -1391,7 +1391,7 @@ function renderBuHafta() {
       ${g.isler.some((x) => x.tur === 'salon' && x.kaynak === 'oneri') ? `<button class="btn btn-block" data-bh="salon" data-t="${g.tarih}" data-dk="${g.isler.find((x) => x.tur === 'salon').sure || 65}">📅 Salonu planla · programa yaz</button>` : ''}
     </div>`).join('')}
     ${olcum.length ? `<p class="sp-lb">ÖLÇÜM</p>${olcum.map((o) => (/^CSS/.test(o) ? `<button class="hw-g hw-test" data-bh="css">📏 ${esc(o)} · testi yap ›</button>` : `<p class="hw-g">📏 ${esc(o)}</p>`)).join('')}` : ''}
-    <p class="sp-note">Yük = süre (dk) × zorluk (RPE). Yüzme programı idman dosyasındaki havuzPlan'da kalır; önerilen salon günü düzenleyip salonPlan sayfasına yazabilirsin.</p>`;
+    <p class="sp-note">Yük = süre (dk) × zorluk (RPE). Yüzme programı idman dosyasındaki yuzmePlan'da kalır; önerilen salon günü düzenleyip karaPlan sayfasına yazabilirsin.</p>`;
   for (const el of $('bh-body').querySelectorAll('[data-w]')) el.style.width = `${el.dataset.w}%`;
 }
 
@@ -1697,7 +1697,7 @@ async function openDate(tarih) {
   if (!r.plan.setler || !r.plan.setler.length) {
     await modal({
       title: 'Set bulunamadı',
-      body: `<p>${esc(fmtDateTR(tarih))} için havuzPlan sayfasında satır yok.</p>`,
+      body: `<p>${esc(fmtDateTR(tarih))} için yuzmePlan sayfasında satır yok.</p>`,
       actions: [{ label: 'Tamam', value: true }],
     });
     return showDays();
@@ -3527,7 +3527,7 @@ function showDone({ ok, result }) {
   $('done-title').textContent = ok ? 'Kaydedildi' : 'Kaydedilemedi';
   let text;
   if (ok) {
-    text = `${result.yazilanSet} set havuzVeri sayfasına yazıldı, ${result.silinenSet} satır havuzPlan'dan silindi.`;
+    text = `${result.yazilanSet} set yuzmeVeri sayfasına yazıldı, ${result.silinenSet} satır yuzmePlan'dan silindi.`;
     if (result.uyari) text += ` ${result.uyari}`;
     text += ' Seans bu telefonda da saklandı.';
   } else {
@@ -3589,7 +3589,7 @@ const hPay = (ad) => { const d = salonData(); return d ? grup.haritaPay(salon.gr
 /** Yüzme + salon seansları (yük hesapları için). */
 function seansListesi() {
   const d = salonData();
-  return yuk.seanslar({ hist: data.getHistory(), salonGecmis: d ? d.gecmis : [], etkiPay: (ad) => (d ? salon.grupPay(d.etki, ad) : {}), katsayi: yuk.yuzmeKatsayi(sporRef()) });
+  return yuk.seanslar({ hist: data.getHistory(), salonGecmis: d ? d.gecmis : [], salonSeans: d && Array.isArray(d.seans) ? d.seans : [], etkiPay: (ad) => (d ? salon.grupPay(d.etki, ad) : {}), katsayi: yuk.yuzmeKatsayi(sporRef()) });
 }
 /** Hareketin kısıt durumu (katalog satırı + kurallar). */
 const kisitOf = (ad) => kisit.hareketKisit(katalogOf(ad) || { ad }, kurallar());
@@ -3734,12 +3734,12 @@ function renderGymGo(hz, ses) {
     const set = list.reduce((a, x) => a + (x.set || 0), 0);
     meta = `${list.length} hareket · ${set} set · ${fmtSure(salonTahmin(list))}`;
     const bugun = !hz.tarih || hz.tarih === todayKey();
-    src = hz.tur === 'plan' ? 'Telefonda kayıtlı plan (eski sürüm)' : bugun ? 'salonPlan · tablodan' : 'salonPlan · bugün plan yok, sıradaki gün';
+    src = hz.tur === 'plan' ? 'Telefonda kayıtlı plan (eski sürüm)' : bugun ? 'karaPlan · tablodan' : 'karaPlan · bugün plan yok, sıradaki gün';
     if (!bugun) ana = 'Bu planla başla';
   } else {
     when = 'Plan yok';
     meta = 'Sırada salon planı yok';
-    src = salonData() ? "Tabloda salonPlan'a yazabilir ya da burada planlayabilirsin." : 'Plan yükleniyor…';
+    src = salonData() ? "Tabloda karaPlan'a yazabilir ya da burada planlayabilirsin." : 'Plan yükleniyor…';
     ana = '＋ İdman planla';
   }
   $('home-gym-tag').innerHTML = when;
@@ -3829,7 +3829,7 @@ function renderSalonStart() {
       <div class="pg-act"><button class="btn btn-primary" data-ss="basla" data-t="${t}">${t === bugun ? 'İdmanı aç' : 'Bu planla başla'}</button><button class="btn" data-ss="duzenle" data-t="${t}">Düzenle</button></div>
     </div>`;
   };
-  body.innerHTML = `${gunler.length ? gunler.map(kart).join('') : `<p class="empty">salonPlan'da sırada plan yok. Tabloda yazabilir ya da burada planlayabilirsin.</p>`}
+  body.innerHTML = `${gunler.length ? gunler.map(kart).join('') : `<p class="empty">karaPlan'da sırada plan yok. Tabloda yazabilir ya da burada planlayabilirsin.</p>`}
     <button class="btn btn-block set-gap${gunler.length ? '' : ' btn-primary'}" data-ss="plan">＋ Yeni idman planla</button>
     <button class="btn btn-block set-gap" data-ss="prog">📅 Salon programı (hafta)</button>
     ${sl.err ? `<p class="muted set-gap">Çevrimdışı: son alınan veri gösteriliyor.</p>` : ''}`;
@@ -4781,9 +4781,41 @@ function showSalonOzet() {
       <small>${x.set} × ${esc(fmtDec(x.tekrar))} · ${esc(fmtKg(x.agirlik))} · ${esc(x.sure)}${x.nabiz !== '' ? ` · ${x.nabiz} atım` : ''}${x.rpe !== '' ? ` · RPE ${fmtDec(x.rpe)}` : ''}${x.msi !== '' ? ` · MSI ${fmtDec(x.msi)}` : ''}</small>
       <small>${esc(x.aciklama)}</small></span></div>`).join('') : '<p class="empty">Biten set yok: kaydedilecek hareket yok.</p>'}
     ${missing ? `<p class="dt-why">${missing} harekette RPE/MSI girilmedi; boş yazılır.</p>` : ''}`;
+  if (!sl.ses.seans) { sl.ses.seans = { yer: prefs().yer || 'Salon' }; slPersist(); }
+  $('so-body').querySelector('.so-top').insertAdjacentHTML('afterend', '<div class="so-seans" id="so-seans"></div>');
+  renderSoSeans();
   paint($('so-body'));
   yerlestirMini($('so-body'));
   $('so-save').disabled = !p.hareketler.length;
+}
+
+/** 13.4: idmanın geneli (karaSeans): seans RPE'si, MSI, yer, not — yük hesabı gerçek süre × bu RPE ile yapılır. */
+function renderSoSeans() {
+  const box = $('so-seans');
+  if (!box || !sl.ses) return;
+  const K = sl.ses.seans || {};
+  const rr = sporRef();
+  const grid = (key, vals, cur) => `<div class="sg-grid sg-${key}">${vals.map((v) => `<button data-so="${key}" data-v="${v}" class="${cur === v ? 'is-on' : ''}">${fmtDec(v)}</button>`).join('')}</div>`;
+  const rpeText = rr && K.rpe != null ? ref.scaleText(rr.rpe, K.rpe) : '';
+  const hr = salon.payload(sl.ses, slst()).hareketler.map((x) => Number(x.rpe)).filter((x) => x > 0);
+  const ort = hr.length ? Math.round((hr.reduce((a, b) => a + b, 0) / hr.length) * 10) / 10 : null;
+  box.innerHTML = `<p class="sp-lb">İDMANIN GENELİ <small>— karaSeans'a yazılır, yük bu RPE ile hesaplanır</small></p>
+    <p class="sg-lb">RPE · tüm idman ne kadar zordu?${ort != null ? ` <small>(hareketlerin ortalaması ${fmtDec(ort)})</small>` : ''}</p>${grid('rpe', salon.RPE_DEGERLER, K.rpe)}
+    ${rpeText ? `<p class="sg-desc">${esc(rpeText)} <span>(idmanRef)</span></p>` : ''}
+    <p class="sg-lb">MSI · idman sonrası ağrı</p>${grid('msi', salon.MSI_DEGERLER, K.msi)}
+    <p class="sg-lb">YER</p><div class="sg-grid sg-yer">${['Salon', 'Ev', 'Otel'].map((y) => `<button data-so="yer" data-v="${y}" class="${K.yer === y ? 'is-on' : ''}">${y}</button>`).join('')}</div>
+    <label class="es-blk"><span class="es-l">NOT</span><textarea id="so-not" rows="2" autocomplete="off">${esc(K.not || '')}</textarea></label>`;
+}
+
+function onSoSeansClick(e) {
+  const b = e.target.closest('[data-so]');
+  if (!b || !sl.ses) return;
+  const K = (sl.ses.seans = sl.ses.seans || {});
+  const k = b.dataset.so;
+  const v = k === 'yer' ? b.dataset.v : Number(b.dataset.v);
+  K[k] = K[k] === v && k !== 'yer' ? null : v; // ikinci dokunuş seçimi kaldırır
+  slPersist();
+  renderSoSeans();
 }
 
 /** Geçen benzer idman (en az bir ortak hareket, en yeni tarih) ile hacim ve RPE kıyası. */
@@ -4811,7 +4843,7 @@ function onSoBack() {
 /** Telefonda saklanan kopya (Yapılmış idmanlar). */
 function keepSalonHistory(payload, status) {
   const st = slst();
-  data.addHistory({ id: `s${payload.tarih}-${Date.now()}`, tur: 'salon', tarih: payload.tarih, savedAt: Date.now(), status, startedAt: st.basla, endedAt: st.son, sure: fmtHMS(salon.idmanMs(st, Date.now())), hareketler: payload.hareketler });
+  data.addHistory({ id: `s${payload.tarih}-${Date.now()}`, tur: 'salon', tarih: payload.tarih, savedAt: Date.now(), status, startedAt: st.basla, endedAt: st.son, sure: fmtHMS(salon.idmanMs(st, Date.now())), hareketler: payload.hareketler, seans: payload.seans });
 }
 
 async function saveSalonForm() {
@@ -4891,8 +4923,8 @@ function renderSalonProgram() {
       ${rows.length ? `<ul class="hgg-ls">${liste}</ul><div class="pg-act">${yapildi ? '' : `<button class="btn btn-primary" data-pg="basla" data-t="${t}">İdmana başla</button>`}<button class="btn" data-pg="duzenle" data-t="${t}">Düzenle</button><button class="btn" data-pg="sil" data-t="${t}">Sil</button></div>`
         : t >= bugun ? `<button class="btn btn-block pg-ekle" data-pg="planla" data-t="${t}">＋ Bu güne salon planla</button>` : ''}</div>`);
   }
-  $('pg-body').innerHTML = `${destek ? '' : '<p class="bi-off">Programı tabloda tutmak için idman dosyasında salonPlan sayfası gerekir: ilk kez "Programa yaz" deyince betik sayfayı kendisi açar.</p>'}${gunler.join('')}
-    <p class="sp-note">Program idman dosyasının salonPlan sayfasında durur; masada planla, salonda uygula. Yapılan idman salonVeri'ye yazılır, o günün satırları plandan silinir.</p>`;
+  $('pg-body').innerHTML = `${destek ? '' : '<p class="bi-off">Programı tabloda tutmak için idman dosyasında karaPlan sayfası gerekir: ilk kez "Programa yaz" deyince betik sayfayı kendisi açar.</p>'}${gunler.join('')}
+    <p class="sp-note">Program idman dosyasının karaPlan sayfasında durur; masada planla, salonda uygula. Yapılan idman karaVeri'ye yazılır, o günün satırları plandan silinir.</p>`;
 }
 
 async function onSalonProgramClick(e) {
@@ -4928,7 +4960,7 @@ async function programaYaz() {
   let t = P.hedefTarih;
   if (!t) {
     const gunler = Array.from({ length: 7 }, (_, i) => yuk.gunEkle(todayKey(), i));
-    t = await modal({ title: 'Hangi güne?', body: '<p>Plan idman dosyasının salonPlan sayfasına yazılır; o günün eski planı değişir.</p>', actions: [...gunler.map((g, i) => ({ label: `${i === 0 ? 'Bugün' : i === 1 ? 'Yarın' : ''} ${fmtDateTR(g)}`.trim(), value: g, cls: i === 0 ? 'btn-primary' : '' })), { label: 'Vazgeç', value: '' }] });
+    t = await modal({ title: 'Hangi güne?', body: '<p>Plan idman dosyasının karaPlan sayfasına yazılır; o günün eski planı değişir.</p>', actions: [...gunler.map((g, i) => ({ label: `${i === 0 ? 'Bugün' : i === 1 ? 'Yarın' : ''} ${fmtDateTR(g)}`.trim(), value: g, cls: i === 0 ? 'btn-primary' : '' })), { label: 'Vazgeç', value: '' }] });
     if (!t) return;
   }
   const hareketler = P.liste.map((x) => ({ hareket: x.ad, set: x.set, tekrar: x.sure ? 1 : x.tekrar, agirlik: x.agirlik, sure: x.sure || '', dinlen: x.dinlen, ss: x.ss ? String(P.liste.findIndex((y) => y.ss === x.ss) + 1) : '' }));
@@ -5069,7 +5101,7 @@ function renderSalonPlan() {
           ${i < P.liste.length - 1 ? `<button class="sp-ss${x.ss && P.liste[i + 1].ss === x.ss ? ' is-on' : ''}" data-sp-ss="${i}">${x.ss && P.liste[i + 1].ss === x.ss ? '⛓ süperset · ayır' : '⛓ süperset yap'}</button>` : ''}`;
       }).join('')}
       <button class="btn btn-block sp-ekle" data-sp-add>＋ Hareket ekle</button>
-      <p class="sp-note">Set, tekrar, ağırlık: sağdaki değere dokun. "Plana yaz" planı idman dosyasının salonPlan sayfasına yazar${P.hedefTarih ? ` (${esc(fmtDateTR(P.hedefTarih))})` : ' (gün seçilir)'}; ana sayfada yüzme planı gibi görünür.</p>`;
+      <p class="sp-note">Set, tekrar, ağırlık: sağdaki değere dokun. "Plana yaz" planı idman dosyasının karaPlan sayfasına yazar${P.hedefTarih ? ` (${esc(fmtDateTR(P.hedefTarih))})` : ' (gün seçilir)'}; ana sayfada yüzme planı gibi görünür.</p>`;
     next.textContent = 'İdmana başla';
     next.disabled = !P.liste.length;
   }
@@ -5305,6 +5337,8 @@ function wireSalon() {
   $('sl-giris').addEventListener('click', onGirisClick);
   $('so-back').addEventListener('click', onSoBack);
   $('so-save').addEventListener('click', saveSalonForm);
+  $('so-body').addEventListener('click', onSoSeansClick);
+  $('so-body').addEventListener('input', (e) => { if (e.target.id === 'so-not' && sl.ses) { (sl.ses.seans = sl.ses.seans || {}).not = e.target.value; slPersist(); } });
   $('sp-back').addEventListener('click', onSalonPlanBack);
   $('sp-body').addEventListener('click', onSalonPlanClick);
   $('sp-body').addEventListener('pointerdown', onSalonPlanPointer);

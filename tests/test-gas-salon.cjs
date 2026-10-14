@@ -220,7 +220,7 @@ test('13.2 yeni sayfa adları (eşleme yok): idman havuzPlan/havuzVeri/havuzSean
   assert.ok(f.ok, JSON.stringify(f));
   assert.deepStrictEqual([e.sheets.havuzVeri.getLastRow(), e.sheets.havuzSeans.getLastRow(), e.sheets.havuzPlan.getLastRow()], [2, 2, 1]);
   assert.ok(e.call({ action: 'savePlan', tarih: '2026-10-11', hareketler: [{ hareket: 'Dead Bug', set: 3, tekrar: 10 }] }).ok);
-  assert.ok(e.sheets.salonPlan, 'salonPlan sayfası açılır');
+  assert.ok(e.sheets.karaPlan, '13.4 (bilinçli değişiklik): plan sayfası yoksa güncel adla (karaPlan) açılır');
   const r = makeEnv({
     salonHar: new Sheet('salonHar', ['Exercise', 'Goal Tag', 'Equipment', 'BW Coefficient', 'Swim Transfer Coefficient'], [['Dead Bug', 'Strength', 'Bodyweight', 0.5, 0.8]]),
     salonHKEtki: new Sheet('salonHKEtki', ['Exercise', 'Muscle Group', 'Muscle', 'Kinetic Chain', 'Yük Etki Oranı'], [['Dead Bug', 'Core', 'Rectus Abdominis', 'Stability', 1]]),
@@ -228,6 +228,42 @@ test('13.2 yeni sayfa adları (eşleme yok): idman havuzPlan/havuzVeri/havuzSean
     faz: new Sheet('faz', ['Sezon', 'Faz', 'Tarih_ilk', 'Tarih_son', 'Ad', 'Odak'], [['26-27', 'F1', D('2026-10-12'), D('2026-12-20'), 'Aerobik taban', '']]),
   }, 'secret', 'idmanRef.gs', { alias: false }).call({ action: 'getRef' }).data;
   assert.deepStrictEqual([r.katalog[0].ad, r.etki[0].grup, r.bw[0].kg, r.faz[0].faz, Object.keys(r.bilgi).length], ['Dead Bug', 'Core', 82, 'F1', 0]);
+});
+
+test('13.4 güncel adlar (eşleme yok): yuzmePlan/yuzmeVeri/yuzmeSeans, karaVeri/karaPlan; karaSeans varsa seans satırı yazılır ve getSalon döner; yoksa atlanır', () => {
+  const PH = ['Tarih', 'Sıra', 'Blok', 'Tekrar', 'Mesafe', 'Stil', 'Tür', 'Açıklama', 'Hedef', 'Dinlen', 'Alet', 'Gerçek', 'Kulaç', 'Nabız', 'RPE', 'MSI', 'Not'];
+  const KH = ['Tarih', 'No', 'Hareket', 'Set', 'Tekrar', 'Ağırlık', 'Nabız', 'RPE', 'MSI', 'Açıklama', 'Süre'];
+  const mk = (seans) => makeEnv({
+    yuzmePlan: new Sheet('yuzmePlan', PH, [[D('2026-10-14'), 1, 'WU', 1, 200, 'FR', 'Swim', '', '00:04:00', '', '', '', '', '', '', '', '']]),
+    yuzmeVeri: new Sheet('yuzmeVeri', PH),
+    yuzmeSeans: new Sheet('yuzmeSeans', ['Tarih', 'Süre', 'Mesafe', 'Havuz', 'RPE', 'MSI', 'Açıklama']),
+    karaVeri: new Sheet('karaVeri', KH),
+    karaPlan: new Sheet('karaPlan', ['Tarih', 'Sıra', 'Hareket', 'Set', 'Tekrar', 'Ağırlık', 'Süre', 'Dinlen', 'Süperset', 'Not', 'Durum'], [[D('2026-10-14'), 1, 'Dead Bug', 3, 10, 'Vücut', '', 60, '', '', '']]),
+    ...(seans ? { karaSeans: new Sheet('karaSeans', ['Tarih', 'Süre', 'RPE', 'MSI', 'Yer', 'Açıklama']) } : {}),
+  }, 'secret', 'idman.gs', { alias: false });
+  const e = mk(true);
+  assert.strictEqual(e.call({ action: 'getDates' }).data.length, 1);
+  assert.ok(e.call({ action: 'finishSession', tarih: '2026-10-14', seans: { sure: '00:30:00', mesafe: 200, rpe: 5 }, setler: [{ sira: 1, tamamlandi: true }] }).ok);
+  assert.deepStrictEqual([e.sheets.yuzmeVeri.getLastRow(), e.sheets.yuzmeSeans.getLastRow(), e.sheets.yuzmePlan.getLastRow()], [2, 2, 1]);
+  const r = e.call({ action: 'saveSalon', tarih: '2026-10-14', hareketler: [{ hareket: 'Dead Bug', set: 3, tekrar: 10, agirlik: 'Vücut', sure: '04:00' }], seans: { sure: '0:52:30', rpe: 7, msi: 0.5, yer: 'Salon', aciklama: 'iyi' } });
+  assert.ok(r.ok, JSON.stringify(r)); assert.deepStrictEqual(r.data, { yazilan: 1, silinenPlan: 1 });
+  const ks = e.sheets.karaSeans.data[1];
+  assert.deepStrictEqual([ks[2], ks[3], ks[4], ks[5]], [7, 0.5, 'Salon', 'iyi']);
+  assert.strictEqual(Math.round(ks[1] * 86400), 52 * 60 + 30);
+  const g = e.call({ action: 'getSalon' }).data;
+  assert.deepStrictEqual(g.seans.map((x) => [x.tarih, x.rpe, x.msi, x.yer]), [['2026-10-14', 7, 0.5, 'Salon']]);
+  assert.ok(g.seans[0].sure, 'süre metni');
+  // karaSeans yoksa seans atlanır, idman yine yazılır
+  const e2 = mk(false);
+  const r2 = e2.call({ action: 'saveSalon', tarih: '2026-10-14', hareketler: [{ hareket: 'Dead Bug', set: 3, tekrar: 10, sure: '04:00' }], seans: { sure: '0:40:00', rpe: 6 } });
+  assert.ok(r2.ok); assert.ok(!('seans' in e2.call({ action: 'getSalon' }).data));
+  // karaSeans yazılamazsa karaVeri de geri alınır
+  const e3 = mk(true);
+  e3.sheets.karaSeans.failOn = 'write';
+  const r3 = e3.call({ action: 'saveSalon', tarih: '2026-10-14', hareketler: [{ hareket: 'Dead Bug', set: 3, tekrar: 10, sure: '04:00' }], seans: { sure: '0:40:00', rpe: 6 } });
+  assert.strictEqual(r3.ok, false);
+  assert.strictEqual(e3.sheets.karaVeri.data.slice(1).filter((x) => x.some((v) => v !== '')).length, 0, 'karaVeri geri alındı');
+  assert.strictEqual(e3.sheets.karaPlan.getLastRow(), 2, 'plan silinmedi');
 });
 
 console.log(`idman (salon) / idmanRef betik testleri: TAMAM (${n} senaryo)`);

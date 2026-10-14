@@ -2,7 +2,7 @@
  * @OnlyCurrentDoc
  *
  * idmanSK — "idman" dosyasının arka ucu (yüzme + salon girişleri). Eski Code.gs + Salon.gs birleşimi.
- * Sayfalar: havuzPlan, havuzVeri, havuzSeans (yüzme); salonVeri, salonPlan (salon).
+ * Sayfalar: yuzmePlan, yuzmeVeri, yuzmeSeans (yüzme); karaPlan, karaVeri, karaSeans (kara/salon). Eski adlar da tanınır.
  * Referanslar (bölgeler, CSS, hareket kataloğu, kas etkileri, vücut ağırlığı) ayrı "idmanRef" dosyasında, idmanRef.gs.
  *
  * @OnlyCurrentDoc: betik yalnızca bağlı olduğu tabloya erişebilir; Drive'daki
@@ -20,12 +20,13 @@
  *   getDates, getPlan, finishSession (yüzme); getSalon, saveSalon, savePlan, planYapildi (salon)
  */
 
-// idman dosyası (yüzme + salon girişleri). Sayfa adları:
-var SHEET_PLAN = 'havuzPlan';   // yüzme programı (eski adı Plan)
-var SHEET_ESKI = 'havuzVeri';   // yapılan yüzme setleri (eski adı eski)
-var SHEET_SEANS = 'havuzSeans'; // yüzme seans özeti (eski adı seans)
-var SHEET_IDMAN = 'salonVeri';  // yapılan salon hareketleri (eski: SalonTakip!idman)
-var SHEET_SALON_PLAN = 'salonPlan'; // salon programı (eski: SalonTakip!plan)
+// idman dosyası (yüzme + kara girişleri). Sayfa adları: ilk ad güncel, sonrakiler eski adlar (geçişte bozulmasın).
+var SHEET_PLAN = ['yuzmePlan', 'havuzPlan'];        // yüzme programı
+var SHEET_ESKI = ['yuzmeVeri', 'havuzVeri'];        // yapılan yüzme setleri
+var SHEET_SEANS = ['yuzmeSeans', 'havuzSeans'];     // yüzme seans özeti (isteğe bağlı)
+var SHEET_IDMAN = ['karaVeri', 'salonVeri'];        // yapılan kara (salon) hareketleri
+var SHEET_SALON_PLAN = ['karaPlan', 'salonPlan'];   // kara (salon) programı
+var SHEET_KARA_SEANS = ['karaSeans', 'salonSeans']; // kara idmanı seans özeti (isteğe bağlı, 13.4)
 var LOCK_WAIT_MS = 30000;
 var TOKEN_PROPERTY = 'TOKEN';
 
@@ -267,10 +268,10 @@ function getPlan_(req) {
 // ---------------------------------------------------------------------------
 // finishSession
 //
-// Sıra: 1) yinelenme kontrolü  2) havuzVeri'ye yaz  3) doğrula  4) havuzSeans'a yaz
-//       5) ancak hepsi başarılıysa günün havuzPlan satırlarını sil (arşiv yok).
+// Sıra: 1) yinelenme kontrolü  2) yuzmeVeri'ye yaz  3) doğrula  4) yuzmeSeans'a yaz
+//       5) ancak hepsi başarılıysa günün yuzmePlan satırlarını sil (arşiv yok).
 // 2–4 arasında bir hata olursa bu çağrının eklediği satırlar geri alınır,
-// havuzPlan'a dokunulmaz. Böylece ya hepsi kalıcı olur ya hiçbiri.
+// yuzmePlan'a dokunulmaz. Böylece ya hepsi kalıcı olur ya hiçbiri.
 // ---------------------------------------------------------------------------
 
 function finishSession_(req) {
@@ -284,7 +285,7 @@ function finishSession_(req) {
   var tz = ss.getSpreadsheetTimeZone();
   var plan = readSheet_(ss, SHEET_PLAN, { formats: true });
   var eski = readSheet_(ss, SHEET_ESKI);
-  var seans = ss.getSheetByName(SHEET_SEANS) ? readSheet_(ss, SHEET_SEANS) : null; // havuzSeans isteğe bağlı
+  var seans = sheetOf_(ss, SHEET_SEANS) ? readSheet_(ss, SHEET_SEANS) : null; // yuzmeSeans isteğe bağlı
   var eskiTarihCol = col_(eski, COL.tarih, true);
   var seansTarihCol = seans ? col_(seans, SEANS_COL.tarih, true) : -1;
 
@@ -299,7 +300,7 @@ function finishSession_(req) {
   var planTarihCol = col_(plan, COL.tarih, true);
   var planSiraCol = col_(plan, COL.sira, true);
   var planRows = rowsForDate_(plan, planTarihCol, tarih, tz);
-  if (!planRows.length) throw appError_('NOT_FOUND', tarih + ' için havuzPlan sayfasında satır yok.');
+  if (!planRows.length) throw appError_('NOT_FOUND', tarih + ' için ' + adOf_(SHEET_PLAN) + ' sayfasında satır yok.');
 
   // Tamamlanan setleri Plan satırlarıyla eşleştir.
   var planBySira = {};
@@ -355,7 +356,7 @@ function finishSession_(req) {
     var yazilan = countDateInColumn_(eski.sheet, eskiTarihCol, tarih, tz);
     if (yazilan !== done.length) {
       throw appError_('WRITE_MISMATCH',
-        'havuzVeri sayfasına ' + done.length + ' satır beklenirken ' + yazilan + ' satır bulundu.');
+        adOf_(SHEET_ESKI) + ' sayfasına ' + done.length + ' satır beklenirken ' + yazilan + ' satır bulundu.');
     }
 
     // 4) seans sayfasına tek satır (sayfa varsa).
@@ -363,7 +364,7 @@ function finishSession_(req) {
       seansWritten = writeRows_(seans, [buildSeansRow_(seans, tarih, seansIn, tz)], true); // en yeni üstte
       SpreadsheetApp.flush();
       if (countDateInColumn_(seans.sheet, seansTarihCol, tarih, tz) !== 1) {
-        throw appError_('WRITE_MISMATCH', 'havuzSeans satırı doğrulanamadı.');
+        throw appError_('WRITE_MISMATCH', adOf_(SHEET_SEANS) + ' satırı doğrulanamadı.');
       }
     }
   } catch (err) {
@@ -373,7 +374,7 @@ function finishSession_(req) {
     throw err;
   }
 
-  // 5) Günün plan satırlarını sil (arşiv yok: yapılan setler havuzVeri'de). Satır numaraları, arada tablo
+  // 5) Günün plan satırlarını sil (arşiv yok: yapılan setler yuzmeVeri'de). Satır numaraları, arada tablo
   //    elle düzenlenmiş olabileceği için taze okumayla yeniden hesaplanır.
   var silinen = 0;
   var uyari = '';
@@ -482,9 +483,24 @@ function convertValue_(v, type) {
 // Tablo yardımcıları
 // ---------------------------------------------------------------------------
 
-function readSheet_(ss, name, opts) {
+/** Sayfa: ad ya da ad listesi (ilk bulunan; güncel ad önce). Yoksa null. */
+function sheetOf_(ss, names) {
+  var list = Array.isArray(names) ? names : [names];
+  for (var i = 0; i < list.length; i++) {
+    var sh = ss.getSheetByName(list[i]);
+    if (sh) return sh;
+  }
+  return null;
+}
+/** Listenin güncel adı (hata mesajı ve yeni sayfa için). */
+function adOf_(names) {
+  return Array.isArray(names) ? names[0] : names;
+}
+
+function readSheet_(ss, names, opts) {
   opts = opts || {};
-  var sheet = ss.getSheetByName(name);
+  var sheet = sheetOf_(ss, names);
+  var name = adOf_(names);
   if (!sheet) throw appError_('NO_SHEET', '"' + name + '" sayfası bulunamadı.');
   var lastRow = sheet.getLastRow();
   var lastCol = sheet.getLastColumn();
@@ -803,7 +819,7 @@ function reply_(obj) {
 }
 
 // ===========================================================================
-// Salon (eski Salon.gs): salonVeri (yapılan hareketler) ve salonPlan (program).
+// Kara / salon (eski Salon.gs): karaVeri (yapılan hareketler), karaPlan (program), karaSeans (seans özeti).
 // Hareket kataloğu, kas etkileri ve vücut ağırlığı artık idmanRef dosyasında (getRef).
 // ===========================================================================
 
@@ -843,9 +859,9 @@ function planCols_(t) {
 }
 
 function planSheet_(ss) {
-  var sh = ss.getSheetByName(SHEET_SALON_PLAN);
+  var sh = sheetOf_(ss, SHEET_SALON_PLAN);
   if (!sh) {
-    sh = ss.insertSheet(SHEET_SALON_PLAN);
+    sh = ss.insertSheet(adOf_(SHEET_SALON_PLAN));
     sh.getRange(1, 1, 1, PLAN_HEADERS.length).setValues([PLAN_HEADERS]);
   }
   return sh;
@@ -881,7 +897,7 @@ function savePlan_(req) {
   return { yazilan: rows.length, silinen: silinen };
 }
 
-/** planYapildi { tarih } — 13.2.1: o günün salonPlan satırları silinir (sayfa yoksa bir şey yapmaz). */
+/** planYapildi { tarih } — 13.2.1: o günün karaPlan satırları silinir (sayfa yoksa bir şey yapmaz). */
 function planYapildi_(req) {
   var tarih = requireDate_(req.tarih);
   var ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -889,7 +905,7 @@ function planYapildi_(req) {
 }
 
 function deletePlanDay_(ss, tarih, tz) {
-  if (!ss.getSheetByName(SHEET_SALON_PLAN)) return 0;
+  if (!sheetOf_(ss, SHEET_SALON_PLAN)) return 0;
   var t = readSheet_(ss, SHEET_SALON_PLAN);
   return deleteDateRows_(t.sheet, planCols_(t).tarih, tarih, tz);
 }
@@ -973,14 +989,71 @@ function saveSalon_(req) {
     SpreadsheetApp.flush();
     throw appError_('WRITE_MISMATCH', 'idman sayfasına ' + rows.length + ' satır beklenirken farklı sayı bulundu.');
   }
-  // 13.2.1: havuz gibi — yapılan idman salonVeri'de, günün salonPlan satırları silinir (arşiv yok).
+  // 13.4: karaSeans (varsa) tek satır; yazılamazsa karaVeri satırları da geri alınır.
+  var seansSheet = req.seans && typeof req.seans === 'object' ? sheetOf_(ss, SHEET_KARA_SEANS) : null;
+  if (seansSheet) {
+    var ks = readSheet_(ss, SHEET_KARA_SEANS);
+    var ksTarih = col_(ks, KARA_SEANS_COL.tarih, true);
+    var ksWritten = null;
+    try {
+      ksWritten = writeRows_(ks, [buildKaraSeansRow_(ks, day, req.seans)], true); // en yeni üstte
+      SpreadsheetApp.flush();
+      if (countDateInColumn_(ks.sheet, ksTarih, tarih, tz) !== 1) {
+        throw appError_('WRITE_MISMATCH', adOf_(SHEET_KARA_SEANS) + ' satırı doğrulanamadı.');
+      }
+    } catch (err) {
+      rollback_(ksWritten, ksTarih, tarih, tz);
+      rollback_(written, c.tarih, tarih, tz);
+      SpreadsheetApp.flush();
+      throw err;
+    }
+  }
+  // 13.2.1: havuz gibi — yapılan idman karaVeri'de, günün karaPlan satırları silinir (arşiv yok).
   var out = { yazilan: rows.length, silinenPlan: 0 };
   try {
     out.silinenPlan = deletePlanDay_(ss, tarih, tz);
   } catch (err) {
     console.error('salon plan sil: ' + ((err && err.stack) || err));
-    out.uyari = 'İdman kaydedildi ancak salonPlan satırları silinemedi.';
+    out.uyari = 'İdman kaydedildi ancak ' + adOf_(SHEET_SALON_PLAN) + ' satırları silinemedi.';
   }
+  return out;
+}
+
+var KARA_SEANS_COL = { tarih: 'Tarih', sure: 'Süre', rpe: 'RPE', msi: 'MSI', yer: 'Yer', aciklama: 'Açıklama' };
+
+/** karaSeans satırı: { sure: 'h:mm:ss', rpe, msi, yer, aciklama } — başlık sırası tablodan. */
+function buildKaraSeansRow_(ks, day, s) {
+  var fields = {};
+  fields[normalize_(KARA_SEANS_COL.tarih)] = { value: day, format: null };
+  fields[normalize_(KARA_SEANS_COL.sure)] = convertValue_(s.sure, 'duration');
+  fields[normalize_(KARA_SEANS_COL.rpe)] = convertValue_(s.rpe, 'number');
+  fields[normalize_(KARA_SEANS_COL.msi)] = convertValue_(s.msi, 'number');
+  fields[normalize_(KARA_SEANS_COL.yer)] = convertValue_(s.yer, 'text');
+  fields[normalize_(KARA_SEANS_COL.aciklama)] = convertValue_(s.aciklama, 'text');
+  var values = [];
+  var formats = [];
+  ks.headers.forEach(function (h) {
+    var f = fields[normalize_(h)];
+    values.push(f ? f.value : '');
+    formats.push(f ? f.format : null);
+  });
+  return { values: values, formats: formats };
+}
+
+/** karaSeans → [{ tarih, sure, rpe, msi, yer, aciklama }] (yük hesabı için gerçek süre ve seans RPE'si). */
+function readKaraSeans_(ss, tz) {
+  var t = readSheet_(ss, SHEET_KARA_SEANS, { display: true });
+  var c = {};
+  Object.keys(KARA_SEANS_COL).forEach(function (k) { c[k] = col_(t, KARA_SEANS_COL[k], k === 'tarih'); });
+  var out = [];
+  t.values.forEach(function (r, i) {
+    var tarih = dateKey_(r[c.tarih], tz);
+    if (!tarih) return;
+    out.push({
+      tarih: tarih, sure: c.sure >= 0 ? durationText_(t.display[i][c.sure]) : '',
+      rpe: toNumber_(cell_(r, c.rpe)), msi: toNumber_(cell_(r, c.msi)), yer: text_(r, c.yer), aciklama: text_(r, c.aciklama)
+    });
+  });
   return out;
 }
 
@@ -997,11 +1070,12 @@ function ensureSureHeader_(t) {
   t.map = headerMap_(t.headers);
 }
 
-/** getSalon: geçmiş (salonVeri) ve varsa program (salonPlan). katalog/etki/bw idmanRef'ten gelir (boş döner). */
+/** getSalon: geçmiş (karaVeri), varsa program (karaPlan) ve seanslar (karaSeans). katalog/etki/bw başka dosyadan gelir (boş döner). */
 function getSalon_() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var tz = ss.getSpreadsheetTimeZone();
-  var out = { katalog: [], etki: [], bw: [], gecmis: ss.getSheetByName(SHEET_IDMAN) ? readGecmis_(ss, tz) : [] }; // salonVeri yoksa boş geçmiş
-  if (ss.getSheetByName(SHEET_SALON_PLAN)) out.plan = readPlan_(ss, tz);
+  var out = { katalog: [], etki: [], bw: [], gecmis: sheetOf_(ss, SHEET_IDMAN) ? readGecmis_(ss, tz) : [] }; // karaVeri yoksa boş geçmiş
+  if (sheetOf_(ss, SHEET_SALON_PLAN)) out.plan = readPlan_(ss, tz);
+  if (sheetOf_(ss, SHEET_KARA_SEANS)) out.seans = readKaraSeans_(ss, tz);
   return out;
 }

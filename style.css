@@ -1789,3 +1789,9 @@ button.hw-g.ok { color: var(--t-green); }
 .hgg-src { margin-top: 6px; font-size: 12px; font-weight: 600; color: var(--d-muted); }
 .hc-plan { display: block; width: 100%; margin-top: 8px; padding: 10px; border: 0; background: none; color: var(--sec); font-family: 'Archivo', sans-serif; font-size: 16px; font-weight: 800; }
 .hc-plan[hidden] { display: none; }
+
+/* 13.4: salon özeti — idmanın geneli (karaSeans) */
+.so-seans { margin-top: 6px; }
+.so-seans .sp-lb small, .so-seans .sg-lb small { font-weight: 600; letter-spacing: 0; color: var(--d-muted); }
+.sg-yer { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.sg-yer button { font-family: 'Archivo', sans-serif; font-size: 17px; }

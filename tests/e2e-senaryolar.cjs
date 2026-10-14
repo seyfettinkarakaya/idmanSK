@@ -931,7 +931,7 @@ const slPress = (s) => s.page.$eval('#sl-main', (b) => b.click());
 const slTap = async (s, sec) => { await slPress(s); if (sec) await s.adv(sec); };
 
 /** 13.3: salon idmanı salonPlan'dan başlar — bugüne son idmanın değerleriyle plan. */
-const salonPlanli = () => ({ ...sampleSalon(), plan: new Sheet('plan', ['Tarih', 'Sıra', 'Hareket', 'Set', 'Tekrar', 'Ağırlık', 'Süre', 'Dinlen', 'Süperset', 'Not', 'Durum'], [
+const salonPlanli = () => ({ ...sampleSalon(), karaSeans: new Sheet('karaSeans', ['Tarih', 'Süre', 'RPE', 'MSI', 'Yer', 'Açıklama']), plan: new Sheet('plan', ['Tarih', 'Sıra', 'Hareket', 'Set', 'Tekrar', 'Ağırlık', 'Süre', 'Dinlen', 'Süperset', 'Not', 'Durum'], [
   [D(T23), 1, 'Band Bent Over Row', 4, 20, 15, '', 90, '', '', ''],
   [D(T23), 2, 'Standard Pull-up', 3, 11, 'Vücut', '', 90, '', '', ''],
   [D('2026-09-26'), 1, 'Front Plank', 3, 1, 'Vücut', 45, 60, '', '', ''],
@@ -947,7 +947,7 @@ sc('Salon: kurulmadıysa Ayarlar; salonPlan içindeki bugünün planı → BAŞL
   s = await launch({ salonSheets: salonPlanli(), ref: true }); p = s.page;
   await s.waitScreen('home');
   await p.waitForFunction(() => localStorage.getItem('ysk.salon'));
-  await p.waitForFunction(() => /salonPlan · tablodan/.test(document.getElementById('home-gym-go').textContent));
+  await p.waitForFunction(() => /karaPlan · tablodan/.test(document.getElementById('home-gym-go').textContent));
   await p.click('#home-gym'); await s.waitScreen('salon-start');
   assert.match(await slText(s, '#ss-body'), /23 EYLÜL ÇARŞAMBA · BUGÜN · 2 HAREKET.*Band Bent Over Row\s*4 × 20 · 15 kg.*Standard Pull-up\s*3 × 11 · Vücut.*İdmanı aç.*26 EYLÜL.*Front Plank\s*3 × 45 sn.*Bu planla başla/);
   await p.click('[data-ss="basla"][data-t="2026-09-23"]');
@@ -998,6 +998,12 @@ sc('Salon: kurulmadıysa Ayarlar; salonPlan içindeki bugünün planı → BAŞL
   await s.waitScreen('salon-ozet');
   assert.match(await slText(s, '#so-body'), /HAREKET\s*2\s*SET\s*5/);
   assert.match(await slText(s, '#so-body'), /1 harekette RPE\/MSI girilmedi/);
+  // 13.4: idmanın geneli (karaSeans): RPE 7, MSI 0,5, yer Ev, not
+  assert.match(await slText(s, '#so-seans'), /İDMANIN GENELİ.*RPE · tüm idman ne kadar zordu\? \(hareketlerin ortalaması 8\).*MSI.*YER\s*Salon\s*Ev\s*Otel/);
+  assert.equal(await p.getAttribute('#so-seans [data-so="yer"][data-v="Salon"]', 'class'), 'is-on', 'yer varsayılanı Salon');
+  await p.click('#so-seans [data-so="rpe"][data-v="7"]'); await p.click('#so-seans [data-so="msi"][data-v="0.5"]'); await p.click('#so-seans [data-so="yer"][data-v="Ev"]');
+  await p.fill('#so-not', 'Kısa idman');
+  assert.deepStrictEqual((await s.ls('ysk.salonSession')).seans, { yer: 'Ev', rpe: 7, msi: 0.5, not: 'Kısa idman' });
   await p.click('#so-save');
   await s.waitScreen('home');
   const I = s.envs.SALON.sheets.idman;
@@ -1009,6 +1015,9 @@ sc('Salon: kurulmadıysa Ayarlar; salonPlan içindeki bugünün planı → BAŞL
   ]);
   assert.ok(I.data[1][0] instanceof s.envs.SALON.CDate && I.data[1][0].toISOString().startsWith('2026-09-23'));
   assert.deepStrictEqual(s.envs.SALON.sheets.plan.data.slice(1).filter((r) => r[2]).map((r) => r[2]), ['Front Plank'], 'günün plan satırları silindi');
+  const KS = s.envs.SALON.sheets.karaSeans.data;
+  assert.deepStrictEqual(KS[1].slice(2), [7, 0.5, 'Ev', 'Kısa idman'], 'karaSeans satırı');
+  assert.ok(KS[1][1] * 86400 >= 4 * 30 + 3 * 63, 'idman süresi');
   const sure = Math.round(I.data[1][10] * 86400);
   assert.ok(sure >= 4 * 30 + 3 * 63 && sure < 4 * 31 + 3 * 64 + 3, `Row süresi ${sure}`);
   assert.strictEqual(await s.ls('ysk.salonSession'), null);
