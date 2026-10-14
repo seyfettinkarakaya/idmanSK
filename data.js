@@ -12,6 +12,7 @@ const KEYS = {
   queue: 'ysk.queue',
   history: 'ysk.history', // telefonda saklanan biten seanslar (elle silinir)
   prefs: 'ysk.prefs',
+  kutuphane: 'ysk.kutuphane', // 13.4: idmanKutuphane (hareket kataloğu, kas etkileri)
   ref: 'ysk.ref',               // sporRef verisi (CSS, bölgeler, RPE/MSI tanımları)
   salon: 'ysk.salon',           // SalonTakip verisi (katalog, kas etkileri, geçmiş)
   salonSession: 'ysk.salonSession',
@@ -452,8 +453,27 @@ export function addCss(payload) {
 // Salon (SalonTakip)
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// idmanKutuphane (13.4, salt okuma): hareket kataloğu (karaHareket) ve kas etkileri (karaEtki)
+// ---------------------------------------------------------------------------
+
+const validKutuphane = (d) => Boolean(d && Array.isArray(d.katalog) && Array.isArray(d.etki));
+
+export async function getKutuphane() {
+  const data = await call('getKutuphane', {}, 'kutuphane');
+  if (!validKutuphane(data)) throw new ApiError('BAD_RESPONSE', 'idmanKutuphane cevabı beklenen biçimde değil. Adres idmanKutuphane betiğinin mi (idmanKutuphane.gs)?');
+  store(KEYS.kutuphane, { data, savedAt: Date.now() });
+  return data;
+}
+
+export function getCachedKutuphane() {
+  const r = load(KEYS.kutuphane, null);
+  return r && validKutuphane(r.data) ? r : null;
+}
+
 export async function getSalon() {
-  if (!getCachedRef() && isConfigured('ref')) await getRef().catch(() => {}); // katalog idmanRef'ten
+  if (!getCachedRef() && isConfigured('ref')) await getRef().catch(() => {}); // vücut ağırlığı (eski sürümde katalog da) idmanRef'ten
+  if (!getCachedKutuphane() && isConfigured('kutuphane')) await getKutuphane().catch(() => {}); // katalog + etkiler
   const data = await call('getSalon', {}, 'salon', SLOW_TIMEOUT_MS); // büyük idman dosyası + soğuk başlangıç
   if (!validSalon(data)) throw new ApiError('BAD_RESPONSE', 'Kara idmanı cevabı beklenen biçimde değil. Adres idman betiğinin mi (idman.gs), yeni sürüm dağıtıldı mı?');
   store(KEYS.salon, { data, savedAt: Date.now() });
@@ -466,10 +486,12 @@ export async function getSalon() {
  */
 function refIle(d) {
   const r = getCachedRef();
-  const x = r && r.data;
-  if (!x) return d;
-  const al = (k) => (Array.isArray(d[k]) && d[k].length ? d[k] : Array.isArray(x[k]) ? x[k] : []);
-  return { ...d, katalog: al('katalog'), etki: al('etki'), bw: al('bw') };
+  const x = (r && r.data) || {};
+  const kt = getCachedKutuphane();
+  const y = (kt && kt.data) || {};
+  // 13.4: katalog ve etkiler önce idmanKutuphane'den, yoksa idmanRef'ten (eski kurulum); BW idmanRef'ten
+  const al = (k, ...src) => (Array.isArray(d[k]) && d[k].length ? d[k] : (src.find((o) => Array.isArray(o[k]) && o[k].length) || {})[k] || []);
+  return { ...d, katalog: al('katalog', y, x), etki: al('etki', y, x), bw: al('bw', x) };
 }
 
 export function getCachedSalon() {
@@ -486,7 +508,7 @@ export function saveSalonProgram(tarih, hareketler) {
   return call('savePlan', { tarih, hareketler }, 'salon');
 }
 
-/** Salon programı: o günün salonPlan satırlarını siler (13.3.0; saveSalon da siler). */
+/** Salon programı: o günün salonPlan satırlarını siler (13.4.0; saveSalon da siler). */
 export function salonProgramYapildi(tarih) {
   return call('planYapildi', { tarih }, 'salon');
 }

@@ -150,12 +150,6 @@ Bant hareketleri 61, esneme 57. Örnek ekranlar yerelde üretilir (`tasarim/v28/
   dokunmama + formül kopyalama. [x] Uygulamada 2 bağlantı (salon = idman; katalog idmanRef'ten). [x] CSS testi kaynağı
   "idmanSK CSS testi".
 - [ ] **Kullanıcı:** iki betiği yapıştır + `tokenUret` + dağıt; telefonda Ayarlar → idman ve idmanRef bağlantıları.
-- [ ] **salonSeans sayfası** (karar 09.10: olsun; "uygula" bekliyor): `idman!salonSeans` sütunları
-  `Tarih, Süre, RPE, MSI, Yer, Açıklama` (Hareket sayısı / Set / Hacim yok). havuzSeans'ın eşi: tek satır, idman sonu
-  RPE + MSI adımı (yüzmedeki gibi), Süre = ilk hareketten bitişe gerçek süre. Yük modeli salon için bu satırı kullanır
-  (yoksa bugünkü tahmin: hareket süreleri toplamı × ortalama hareket RPE'si). Sayfa yoksa yazılmaz (havuzSeans gibi
-  isteğe bağlı). idman.gs dağıtımı gerekir.
-
 ### Bütünleşik yüzme + salon modeli — araştırma önerileri (08.10.2026; "uygula" bekliyor)
 Rapor: `reports/Bütünleşik yüzme salon idman modeli.md` (notlar: `research_notes/…`). Kod incelemesine göre çoğu
 **dağıtım gerektirmez** (hesaplar telefonda; yeni ayarlar sporRef `kisit` satırı olarak; Plan'daki Alet sütunu zaten var).
@@ -689,6 +683,10 @@ Sürüm 8 görünümü korunuyor; v10/v11 önerileri beğenilmedi, görsel yenil
 
 ## Tamamlanan
 
+- [x] Sürüm 13.4.0 (dağıtım: idman.gs yeni sürüm + idmanKutuphane.gs yeni betik):
+  - idman sayfa adları yuzme… / kara… (eski adlar yedek); karaSeans (Tarih, Süre, RPE, MSI, Yer, Açıklama) yazımı,
+    kara özetinde "İdmanın geneli" adımı; yük karaSeans'tan.
+  - idmanKutuphane dosyası (karaHareket, karaEtki; karaKas okunmaz) için üçüncü betik ve bağlantı.
 - [x] Terim değişikliği (14.10): arayüzde "salon" yerine **kara idmanı**, "havuz" yerine **yüzme** (sayfa adları yuzme… / kara…).
   Yer seçeneği "Salon" (mekân) ve havuz boyu (25/50 m) aynen kalır; iç anahtarlar (ysk.salon…, tur 'salon') değişmez.
 - [x] Sürüm 13.3.0 (dağıtım gerekmez; idman.gs 13.2.1 yeterli):

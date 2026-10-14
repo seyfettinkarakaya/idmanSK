@@ -266,4 +266,25 @@ test('13.4 güncel adlar (eşleme yok): yuzmePlan/yuzmeVeri/yuzmeSeans, karaVeri
   assert.strictEqual(e3.sheets.karaPlan.getLastRow(), 2, 'plan silinmedi');
 });
 
+test('13.4 idmanKutuphane.gs: karaHareket + karaEtki (A1 boş → A sütunu hareket), karaKas okunmaz; eski adlar da tanınır; token ve bilinmeyen işlem', () => {
+  const e = makeEnv({
+    karaHareket: new Sheet('karaHareket', ['Exercise', 'Goal Tag', 'Equipment', 'BW Coefficient', 'Swim Transfer Coefficient', 'Gemini STC', 'Chat GPT STC'], [
+      ['Ab Wheel Rollout', 'Strength', 'Bodyweight', 0.85, 0.925, 0.9, 0.95], ['Band Bent Over Row', 'Rehab', 'Band', '—', 0.75, 0.65, 0.85], ['', '', '', '', '', '', '']]),
+    karaKas: new Sheet('karaKas', ['Muscle Group', 'Muscle', 'Kinetic Chain'], [['Back', 'Erector Spinae', 'Mobility']]),
+    karaEtki: new Sheet('karaEtki', ['', 'Muscle Group', 'Muscle', 'Kinetic Chain', 'Yük Etki Oranı', 'Notlar'], [
+      ['Ab Wheel Rollout', 'Back', 'Erector Spinae', 'Posterior Chain', 0.15, 'Eksantrik'], ['Ab Wheel Rollout', 'Core', 'Rectus Abdominis (Upper)', 'Anterior Core', 0.3, 'Ana itici'], ['X', 'Core', '', '', '', '']]),
+  }, 'kutkey', 'idmanKutuphane.gs', { alias: false });
+  const r = e.call({ action: 'getKutuphane' });
+  assert.ok(r.ok, JSON.stringify(r));
+  assert.deepStrictEqual(r.data.katalog, [
+    { ad: 'Ab Wheel Rollout', amac: 'Strength', ekipman: 'Bodyweight', bw: 0.85, stc: 0.925, video: '' },
+    { ad: 'Band Bent Over Row', amac: 'Rehab', ekipman: 'Band', bw: null, stc: 0.75, video: '' }]);
+  assert.deepStrictEqual(r.data.etki.map((x) => [x.ad, x.grup, x.oran]), [['Ab Wheel Rollout', 'Back', 0.15], ['Ab Wheel Rollout', 'Core', 0.3]], 'oranı boş satır atlanır');
+  assert.strictEqual(e.call({ action: 'getKutuphane', token: 'yanlis' }).error, 'AUTH');
+  assert.strictEqual(e.call({ action: 'saveSalon' }).error, 'UNKNOWN_ACTION', 'yazma işlemi yok');
+  const old = makeEnv({ salonHar: new Sheet('salonHar', ['Exercise', 'Equipment'], [['Dead Bug', 'Bodyweight']]), salonHKEtki: new Sheet('salonHKEtki', ['Exercise', 'Muscle Group', 'Yük Etki Oranı'], [['Dead Bug', 'Core', 1]]) }, 'k', 'idmanKutuphane.gs', { alias: false });
+  assert.deepStrictEqual(old.call({ action: 'getKutuphane' }).data.etki.map((x) => x.ad), ['Dead Bug']);
+  assert.deepStrictEqual(makeEnv({}, 'k', 'idmanKutuphane.gs', { alias: false }).call({ action: 'getKutuphane' }).data, { katalog: [], etki: [] });
+});
+
 console.log(`idman (salon) / idmanRef betik testleri: TAMAM (${n} senaryo)`);

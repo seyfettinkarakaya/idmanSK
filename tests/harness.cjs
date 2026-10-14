@@ -8,6 +8,7 @@ const ROOT = path.join(__dirname, '..');
 const API = 'https://script.google.com/macros/s/TEST/exec';
 const REF_API = 'https://script.google.com/macros/s/REF/exec';
 const SALON_API = 'https://script.google.com/macros/s/SALON/exec';
+const KUT_API = 'https://script.google.com/macros/s/KUT/exec';
 const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.png': 'image/png', '.woff2': 'font/woff2' };
 
 function startServer(port) {
@@ -99,13 +100,15 @@ async function launch(opts = {}) {
     giris.idman = salonSheets.idman;
     if (salonSheets.plan) giris.plan = salonSheets.plan;
     if (salonSheets.karaSeans) giris.karaSeans = salonSheets.karaSeans; // 13.4
-    if (salonSheets.H) refSheets.H = salonSheets.H;
-    if (salonSheets.hkEtki) refSheets.hkEtki = salonSheets.hkEtki;
+    // 13.4: opts.kut → katalog ve etkiler idmanKutuphane'de (karaHareket / karaEtki); yoksa eski kurulum gibi idmanRef'te
+    if (salonSheets.H && !opts.kut) refSheets.H = salonSheets.H;
+    if (salonSheets.hkEtki && !opts.kut) refSheets.hkEtki = salonSheets.hkEtki;
     if (salonSheets.ref) refSheets.bilgi = bilgiBw(salonSheets.ref, refSheets.bilgi);
   }
   const env = makeEnv(giris);
   const envs = { TEST: env, REF: makeEnv(refSheets, 'refkey', 'idmanRef.gs') };
   if (salonSheets) envs.SALON = { sheets: env.sheets, CDate: env.CDate }; // salon artık idman betiğinde
+  if (opts.kut && salonSheets) envs.KUT = makeEnv({ karaHareket: salonSheets.H, karaEtki: salonSheets.hkEtki }, 'kutkey', 'idmanKutuphane.gs', { alias: false });
   const net = { offline: Boolean(opts.offline), delay: {}, override: null, calls: [], external: [] };
   const browser = opts.browser;
   const ctx = await browser.newContext({ viewport: opts.viewport || { width: 440, height: 956 }, deviceScaleFactor: 1, hasTouch: true, isMobile: true });
@@ -145,6 +148,7 @@ async function launch(opts = {}) {
   if (opts.configured !== false) {
     const cfg = { apiUrl: API, token: 'secret' };
     if (opts.ref || salonSheets) cfg.ref = { apiUrl: REF_API, token: 'refkey' }; // salon kataloğu idmanRef'te
+    if (opts.kut) cfg.kutuphane = { apiUrl: KUT_API, token: 'kutkey' };
     await page.evaluate((c) => localStorage.setItem('ysk.config', JSON.stringify(c)), cfg);
     if (opts.storage) await page.evaluate((s) => { for (const [k, v] of Object.entries(s)) localStorage.setItem(k, JSON.stringify(v)); }, opts.storage);
     await page.reload();
@@ -256,4 +260,4 @@ async function runScenarios(title, scenarios, port) {
   if (failed) process.exit(1);
 }
 
-module.exports = { launch, runScenarios, prow, samplePlan, sampleRef, sampleSalon, API, REF_API, SALON_API, D };
+module.exports = { launch, runScenarios, prow, samplePlan, sampleRef, sampleSalon, API, REF_API, SALON_API, KUT_API, D };

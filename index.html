@@ -18,9 +18,9 @@
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-  <link rel="stylesheet" href="fonts/fonts.css?v=13.3.0">
-  <link rel="stylesheet" href="style.css?v=13.3.0">
-  <script type="module" src="app.js?v=13.3.0"></script>
+  <link rel="stylesheet" href="fonts/fonts.css?v=13.4.0">
+  <link rel="stylesheet" href="style.css?v=13.4.0">
+  <script type="module" src="app.js?v=13.4.0"></script>
 </head>
 <body>
 
@@ -32,7 +32,7 @@
     </header>
     <div class="scroll pad">
       <h2 class="set-h">Bağlantılar</h2>
-      <p class="muted">İki tablo, her birinin kendi Apps Script'i var; her biri yalnızca kendi dosyasını görür. Adres <b>/exec</b> ile biter. Bilgiler yalnızca bu cihazda saklanır.</p>
+      <p class="muted">Üç tablo, her birinin kendi Apps Script'i var; her biri yalnızca kendi dosyasını görür. Adres <b>/exec</b> ile biter. Bilgiler yalnızca bu cihazda saklanır.</p>
 
       <h3 class="conn-h">idman <small>yüzme + kara girişleri · gerekli</small></h3>
       <label class="field">
@@ -52,6 +52,15 @@
       <label class="field">
         <span>Gizli anahtar (token)</span>
         <input id="setup-ref-token" type="text" autocomplete="off" autocapitalize="off" spellcheck="false">
+      </label>
+      <h3 class="conn-h">idmanKutuphane <small>kara hareketleri, kas etkileri · kara için gerekli</small></h3>
+      <label class="field">
+        <span>Apps Script adresi</span>
+        <input id="setup-lib-url" type="url" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="https://script.google.com/macros/s/…/exec">
+      </label>
+      <label class="field">
+        <span>Gizli anahtar (token)</span>
+        <input id="setup-lib-token" type="text" autocomplete="off" autocapitalize="off" spellcheck="false">
       </label>
       <p id="setup-msg" class="msg" hidden></p>
       <button id="setup-save" class="btn btn-primary btn-block">Kaydet ve bağlan</button>

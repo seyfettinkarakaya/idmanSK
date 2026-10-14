@@ -1,7 +1,7 @@
 // Uçtan uca senaryolar: her biri temiz tarayıcı bağlamında, sahte Apps Script ile.
 //   NODE_PATH=$(npm root -g) node tests/e2e-senaryolar.cjs [filtre]
 const assert = require('assert');
-const { runScenarios, prow, D, REF_API, SALON_API, sampleSalon } = require('./harness.cjs');
+const { runScenarios, prow, D, REF_API, SALON_API, KUT_API, sampleSalon } = require('./harness.cjs');
 const { Sheet } = require('./fakegas.cjs');
 
 const T23 = '2026-09-23';
@@ -391,6 +391,27 @@ sc('Kurulum: 2 bağlantı (13.2: idman + idmanRef); isteğe bağlı boş geçili
   await p.click('#home-settings'); await s.waitScreen('setup');
   assert.strictEqual(await p.inputValue('#setup-ref-token'), 'refkey');
   assert.ok(await p.isVisible('#pref-css-ref'));
+});
+
+sc('13.4 Kurulum: 3. bağlantı idmanKutuphane; kara kataloğu ve kas etkileri oradan gelir (idmanRef\'te yokken); yanlış anahtar uyarısı', async ({ launch }) => {
+  const s = await launch({ salon: true, kut: true }); const p = s.page;
+  await s.waitScreen('home');
+  await p.waitForFunction(() => localStorage.getItem('ysk.kutuphane') && localStorage.getItem('ysk.salon'));
+  assert.equal((await s.ls('ysk.ref')).data.katalog.length, 0, 'idmanRef\'te katalog yok');
+  assert.deepStrictEqual((await s.ls('ysk.kutuphane')).data.katalog.map((k) => k.ad).slice(0, 2), ['Band Bent Over Row', 'Standard Pull-up']);
+  await p.click('#home-gym'); await s.waitScreen('salon-start');
+  await p.click('[data-ss="plan"]'); await s.waitScreen('salon-plan');
+  await p.click('[data-sp-grup="Back"]'); await p.click('#sp-next');
+  assert.ok(await p.$('[data-sp-ex="Band Bent Over Row"]'), 'katalog idmanKutuphane\'den');
+  await p.click('#sp-back'); await p.click('#sp-back');
+  await p.click('#ss-back'); await s.waitScreen('home');
+  await p.click('#home-settings'); await s.waitScreen('setup');
+  assert.strictEqual(await p.inputValue('#setup-lib-url'), KUT_API);
+  await p.fill('#setup-lib-token', 'yanlis'); await p.click('#setup-save');
+  await p.waitForFunction(() => /idmanKutuphane: anahtar hatalı/.test(document.getElementById('setup-msg').textContent));
+  await p.fill('#setup-lib-token', 'kutkey'); await p.click('#setup-save');
+  await s.waitScreen('home');
+  assert.deepStrictEqual((await s.ls('ysk.config')).kutuphane, { apiUrl: KUT_API, token: 'kutkey' });
 });
 
 // --- Düzen ---------------------------------------------------------------------------------------------

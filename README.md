@@ -40,32 +40,36 @@ dosyasından okunur.
 | `data.js` | **Tek veri erişim modülü**: Apps Script çağrıları, yerel önbellek, gönderim kuyruğu |
 | `manifest.json`, `icons/` | PWA tanımı ve simgeler (192, 512, apple-touch-icon) |
 | `fonts/` | Archivo ve Barlow Condensed (SIL Open Font License); dışarıdan yazı tipi yüklenmez |
-| `idman.gs` | idman betiği: yüzme (`getDates`, `getPlan`, `finishSession`) + salon (`getSalon`, `saveSalon`, `savePlan`, `planYapildi`) |
-| `idmanRef.gs` | idmanRef betiği: `getRef` (bölgeler, CSS, bilgi, faz, kısıtlar + salon kataloğu, kas etkileri, BW), `addCss` |
+| `idman.gs` | idman betiği: yüzme (`getDates`, `getPlan`, `finishSession`) + kara (`getSalon`, `saveSalon`, `savePlan`, `planYapildi`) |
+| `idmanRef.gs` | idmanRef betiği: `getRef` (bölgeler, CSS, bilgi, faz, kısıtlar, BW), `addCss` |
+| `idmanKutuphane.gs` | idmanKutuphane betiği: `getKutuphane` (karaHareket, karaEtki; yalnızca okur) |
 | `tests/` | Arka uç ve uçtan uca testler (bkz. en alt) |
 
 ---
 
-## 1. Tabloları hazırlama (13.2: iki dosya)
+## 1. Tabloları hazırlama (13.4: üç dosya)
 
-İki Google tablosu kullanılır; başlıklar **1. satırda**:
+Üç Google tablosu kullanılır; başlıklar **1. satırda**. Eski sayfa adları (havuz…, salon…) da tanınır.
 
-**idman** — giriş verileri (yüzme + salon):
-- **havuzPlan** (eski adı Plan): `Tarih, Sıra, Blok, Tekrar, Mesafe, Stil, Tür, Açıklama, Hedef, Dinlen, Alet, Gerçek, Kulaç, Nabız, RPE, MSI, Not`
+**idman** — giriş verileri (yüzme + kara idmanı):
+- **yuzmePlan** (eski havuzPlan): `Tarih, Sıra, Blok, Tekrar, Mesafe, Stil, Tür, Açıklama, Hedef, Dinlen, Alet, Gerçek, Kulaç, Nabız, RPE, MSI, Not`
   (yanında Yığımlı Mesafe, Hedef Zone gibi türetilmiş sütunlar olabilir; uygulama onları okumaz, yazmaz.)
-- **havuzVeri** (eski adı eski): havuzPlan'daki 17 başlık; tablonun kendi hesapladığı sütunlar (Sıra, Set Mesafe,
-  Set Süre, Hafta …) olabilir — betik bunlara değer yazmaz, üstteki satırda formül varsa yeni satırlara kopyalar.
-- **havuzSeans** (eski adı seans): `Tarih, Süre, Mesafe, Havuz, RPE, MSI, Açıklama`
-- **salonVeri** (eski SalonTakip!idman): `Tarih, No, Hareket, Set, Tekrar, Ağırlık, Nabız, RPE, MSI, Açıklama, Süre`
-- **salonPlan** (eski SalonTakip!plan; isteğe bağlı, ilk "Programa yaz"da açılır):
-  `Tarih, Sıra, Hareket, Set, Tekrar, Ağırlık, Süre, Dinlen, Süperset, Not, Durum`
-- Arşiv yok: seans kaydedilince o günün havuzPlan satırları silinir (yapılan setler havuzVeri'de).
+- **yuzmeVeri** (eski havuzVeri): yuzmePlan'daki 17 başlık; tablonun kendi hesapladığı sütunlar (Set Mesafe, Set Süre,
+  Hafta …) olabilir — betik bunlara değer yazmaz, üstteki satırda formül varsa yeni satırlara kopyalar.
+- **yuzmeSeans** (eski havuzSeans; isteğe bağlı): `Tarih, Süre, Mesafe, Havuz, RPE, MSI, Açıklama`
+- **karaVeri** (eski salonVeri): `Tarih, No, Hareket, Set, Tekrar, Ağırlık, Nabız, RPE, MSI, Açıklama, Süre`
+- **karaPlan** (eski salonPlan; yoksa ilk "Plana yaz"da açılır): `Tarih, Sıra, Hareket, Set, Tekrar, Ağırlık, Süre, Dinlen, Süperset, Not, Durum`
+- **karaSeans** (isteğe bağlı): `Tarih, Süre, RPE, MSI, Yer, Açıklama` — kara idmanının geneli; yük bu satırdan hesaplanır.
+- Arşiv yok: idman kaydedilince o günün plan satırları (yuzmePlan / karaPlan) silinir.
 
 **idmanRef** — referanslar:
 - **zone, css, alet, bilgi, RPE, MSI, faz** (eski adı fazBilgi); isteğe bağlı **kisit, yuzmeKas, drill**.
-- **salonHar** (eski SalonTakip!H): `Exercise, Goal Tag, Equipment, BW Coefficient, Swim Transfer Coefficient`; isteğe bağlı Video, Kısıt, Alternatif, Görsel.
-- **salonHKEtki** (eski SalonTakip!hkEtki): `Exercise, Muscle Group, Muscle, Kinetic Chain, Yük Etki Oranı`.
 - Vücut ağırlığı: **bilgi** sayfasında bir satır — Kısaltma `BW`, sonra ilk tarih, son tarih, kg.
+
+**idmanKutuphane** — sabit kara idmanı bilgisi:
+- **karaHareket**: `Exercise, Goal Tag, Equipment, BW Coefficient, Swim Transfer Coefficient` (Gemini/Chat GPT STC okunmaz); isteğe bağlı Video, Kısıt, Alternatif, Görsel.
+- **karaEtki**: `Exercise` (A1 boşsa A sütunu), `Muscle Group, Muscle, Kinetic Chain, Yük Etki Oranı` (Notlar okunmaz).
+- **karaKas** (kas / zincir listesi): şimdilik okunmaz.
 
 Betikler sütunları **başlık adına göre** bulur; sütun sırası önemli değildir ve yeni sütun
 eklemek bir şeyi bozmaz. Karşılaştırma büyük/küçük harf, baştaki/sondaki boşluk ve
@@ -77,12 +81,13 @@ Notlar:
   saat haneli yazar: planlanan `[h]:mm:ss`, ölçülen (Gerçek, seans Süre) `[h]:mm:ss.0`.
 - Aynı tarihte her set benzersiz bir `Sıra` değerine sahip olmalı.
 
-## 2. Apps Script'leri kurma ve yayınlama (iki betik)
+## 2. Apps Script'leri kurma ve yayınlama (üç betik)
 
 | Dosya | Betik (bu depodan) | Telefonda Ayarlar → Bağlantılar |
 |---|---|---|
-| idman | `idman.gs` (eski Code.gs + Salon.gs birleşimi) | **idman** (gerekli) |
-| idmanRef | `idmanRef.gs` (eski SporRef.gs + salon kataloğu) | **idmanRef** (salon ve CSS için) |
+| idman | `idman.gs` | **idman** (gerekli) |
+| idmanRef | `idmanRef.gs` | **idmanRef** (CSS, bölgeler, faz, BW) |
+| idmanKutuphane | `idmanKutuphane.gs` (yalnızca okur) | **idmanKutuphane** (kara idmanı için) |
 
 Her dosya için:
 1. Tabloyu açın → **Uzantılar → Apps Script**.
@@ -362,6 +367,15 @@ Hata kodları: `AUTH`, `LOCKED`, `DUPLICATE`, `NOT_FOUND`, `PLAN_MISMATCH`,
    `frame-src https://www.youtube-nocookie.com` eklendi. İnternet yokken fotoğraf ve adımlar gösterilir.
 3. Telefonda yeni yerel anahtarlar: `ysk.hazir` (hazır olma kontrolleri, 60 gün), `ysk.hareketNot` (harekete sabit not);
    ayarlar: `yer` (Salon/Ev/Otel), `bildirim`. Ayarlar → Yedek indir: anahtarlar hariç JSON.
+
+## Sürüm 13.4'te neler var
+
+- **Yeni sayfa adları:** yuzmePlan / yuzmeVeri / yuzmeSeans, karaPlan / karaVeri / karaSeans (eski adlar da tanınır).
+- **karaSeans:** kara idmanı özetinde "İdmanın geneli" — RPE, MSI, Yer (Salon/Ev/Otel), not; tek satır yazılır. Yük
+  hesabı bu satırın gerçek süresi × RPE'siyle yapılır (yoksa eski tahmin).
+- **idmanKutuphane:** hareket kataloğu ve kas etkileri ayrı dosyada; üçüncü betik ve bağlantı. Kurulmamışsa idmanRef'teki
+  eski sayfalar kullanılır.
+- **Terimler:** arayüzde "salon" yerine kara idmanı, "havuz" yerine yüzme (yer seçeneği "Salon" ve havuz boyu aynı).
 
 ## Sürüm 13.3'te neler var
 

@@ -1,24 +1,24 @@
 // idmanSK — arayüz. Veriye yalnızca data.js üzerinden erişir.
 
-import * as data from './data.js?v=13.3.0';
-import { Wheel } from './wheel.js?v=13.3.0';
-import * as zaman from './zaman.js?v=13.3.0';
-import * as ref from './ref.js?v=13.3.0';
-import * as duzen from './duzen.js?v=13.3.0';
-import * as salon from './salon.js?v=13.3.0';
-import * as grup from './grup.js?v=13.3.0';
-import * as kisit from './kisit.js?v=13.3.0';
-import * as yuk from './yuk.js?v=13.3.0';
-import * as harita from './harita.js?v=13.3.0';
-import * as bilgi from './bilgi.js?v=13.3.0';
-import * as analiz from './analiz.js?v=13.3.0';
-import * as video from './video.js?v=13.3.0';
-import * as hazir from './hazir.js?v=13.3.0';
-import { VIDEOLAR } from './videolar.js?v=13.3.0';
-import * as model from './model.js?v=13.3.0';
+import * as data from './data.js?v=13.4.0';
+import { Wheel } from './wheel.js?v=13.4.0';
+import * as zaman from './zaman.js?v=13.4.0';
+import * as ref from './ref.js?v=13.4.0';
+import * as duzen from './duzen.js?v=13.4.0';
+import * as salon from './salon.js?v=13.4.0';
+import * as grup from './grup.js?v=13.4.0';
+import * as kisit from './kisit.js?v=13.4.0';
+import * as yuk from './yuk.js?v=13.4.0';
+import * as harita from './harita.js?v=13.4.0';
+import * as bilgi from './bilgi.js?v=13.4.0';
+import * as analiz from './analiz.js?v=13.4.0';
+import * as video from './video.js?v=13.4.0';
+import * as hazir from './hazir.js?v=13.4.0';
+import { VIDEOLAR } from './videolar.js?v=13.4.0';
+import * as model from './model.js?v=13.4.0';
 
 // Telefonun güncel kodu çalıştırıp çalıştırmadığını görmek için ekranda gösterilir.
-export const APP_VERSION = '13.3.0';
+export const APP_VERSION = '13.4.0';
 
 const $ = (id) => document.getElementById(id);
 
@@ -245,6 +245,7 @@ function cssUyarisi(tarih = todayKey()) {
 
 /** sporRef'i arka planda tazeler; bölge önbelleğini sıfırlar. */
 async function refreshRef() {
+  if (data.isConfigured('kutuphane')) data.getKutuphane().catch(() => {}); // 13.4: katalog arka planda tazelenir
   if (!data.isConfigured('ref')) return;
   try {
     state.ref = okRef(await data.getRef());
@@ -417,6 +418,7 @@ function endSessionLocally() {
 const CONN = [
   { target: 'yuzme', url: 'setup-url', token: 'setup-token', ad: 'idman' },
   { target: 'ref', url: 'setup-ref-url', token: 'setup-ref-token', ad: 'idmanRef' },
+  { target: 'kutuphane', url: 'setup-lib-url', token: 'setup-lib-token', ad: 'idmanKutuphane' }, // 13.4
 ];
 
 function showSetup(canGoBack) {
@@ -470,7 +472,7 @@ async function saveSetup() {
   btn.disabled = true;
   btn.textContent = 'Bağlanıyor…';
   try {
-    const [yuzme, refR] = await Promise.allSettled([data.getDates(), data.isConfigured('ref') ? data.getRef() : null]);
+    const [yuzme, refR, kutR] = await Promise.allSettled([data.getDates(), data.isConfigured('ref') ? data.getRef() : null, data.isConfigured('kutuphane') ? data.getKutuphane() : null]);
     const [salonR] = await Promise.allSettled([data.isConfigured('salon') && yuzme.status === 'fulfilled' ? data.getSalon() : null]); // katalog için idmanRef önce
     const errs = [];
     if (yuzme.status === 'fulfilled') {
@@ -481,6 +483,7 @@ async function saveSetup() {
       errs.push(connError(CONN[0], yuzme.reason));
     }
     if (refR.status === 'rejected') errs.push(connError(CONN[1], refR.reason));
+    if (kutR.status === 'rejected') errs.push(connError(CONN[2], kutR.reason));
     if (salonR.status === 'rejected') errs.push(connError({ ad: 'Kara (idman)' }, salonR.reason));
     if (refR.status === 'fulfilled') { state.ref = okRef(refR.value); state.refErr = null; } else if (refR.reason) state.refErr = refR.reason.message;
     if (!errs.length) return showHome();
@@ -4229,8 +4232,8 @@ function slPlusSet() {
 
 let hdb = null; // hareketdb.js (yalnızca kart açılınca yüklenir)
 let adb = null; // adimlar.js (Türkçe adımlar, yalnızca kart açılınca)
-const adimYukle = () => adb || (adb = import('./adimlar.js?v=13.3.0').then((m) => m.ADIMLAR).catch(() => ({})));
-const hdbYukle = () => hdb || (hdb = import('./hareketdb.js?v=13.3.0'));
+const adimYukle = () => adb || (adb = import('./adimlar.js?v=13.4.0').then((m) => m.ADIMLAR).catch(() => ({})));
+const hdbYukle = () => hdb || (hdb = import('./hareketdb.js?v=13.4.0'));
 let bilgiTimer = null;
 
 /** Hareketin videosu (H · Video önce, sonra uygulamadaki liste) ya da null. */
