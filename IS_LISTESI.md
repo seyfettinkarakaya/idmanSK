@@ -12,7 +12,8 @@ Tamamlandı (sürüm 8), bkz. Tamamlanan. Kalan: Code.gs'in yeniden dağıtılma
 ### Açık işler özeti (temizlik 14.10.2026)
 - **Onaylandı, sırada:** P3 aynı kas grubundan otomatik alternatif; F.7 çevrimdışı açılış (service worker);
   görünüm paketi (kurulum/form/"Kaydedildi" ekranları, simge seti, uygulama simgesi, animasyon, açık tema, yazı boyutu).
-- **Karar/bilgi bekliyor:** B20 (gün düzeni hangi sayfadan), B21 (parametrik: zaruri/seçimlik), B1 (örnek ekran),
+- **Beklemede (kullanıcı 14.10):** B20 gün düzeni ve B21 zaruri/seçimlik — bilgi sayfası önerisi hazır (aşağıda maddelerde).
+- **Karar bekliyor:** B1,
   B2, B3 (açıklama verildi), örnek ekranları gösterildi, karar bekliyor: B5, B7, B9, B10, B11, B16, B17, B18, P8.
 - **Ertelendi:** uzak duvar ölçümü, P3-1 (+1 sn; veri gerekli), F4 saat verisi.
 - **İptal:** B4, B6, B8, B12, B13, B14, B19, B22, B23, P7 (barbell yok); Gym visual GIF seti.
@@ -186,10 +187,10 @@ Rapor: `reports/Bütünleşik yüzme salon idman modeli.md` (notlar: `research_n
 **Gerçek kapasite (kullanıcı, 08.10.2026; 2026 havuz + salon istatistikleri):** yüzme dönemlerinde hafta içi havuz
 ortalama ~2,5 gün (bazı haftalar 2, bazı 3), salon yalnız hafta sonu 1 gün. İdeal ve hedef: **hafta içi 3 sabah havuz +
 hafta sonu 1 salon**. Model bu gerçeğe göre kurulur (öneriler buna göre uyarlanır):
-- [ ] B20 (Y) Gün düzeni ayarı: `yuzme_gunleri` (ör. Pzt, Çar, Cum), `yuzme_saat` (sabah), `salon_gunleri` (Cmt, Paz), → KARAR 14.10: hangi sayfadan okunacağı soruldu (öneri: idmanRef!bilgi satırları; kisit sayfası yok)
+- [ ] B20 (Y) Gün düzeni ayarı: `yuzme_gunleri` (ör. Pzt, Çar, Cum), `yuzme_saat` (sabah), `salon_gunleri` (Cmt, Paz), → BEKLEMEDE (14.10): öneri idmanRef!bilgi satırları — GUN_YUZME (Pzt,Çar,Cum), SAAT_YUZME (sabah), GUN_KARA (Cmt); değer Tam Adı sütununda; dağıtım gerekmez
   `gun_hafta_salon` 1 — sporRef `kisit` satırları (dağıtım gerekmez). Planlayıcı bugünkü "Cuma akşam + Sal–Per"
   varsayımı yerine bu günleri kullanır; salon hafta sonuna, son yüzmeden ≥ 24 sa sonra.
-- [ ] B21 (Y) "2 kilit + 1 isteğe bağlı" yüzme haftası: kilit 1 = kalite (CSS/eşik), kilit 2 = uzun aerobik; → KARAR 14.10: olabilir ama PARAMETRİK — hedefe göre öncelik/içerik değişir; bilgi sayfasında zaruri/seçimlik etiketi
+- [ ] B21 (Y) "2 kilit + 1 isteğe bağlı" yüzme haftası: kilit 1 = kalite (CSS/eşik), kilit 2 = uzun aerobik; → BEKLEMEDE (14.10): öneri bilgi satırları YZ1/YZ2/YZ3/KR1 — Tam Adı = içerik, Açıklama = zaruri/seçimlik, Açıklama.2 = faz (boş = hepsi); sıra = öncelik; zaruri sayısı yapılınca hafta tamam
   3. gün = teknik/kolay + omuz önleyici. Hafta 2 günle kalırsa kilitler korunur, 3. düşer; yük hedefi ve "normal
   hafta" 2,5 günlük gerçek ortalamaya göre (3 gün hedef, 2 gün de "tamam" sayılır).
 - [-] B22 (Y) Tek salon günü = tam vücut, kuvvet öncelikli (~60 dk): omuz önleyici ısınma → çekiş kuvveti → kalça → İPTAL 14.10: zaten öyle
