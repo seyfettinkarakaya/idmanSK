@@ -729,7 +729,7 @@ sc('Ana sayfa: Yüzme kartında ilk planlı idman; İdmanı aç doğrudan girer,
   assert.match(await p.textContent('#home-swim-meta'), /^\d+ set · [\d.]+ m · \d+:\d\d( · ana set [\d.]+ m)?$/);
   assert.ok(await p.$('#home-swim-metro svg.metro'), 'blok renkli hat');
   assert.strictEqual(await p.textContent('#home-open-text'), 'İdmanı aç');
-  assert.strictEqual(await p.$$eval('.home-card .hc-hd .hc-name', (e) => e.map((x) => x.textContent).join(',')), 'Yüzme,Salon');
+  assert.strictEqual(await p.$$eval('.home-card .hc-hd .hc-name', (e) => e.map((x) => x.textContent).join(',')), 'Yüzme,Kara');
   // Bölüm renkleri: Yüzme turkuaz, Salon amber
   const colors = await p.$$eval('.home-card', (e) => e.map((x) => getComputedStyle(x, '::before').backgroundColor));
   assert.deepStrictEqual(colors, ['rgb(45, 212, 191)', 'rgb(245, 165, 36)']);
@@ -993,7 +993,7 @@ sc('Salon: kurulmadıysa Ayarlar; salonPlan içindeki bugünün planı → BAŞL
   await s.adv(3); // çift dokunma koruması (2 sn) son BİTTİ'den sayılır
   // Pull-up: 1 set yapılır, sonra idman ‹ ile bitirilir (giriş yapılmadı → boş yazılır)
   await slTap(s, 40); await slPress(s); await s.adv(5);
-  await p.click('#sl-back'); await s.waitModal('Salon idmanı');
+  await p.click('#sl-back'); await s.waitModal('Kara idmanı');
   await s.modalClick('İdmanı bitir ve kaydet');
   await s.waitScreen('salon-ozet');
   assert.match(await slText(s, '#so-body'), /HAREKET\s*2\s*SET\s*5/);
@@ -1024,7 +1024,7 @@ sc('Salon: kurulmadıysa Ayarlar; salonPlan içindeki bugünün planı → BAŞL
   const h = (await s.ls('ysk.history'))[0];
   assert.strictEqual(h.tur, 'salon'); assert.strictEqual(h.status, 'sent');
   await p.click('#home-history'); await s.waitScreen('history');
-  assert.match(await slText(s, '.hist-row.is-salon'), /Salon · Çarşamba Tabloda 2 hareket · 5 set/);
+  assert.match(await slText(s, '.hist-row.is-salon'), /Kara · Çarşamba Tabloda 2 hareket · 5 set/);
 });
 
 sc('Salon planlama: dağılım, öncelik, puanlı liste (⚠ ağrı), sıra, plan → idman; Değiştir aynı gruptan; Sil + Geri al; süreli hareket kendiliğinden biter', async ({ launch }) => {

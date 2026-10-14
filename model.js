@@ -85,7 +85,7 @@ export function saglikButceleri({ L = [], salonSatir = [], bugun, K, normal, msi
   return [
     { ad: 'Omuz', deger: omuz, sinir: omuzSinir, birim: 'yük', durum: d(omuz, omuzSinir), not: `Serbest/kelebek/pull + itiş setleri (son 7 gün)${omuzAgri ? ' · ağrı var: sınır %20 dar' : ''}` },
     { ad: 'Kalça', deger: brAy, sinir: brSinir, birim: '% BR', durum: d(brAy, brSinir), not: `Kurbağalama bu ay (Perthes)${kalcaAgri || dizAgri ? ' · ağrı var: sınır yarıya indi' : ''}` },
-    { ad: 'Diz', deger: dizSet, sinir: dizSinir, birim: 'set', durum: d(dizSet, dizSinir), not: `Diz bükümlü salon setleri, ≤ 90° (son 7 gün)${dizAgri ? ' · ağrı var' : ''}` },
+    { ad: 'Diz', deger: dizSet, sinir: dizSinir, birim: 'set', durum: d(dizSet, dizSinir), not: `Diz bükümlü kara setleri, ≤ 90° (son 7 gün)${dizAgri ? ' · ağrı var' : ''}` },
   ].map((b) => ({ ...b, pay: b.sinir ? Math.round((b.deger / b.sinir) * 100) : 0 }));
 }
 
@@ -101,9 +101,9 @@ export function haftaPlani({ bugun, bas, K, L = [], yuzmePlan = [], salonPlan = 
   const gunler = Array.from({ length: 7 }, (_, i) => {
     const t = gunEkle(bas, i);
     const yap = L.filter((s) => s.tarih === t);
-    const isler = yap.map((s) => ({ tur: s.tur, ad: s.tur === 'yuzme' ? `Yüzme ${s.metre ? `${s.metre} m` : ''}`.trim() : `Salon ${s.set || ''} set`.trim(), sure: s.dk, kaynak: 'yapildi' }));
+    const isler = yap.map((s) => ({ tur: s.tur, ad: s.tur === 'yuzme' ? `Yüzme ${s.metre ? `${s.metre} m` : ''}`.trim() : `Kara ${s.set || ''} set`.trim(), sure: s.dk, kaynak: 'yapildi' }));
     if (!yap.some((s) => s.tur === 'yuzme') && yuzmePlan.includes(t)) isler.push({ tur: 'yuzme', ad: 'Yüzme programı', sure: planDk[t] || 0, kaynak: 'program', yan: 'her aerobik blok sonunda omuz rahatlatma' });
-    if (!yap.some((s) => s.tur === 'salon') && salonPlan.includes(t)) isler.push({ tur: 'salon', ad: 'Salon programı', kaynak: 'program', yan: 'önce önleyici ısınma' });
+    if (!yap.some((s) => s.tur === 'salon') && salonPlan.includes(t)) isler.push({ tur: 'salon', ad: 'Kara programı', kaynak: 'program', yan: 'önce önleyici ısınma' });
     return { tarih: t, gun: GUN[haftaGunu(t)], durum: yap.length ? 'yapildi' : isler.length ? 'planli' : 'bos', isler, uyarilar: [] };
   });
   const dolu = () => gunler.filter((g) => g.isler.length).length;
@@ -126,7 +126,7 @@ export function haftaPlani({ bugun, bas, K, L = [], yuzmePlan = [], salonPlan = 
   if (dolu() < K.gunHafta && !turVar('salon')) {
     const ad = aday();
     const g = ad.find((x) => !komsuYuzme(x)) || ad[0];
-    if (g) ekle(g, { tur: 'salon', ad: `Salon · ${F.salon}`, sure: butce(g.tarih).sure, butce: butce(g.tarih).yazi, kaynak: 'oneri', yan: 'önleyici + core 15–20 dk' });
+    if (g) ekle(g, { tur: 'salon', ad: `Kara · ${F.salon}`, sure: butce(g.tarih).sure, butce: butce(g.tarih).yazi, kaynak: 'oneri', yan: 'önleyici + core 15–20 dk' });
   }
   while (dolu() < K.gunHafta) {
     const ad = aday();
@@ -150,7 +150,7 @@ export function haftaPlani({ bugun, bas, K, L = [], yuzmePlan = [], salonPlan = 
       const ad = gunler.filter((g) => bos(g));
       const g = ad.find((x) => !komsuYuzme(x)) || ad[0];
       if (!g) break;
-      ekle(g, { tur: 'salon', ad: `Salon · ${F.salon}`, sure: K.salonDk || 50, butce: `~${K.salonDk || 50} dk`, kaynak: 'oneri', yan: 'önleyici + core 15–20 dk' });
+      ekle(g, { tur: 'salon', ad: `Kara · ${F.salon}`, sure: K.salonDk || 50, butce: `~${K.salonDk || 50} dk`, kaynak: 'oneri', yan: 'önleyici + core 15–20 dk' });
     }
     return bitir();
   }
@@ -185,7 +185,7 @@ export function olcumZamani({ bugun, sonCssTarih = null, fazNo = null }) {
   const out = [];
   const gun = sonCssTarih ? Math.round((Date.parse(bugun) - Date.parse(sonCssTarih)) / 86400000) : null;
   if (gun == null || gun >= 28) out.push(`CSS testi (400 + 200)${gun == null ? '' : `: son test ${gun} gün önce`}`);
-  if (fazNo != null && ((fazNo % 4) + 4) % 4 === 3) out.push('Dinlenme haftası: salonda tahmini 1RM ve ağrı (MSI) eğilimini gözden geçir');
+  if (fazNo != null && ((fazNo % 4) + 4) % 4 === 3) out.push('Dinlenme haftası: kara idmanında tahmini 1RM ve ağrı (MSI) eğilimini gözden geçir');
   return out;
 }
 

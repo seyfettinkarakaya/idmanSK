@@ -270,7 +270,7 @@ export function cakisma(liste, tarih, planli = [], omuzPlan = false) {
     for (const b of gunler) {
       if ((a !== tarih && b !== tarih) || Math.abs(fark(a, b)) > 1 || !uzun(b)) continue;
       const ayni = a === b;
-      return { metin: `Ağır omuz salonu (${ad(a)}) ${ayni ? 've' : 'ile'} uzun yüzme (${ad(b)}) ${ayni ? 'aynı gün' : 'art arda'}: omuz yükü birikir — salonda omuzu hafiflet ya da günleri ayır` };
+      return { metin: `Ağır omuz kara idmanı (${ad(a)}) ${ayni ? 've' : 'ile'} uzun yüzme (${ad(b)}) ${ayni ? 'aynı gün' : 'art arda'}: omuz yükü birikir — kara idmanında omuzu hafiflet ya da günleri ayır` };
     }
   }
   return null;

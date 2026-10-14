@@ -121,8 +121,8 @@ sc('Ana sayfa salon kartı: bugün plan yok → sıradaki gün ("Bu planla başl
   await s.close();
   const s2 = await launch({ salonSheets: salonV12(), ref: true }); const p2 = s2.page;
   await s2.waitScreen('home');
-  await p2.waitForFunction(() => /Sırada salon planı yok/.test(document.getElementById('home-gym-go').textContent));
-  assert.match(await txt(s2, '#home-gym-go'), /Plan yok\s*Sırada salon planı yok.*＋ İdman planla\s*Takvim/);
+  await p2.waitForFunction(() => /Sırada kara planı yok/.test(document.getElementById('home-gym-go').textContent));
+  assert.match(await txt(s2, '#home-gym-go'), /Plan yok\s*Sırada kara planı yok.*＋ İdman planla\s*Takvim/);
   assert.equal(await p2.isHidden('#home-gym-planla'), true);
   await p2.click('#home-gym-start'); await s2.waitScreen('salon-plan');
 });
@@ -325,7 +325,7 @@ sc('Süperset: planda bağla; set sonrası dinlenmeden sıradakine geçer, turun
   assert.equal(await title(), 'Dumbbell Shoulder Press');
   // bitir ve kaydet: ısınma notu
   await s.adv(60);
-  await p.click('#sl-back'); await s.waitModal('Salon idmanı'); await s.modalClick('İdmanı bitir ve kaydet');
+  await p.click('#sl-back'); await s.waitModal('Kara idmanı'); await s.modalClick('İdmanı bitir ve kaydet');
   await s.waitScreen('salon-ozet'); await p.click('#so-save'); await s.waitScreen('home');
   const I = s.envs.SALON.sheets.idman;
   assert.match(I.data[1][9], /^Setler: 10\. Isınma 1 set/);
@@ -491,7 +491,7 @@ sc('Haftanın özeti: bu hafta (km, seans, ağrı, notlar) → önceki hafta (sa
   assert.equal(await p.isDisabled('#hz-next'), false);
   b = await txt(s, '#hz-body');
   assert.match(b, /YÜZME\s*4,6\s*km/);
-  assert.match(b, /SALON\s*9\s*set/);
+  assert.match(b, /KARA\s*9\s*set/);
   assert.match(b, /KURBAĞALAMA %52/);
   await p.click('#hz-next');
   assert.match(await txt(s, '#hz-title'), /21 Eylül/);
@@ -520,7 +520,7 @@ sc('Çakışma uyarısı (B5): dün uzun serbest yüzme + bugün omuz ağırlık
   assert.equal(await p.$$eval('.sp-cak', (e) => e.length), 0);
   await p.click('#sp-back');
   await p.click('[data-sp-grup="Shoulders"]'); await p.click('#sp-next');
-  assert.match(await txt(s, '.sp-cak'), /Ağır omuz salonu \(bugün\) ile uzun yüzme \(dün\) art arda/);
+  assert.match(await txt(s, '.sp-cak'), /Ağır omuz kara idmanı \(bugün\) ile uzun yüzme \(dün\) art arda/);
 });
 
 sc('Form ve denge: uzun aradan sonra iki hafif yüzme → "yük hızlı arttı" uyarısı YOK, "aradan dönüş"; ana sayfada uyarı yok; yorgun kas yoksa harita yok', async ({ launch }) => {

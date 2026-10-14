@@ -662,6 +662,7 @@ Sürüm 8 görünümü korunuyor; v10/v11 önerileri beğenilmedi, görsel yenil
 - [ ] Ayarlar'da yazı boyutu seçimi.
 
 ## İzlenecek
+- E2E "Eski Code.gs (detay yok)" senaryosu tam takımda bir kez "geçmiş gün indirilmez" ile kaldı (14.10), tek başına iki kez geçti; zamanlamaya bağlı olabilir.
 - 13.2.0 (09.10.2026): "sporRef beklenmeyen cevap verirse çökmez" senaryosu tam koşuda bir kez zaman aşımı verdi, tek başına ve tekrar tam koşuda geçti (sahte saat).
 - Uçtan uca testlerde sahte saatle zaman ilerletmeli uzun yüzme senaryoları ("Tam idman", "Mola") tam takım
   çalışırken ara sıra bir dokunuşu kaçırıyor (yaklaşık 2–3 tam koşuda bir). 04.10.2026'da sürüm 12 öncesi kodda da
@@ -688,6 +689,8 @@ Sürüm 8 görünümü korunuyor; v10/v11 önerileri beğenilmedi, görsel yenil
 
 ## Tamamlanan
 
+- [x] Terim değişikliği (14.10): arayüzde "salon" yerine **kara idmanı**, "havuz" yerine **yüzme** (sayfa adları yuzme… / kara…).
+  Yer seçeneği "Salon" (mekân) ve havuz boyu (25/50 m) aynen kalır; iç anahtarlar (ysk.salon…, tur 'salon') değişmez.
 - [x] Sürüm 13.3.0 (dağıtım gerekmez; idman.gs 13.2.1 yeterli):
   - Ana sayfa salon kartı yüzme kartıyla aynı yapı; plan yalnızca salonPlan'dan (bugün ya da sıradaki gün).
   - "Son idmanı tekrarla/düzenle" kaldırıldı; salon ekranında salonPlan günleri (İdmanı aç / Bu planla başla / Düzenle).

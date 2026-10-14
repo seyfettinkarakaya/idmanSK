@@ -481,7 +481,7 @@ async function saveSetup() {
       errs.push(connError(CONN[0], yuzme.reason));
     }
     if (refR.status === 'rejected') errs.push(connError(CONN[1], refR.reason));
-    if (salonR.status === 'rejected') errs.push(connError({ ad: 'Salon (idman)' }, salonR.reason));
+    if (salonR.status === 'rejected') errs.push(connError({ ad: 'Kara (idman)' }, salonR.reason));
     if (refR.status === 'fulfilled') { state.ref = okRef(refR.value); state.refErr = null; } else if (refR.reason) state.refErr = refR.reason.message;
     if (!errs.length) return showHome();
     fail(`${errs.join(' ')} Ayarlar kaydedildi; sol üstten ana sayfaya geçebilirsiniz.`);
@@ -1097,14 +1097,14 @@ function bugunOnerisi(G) {
   if (hz && (hz.karar === 'dinlen' || hz.karar === 'tibbi')) return { metin: hz.metin, butce: '' };
   if (ayriGun(G.K)) {
     const yz = yuk.haftaGunleri(G.L, G.bugun, 'yuzme'), sg = yuk.haftaGunleri(G.L, G.bugun, 'salon');
-    if (yz >= G.K.gunHafta && sg >= G.K.gunHaftaSalon) return { metin: `Haftalık ${G.K.gunHafta} yüzme + ${G.K.gunHaftaSalon} salon tamam · dinlenme`, butce: '' };
+    if (yz >= G.K.gunHafta && sg >= G.K.gunHaftaSalon) return { metin: `Haftalık ${G.K.gunHafta} yüzme + ${G.K.gunHaftaSalon} kara tamam · dinlenme`, butce: '' };
   } else if (gun >= G.K.gunHafta) return { metin: `Haftalık ${G.K.gunHafta} gün tamam · dinlenme`, butce: '' };
   if (state.homeNext === G.bugun) return { metin: 'Yüzme programı var', butce };
   const yorgun = Object.entries(G.tp).filter(([, o]) => o.toparlanma < 60).map(([k]) => k);
   const d = salonData();
   const borc = d ? salon.onleyiciDurum(d.gecmis, G.bugun, hPay).filter((o) => o.acik).map((o) => o.ad.toLocaleLowerCase('tr')) : [];
   const odak = borc.length ? borc.join(' + ') : 'dengeye göre';
-  return { metin: `Salon: ${odak}${yorgun.length ? ` · ${yorgun.slice(0, 2).join(', ')} dinleniyor` : ''}`, butce };
+  return { metin: `Kara: ${odak}${yorgun.length ? ` · ${yorgun.slice(0, 2).join(', ')} dinleniyor` : ''}`, butce };
 }
 
 /** Yüzme ve salon günleri ayrı mı sayılıyor (sporRef kisit gun_hafta_salon)? */
@@ -1162,7 +1162,7 @@ function renderHafta() {
   const dinOn = dinlenmeDurumu(G);
   const ring = (v, t, l, cls) => { const p = Math.min(1, v / t); const c = 2 * Math.PI * 20; return `<div class="hw-ring ${cls}"><svg viewBox="0 0 48 48" width="48" height="48"><circle cx="24" cy="24" r="20" class="tr"/><circle cx="24" cy="24" r="20" class="fg" stroke-dasharray="${(c * p).toFixed(1)} ${c.toFixed(1)}" transform="rotate(-90 24 24)"/><text x="24" y="29" text-anchor="middle">${v}/${t}</text></svg><small>${l}</small></div>`; };
   const halka = ayriGun(G.K)
-    ? `${ring(yuk.haftaGunleri(G.L, G.bugun, 'yuzme'), G.K.gunHafta, 'yüzme gün', 'a')}${ring(yuk.haftaGunleri(G.L, G.bugun, 'salon'), G.K.gunHaftaSalon || 0, 'salon gün', 'a')}`
+    ? `${ring(yuk.haftaGunleri(G.L, G.bugun, 'yuzme'), G.K.gunHafta, 'yüzme gün', 'a')}${ring(yuk.haftaGunleri(G.L, G.bugun, 'salon'), G.K.gunHaftaSalon || 0, 'kara gün', 'a')}`
     : ring(gun, G.K.gunHafta, 'bu hafta gün', 'a');
   box.innerHTML = `<div class="hw-top">${halka}${omuz ? ring(omuz.yapilan, omuz.hedef, 'omuz önleyici', 't') : ''}
       <button class="hw-form" data-hw="form"><small>BU HAFTA YÜK</small><b class="n ${DURUM_CLS[G.hd.durum]}">%${G.hd.pay}</b><span class="${DURUM_CLS[G.hd.durum]}">${esc(G.hd.metin.toLocaleLowerCase('tr'))}</span><small>normal haftaya göre ›</small></button></div>
@@ -1174,7 +1174,7 @@ function renderHafta() {
     ${dinOn.oner ? `<p class="hw-g warn">⚠ Dinlenme haftası öner: ${esc(dinOn.nedenler.join(', '))}</p>` : ''}
     ${new Date().getDay() === 0 && gun ? '<button class="hw-g hw-oz" data-hw="hafta">📋 Haftanın özeti hazır ›</button>' : ''}
     ${testZ ? '<button class="hw-g hw-test" data-hw="css">💡 CSS testi zamanı: eşik setleri hedefin altında · testi yap ›</button>' : ''}
-    <button class="hw-g hw-bh" data-hw="buhafta">🗓 Bu hafta · yüzme + salon planı ›</button>`;
+    <button class="hw-g hw-bh" data-hw="buhafta">🗓 Bu hafta · yüzme + kara planı ›</button>`;
 }
 
 // --- Form ve denge ekranı -------------------------------------------------------------------
@@ -1192,7 +1192,7 @@ function haftaGrafik(H, normal) {
     const x0 = pl + i * bw + 4, bwi = Math.max(2, bw - 8);
     const yY = Y(x.yuzme), yS = Y(x.yuzme + x.salon);
     if (x.yuzme) o.push(`<rect x="${x0.toFixed(1)}" y="${yY.toFixed(1)}" width="${bwi.toFixed(1)}" height="${(h - pb - yY).toFixed(1)}" rx="2" class="by"><title>${esc(fmtDateTR(x.bas))} haftası · yüzme ${fmtNum(x.yuzme)}</title></rect>`);
-    if (x.salon) o.push(`<rect x="${x0.toFixed(1)}" y="${yS.toFixed(1)}" width="${bwi.toFixed(1)}" height="${(yY - yS).toFixed(1)}" rx="2" class="bs"><title>${esc(fmtDateTR(x.bas))} haftası · salon ${fmtNum(x.salon)}</title></rect>`);
+    if (x.salon) o.push(`<rect x="${x0.toFixed(1)}" y="${yS.toFixed(1)}" width="${bwi.toFixed(1)}" height="${(yY - yS).toFixed(1)}" rx="2" class="bs"><title>${esc(fmtDateTR(x.bas))} haftası · kara ${fmtNum(x.salon)}</title></rect>`);
     if (i % 2 === (H.length - 1) % 2 || i === H.length - 1) o.push(`<text x="${(x0 + bwi / 2).toFixed(1)}" y="${h - 5}" text-anchor="middle" class="ax">${i === H.length - 1 ? 'bu hafta' : `${x.bas.slice(8, 10)}.${x.bas.slice(5, 7)}`}</text>`);
   });
   o.push(`<line x1="${pl}" x2="${w - pr}" y1="${Y(normal).toFixed(1)}" y2="${Y(normal).toFixed(1)}" class="ref"/><text x="${w - pr}" y="${(Y(normal) - 4).toFixed(1)}" text-anchor="end" class="ax">normal hafta ${fmtNum(normal)}</text>`);
@@ -1217,11 +1217,11 @@ function renderForm() {
   // Haftalık set (salon, kas grubu başına; hedef 10–20, omuz ≤ 12)
   const sd = salonData();
   const hs = sd ? hazir.haftalikSet(sd.gecmis.map((r) => ({ tarih: r.tarih, hareket: r.hareket, set: r.set })), salon.haftaBasi(G.bugun), G.bugun, hPay) : {};
-  const setHtml = Object.keys(hs).length ? `<p class="sp-lb">HAFTALIK SET · KAS GRUBU <small>(salon; hedef 10–20, omuz itiş ≤ 12)</small></p>${grup.sirala(Object.keys(hs)).map((g) => { const d = hazir.setDurum(g, hs[g]); return `<div class="fd-r"><span class="fs-g">${esc(g)}</span><div class="fd-t"><i data-bg="${grup.grupRenk(g)}" data-w="${Math.min(100, (hs[g] / 20) * 100)}"></i><s data-l="${(d.alt / 20) * 100}"></s></div><b class="n ${d.durum === 'iyi' ? '' : 'warn'}">${hs[g]}</b><small>${d.durum === 'az' ? 'az' : d.durum === 'fazla' ? 'fazla' : 'iyi'}</small></div>`; }).join('')}` : '';
+  const setHtml = Object.keys(hs).length ? `<p class="sp-lb">HAFTALIK SET · KAS GRUBU <small>(kara; hedef 10–20, omuz itiş ≤ 12)</small></p>${grup.sirala(Object.keys(hs)).map((g) => { const d = hazir.setDurum(g, hs[g]); return `<div class="fd-r"><span class="fs-g">${esc(g)}</span><div class="fd-t"><i data-bg="${grup.grupRenk(g)}" data-w="${Math.min(100, (hs[g] / 20) * 100)}"></i><s data-l="${(d.alt / 20) * 100}"></s></div><b class="n ${d.durum === 'iyi' ? '' : 'warn'}">${hs[g]}</b><small>${d.durum === 'az' ? 'az' : d.durum === 'fazla' ? 'fazla' : 'iyi'}</small></div>`; }).join('')}` : '';
   // 3. Kas yorgunluğu: yalnızca toparlanması %90'ın altındaki gruplar
   const yorgun = Object.entries(G.tp).filter(([, o]) => o.toparlanma < 90).sort((a, b) => a[1].toparlanma - b[1].toparlanma);
   const yk = Object.fromEntries(yorgun.map(([g, o]) => [g, Math.min(100, Math.round((100 - o.toparlanma) * 2))]));
-  const kaynak = (o) => (o.yuzmePay >= 80 ? 'yüzmeden' : o.salonPay >= 80 ? 'salondan' : 'yüzme + salon');
+  const kaynak = (o) => (o.yuzmePay >= 80 ? 'yüzmeden' : o.salonPay >= 80 ? 'karadan' : 'yüzme + kara');
   // 4. Yoğunluk dengesi (yüzme setleri, süre ağırlıklı)
   const hist = data.getHistory();
   const reps = (from) => {
@@ -1248,12 +1248,12 @@ function renderForm() {
   for (const x of G.L) if (x.tur === 'yuzme' && x.tarih >= bas4) for (const [k, m] of Object.entries(x.stil || {})) { st4[k] = (st4[k] || 0) + m; stTop += m; }
   const ay = yuk.stilAy(G.L, G.bugun.slice(0, 7));
   // 6. Döngü (blok): yalnızca başlatılınca
-  const BLOK = [['Hacim', 'Salon 3 × 12–15 · yüzmede aerobik hacim'], ['Hacim+', 'Salon 3–4 × 10–12 · eşik setleri artar'], ['Kuvvet', 'Salon 3 × 6–8, dinlenme 2 dk · yüzme hacmi −%10'], ['Dinlenme', 'Hacim %40 az, yoğunluk aynı']];
+  const BLOK = [['Hacim', 'Kara 3 × 12–15 · yüzmede aerobik hacim'], ['Hacim+', 'Kara 3–4 × 10–12 · eşik setleri artar'], ['Kuvvet', 'Kara 3 × 6–8, dinlenme 2 dk · yüzme hacmi −%10'], ['Dinlenme', 'Hacim %40 az, yoğunluk aynı']];
   let blokHtml;
   const fdT = fazBilgisi();
   if (fdT.kaynak === 'takvim') {
     blokHtml = `<div class="fm-blok">${fdT.dongu.map((a, i) => `<div class="${i === fdT.i ? 'on' : ''}"><b>${i + 1}</b><small>${esc(a)}</small></div>`).join('')}</div>
-      <p class="fm-bt"><b>${esc(fazEtiket(fdT))} · ${esc(fdT.F.ad)}</b> — salon: ${esc(fdT.F.salon)} · yüzme: ${esc(fdT.F.yuzme)}</p>
+      <p class="fm-bt"><b>${esc(fazEtiket(fdT))} · ${esc(fdT.F.ad)}</b> — kara: ${esc(fdT.F.salon)} · yüzme: ${esc(fdT.F.yuzme)}</p>
       ${fdT.yasak.length ? `<p class="fm-acik">Bu fazda yok: ${esc(fdT.yasak.join(', ').toLocaleUpperCase('tr'))}</p>` : ''}
       <p class="fm-acik">Faz takvimi idmanRef faz sayfasından; döngü ve yasaklar kisit sayfasından (dongu_F…, yasak_F…).</p>`;
   } else if (p.blokBas) {
@@ -1264,7 +1264,7 @@ function renderForm() {
       ${G.od.durum === 'yuksek' && bh !== 3 ? '<p class="fm-bt warn">⚠ Yük hızlı arttı: dinlenme haftasını öne al.</p>' : ''}
       <button class="btn btn-block" data-fm="blokbitir">Döngüyü durdur</button>`;
   } else {
-    blokHtml = `<p class="fm-acik">İsteğe bağlı: 3 hafta artan yük + 1 hafta dinlenme. Başlatırsan hangi haftada olduğun ve o haftanın salon/yüzme ağırlığı burada görünür.</p>
+    blokHtml = `<p class="fm-acik">İsteğe bağlı: 3 hafta artan yük + 1 hafta dinlenme. Başlatırsan hangi haftada olduğun ve o haftanın kara/yüzme ağırlığı burada görünür.</p>
       <button class="btn btn-block" data-fm="blok">Döngüyü bu hafta başlat</button>`;
   }
   $('fm-body').innerHTML = `
@@ -1272,9 +1272,9 @@ function renderForm() {
     <div class="fm-card">
       <div class="fm-bh"><b class="n ${DURUM_CLS[G.hd.durum]}">%${G.hd.pay}</b><span><b>${esc(G.hd.metin)}</b><small>${B.seans}/${G.K.gunHafta + (G.K.gunHaftaSalon || 0)} seans · ${B.dk} dk · yük ${fmtNum(B.top)} / ${fmtNum(G.normal)}</small></span></div>
       <div class="fm-yb"><i data-w="${bar}" class="${DURUM_CLS[G.hd.durum]}"></i><s data-l="${nrm}"></s></div>
-      <p class="fm-acik">Yük = süre (dk) × zorluk (RPE). Normal hafta = ${ayriGun(G.K) ? 'yüzme ' : ''}${G.K.gunHafta} seans × ${G.K.seansDk} dk × RPE ${G.K.seansRpe}${ayriGun(G.K) ? ` + salon ${G.K.gunHaftaSalon} × ${G.K.salonDk} dk × RPE ${G.K.salonRpe}` : ''}.</p>
+      <p class="fm-acik">Yük = süre (dk) × zorluk (RPE). Normal hafta = ${ayriGun(G.K) ? 'yüzme ' : ''}${G.K.gunHafta} seans × ${G.K.seansDk} dk × RPE ${G.K.seansRpe}${ayriGun(G.K) ? ` + kara ${G.K.gunHaftaSalon} × ${G.K.salonDk} dk × RPE ${G.K.salonRpe}` : ''}.</p>
     </div>
-    <p class="sp-lb">SON 8 HAFTA <small>(mavi yüzme · turuncu salon)</small></p>
+    <p class="sp-lb">SON 8 HAFTA <small>(mavi yüzme · turuncu kara)</small></p>
     ${haftaGrafik(G.H, G.normal)}
     <p class="fm-sonuc ${gid[0]}">${esc(gid[1])}</p>
     ${dinOn.oner ? `<p class="fm-sonuc warn">⚠ Dinlenme haftası öner: ${esc(dinOn.nedenler.join(', '))}.</p>` : ''}
@@ -1312,11 +1312,11 @@ function iskelet(G) {
     const t = yuk.gunEkle(bas, i);
     const ss = G.L.filter((x) => x.tarih === t);
     let tx = '', cls = '';
-    if (ss.length) { tx = ss.map((x) => `${x.tur === 'yuzme' ? 'Yüzme' : 'Salon'} ${x.dk} dk`).join(' + '); cls = 'ok'; }
+    if (ss.length) { tx = ss.map((x) => `${x.tur === 'yuzme' ? 'Yüzme' : 'Kara'} ${x.dk} dk`).join(' + '); cls = 'ok'; }
     else if (planli.has(t) && t >= G.bugun) { tx = 'Yüzme programı'; cls = 't'; if (kalan) kalan--; }
     else if (t >= G.bugun && kalan && (i >= 1 && i <= 4)) {
       const slot = i === 4 ? 'akşam · sınırsız' : `sabah ${G.K.sure.sabah} / öğle ${G.K.sure.ogle} dk`;
-      tx = `Öneri: ${i === 4 ? 'yüzme (eşik + hız)' : 'salon (önleyici + core)'} · ${slot}`; cls = 'a'; kalan--;
+      tx = `Öneri: ${i === 4 ? 'yüzme (eşik + hız)' : 'kara (önleyici + core)'} · ${slot}`; cls = 'a'; kalan--;
     }
     rows.push(`<div class="fm-gun ${cls}${t === G.bugun ? ' today' : ''}"><b>${ad[i]}</b><span>${esc(tx || '—')}</span></div>`);
   }
@@ -1342,7 +1342,7 @@ function fazEtiket(fd) {
 function fazNotu() {
   const fd = fazBilgisi();
   if (!fd.kaynak) return '';
-  return `<p class="sp-faz">${esc(fazEtiket(fd))} <b>${esc(fd.F.ad)}</b> — salon: ${esc(fd.F.salon)}</p>`;
+  return `<p class="sp-faz">${esc(fazEtiket(fd))} <b>${esc(fd.F.ad)}</b> — kara: ${esc(fd.F.salon)}</p>`;
 }
 
 function showBuHafta() { show('bu-hafta'); renderBuHafta(); }
@@ -1377,21 +1377,21 @@ function renderBuHafta() {
   $('bh-body').innerHTML = `
     <div class="bh-faz"><small>${fd.kaynak ? esc(fazEtiket(fd).toLocaleUpperCase('tr')) : 'DÖNGÜ KAPALI · varsayılan'}</small><b>${esc(F.ad)}</b>${fd.odak ? `<p>🎯 ${esc(fd.odak)}</p>` : ''}${fd.yasak.length ? `<p>⊘ bu fazda yok: ${esc(fd.yasak.join(', ').toLocaleUpperCase('tr'))}</p>` : ''}
       <p>🏊 ${esc(F.yuzme)}</p><p>🏋 ${esc(F.salon)}</p></div>
-    <p class="sp-lb">HAFTALIK YÜK HEDEFİ <small>(yüzme + salon)</small></p>
+    <p class="sp-lb">HAFTALIK YÜK HEDEFİ <small>(yüzme + kara)</small></p>
     <div class="fm-card"><div class="fm-bh"><b class="n">%${pay}</b><span><b>${fmtNum(G.buHafta.top)} / ${fmtNum(hedef.hedef)} · kalan ${fmtNum(hedef.kalan)}</b><small>${esc(hedef.metin)}</small></span></div>
       <div class="fm-yb"><i data-w="${pay}" class="${pay > 100 ? 'warn' : 'ok'}"></i></div></div>
     <p class="sp-lb">SAĞLIK BÜTÇESİ · EKLEM</p>
     ${butce.map((b) => `<div class="fd-r bh-b"><span>${esc(b.ad)}</span><div class="fd-t"><i class="${BCLS[b.durum]}" data-w="${Math.min(100, b.pay)}"></i></div><b class="n ${BCLS[b.durum]}">${fmtDec(b.deger)} / ${fmtDec(b.sinir)}</b><small>${esc(b.birim)}</small></div><p class="fm-src">${esc(b.not)}</p>`).join('')}
-    <p class="sp-lb">GÜNLER <small>(${ayriGun(G.K) ? `${G.K.gunHafta} yüzme + ${G.K.gunHaftaSalon} salon` : `${G.K.gunHafta} gün`}; Cuma akşam yüzme, Sal–Per sabah/öğle)</small></p>
-    ${gunler.some((g) => g.isler.some((x) => x.tur === 'salon')) ? '' : '<p class="bh-u warn">⚠ Bu hafta salon günü yok: yüzme günlerinden birine 15–20 dk omuz önleyici + core ekle.</p>'}
+    <p class="sp-lb">GÜNLER <small>(${ayriGun(G.K) ? `${G.K.gunHafta} yüzme + ${G.K.gunHaftaSalon} kara` : `${G.K.gunHafta} gün`}; Cuma akşam yüzme, Sal–Per sabah/öğle)</small></p>
+    ${gunler.some((g) => g.isler.some((x) => x.tur === 'salon')) ? '' : '<p class="bh-u warn">⚠ Bu hafta kara günü yok: yüzme günlerinden birine 15–20 dk omuz önleyici + core ekle.</p>'}
     ${gunler.map((g) => `<div class="bh-gun ${g.durum}${g.tarih === G.bugun ? ' today' : ''}" data-bh-gun="${g.tarih}">
       <div class="bh-h"><b>${esc(g.gun)}</b><small>${esc(fmtDateTR(g.tarih).split(' ').slice(0, 2).join(' '))}</small>${DY[g.durum] ? `<em>${DY[g.durum]}</em>` : ''}</div>
       ${g.isler.map((x) => `<p class="bh-is ${x.tur}">${x.tur === 'yuzme' ? '🏊' : '🏋'} <b>${esc(x.ad)}</b>${x.sure ? ` · ${x.sure} dk` : ''}${x.butce ? `<small>${esc(x.butce)}</small>` : ''}${x.yan ? `<small>+ ${esc(x.yan)}</small>` : ''}${x.hafif ? `<small class="warn">${esc(x.hafif)}</small>` : ''}</p>`).join('')}
       ${g.uyarilar.map((u) => `<p class="bh-u warn">⚠ ${esc(u)}</p>`).join('')}
-      ${g.isler.some((x) => x.tur === 'salon' && x.kaynak === 'oneri') ? `<button class="btn btn-block" data-bh="salon" data-t="${g.tarih}" data-dk="${g.isler.find((x) => x.tur === 'salon').sure || 65}">📅 Salonu planla · programa yaz</button>` : ''}
+      ${g.isler.some((x) => x.tur === 'salon' && x.kaynak === 'oneri') ? `<button class="btn btn-block" data-bh="salon" data-t="${g.tarih}" data-dk="${g.isler.find((x) => x.tur === 'salon').sure || 65}">📅 Kara idmanını planla · programa yaz</button>` : ''}
     </div>`).join('')}
     ${olcum.length ? `<p class="sp-lb">ÖLÇÜM</p>${olcum.map((o) => (/^CSS/.test(o) ? `<button class="hw-g hw-test" data-bh="css">📏 ${esc(o)} · testi yap ›</button>` : `<p class="hw-g">📏 ${esc(o)}</p>`)).join('')}` : ''}
-    <p class="sp-note">Yük = süre (dk) × zorluk (RPE). Yüzme programı idman dosyasındaki yuzmePlan'da kalır; önerilen salon günü düzenleyip karaPlan sayfasına yazabilirsin.</p>`;
+    <p class="sp-note">Yük = süre (dk) × zorluk (RPE). Yüzme programı idman dosyasındaki yuzmePlan'da kalır; önerilen kara günü düzenleyip karaPlan sayfasına yazabilirsin.</p>`;
   for (const el of $('bh-body').querySelectorAll('[data-w]')) el.style.width = `${el.dataset.w}%`;
 }
 
@@ -1423,7 +1423,7 @@ function onBuHaftaClick(e) {
   if (!b) return;
   if (b.dataset.bh === 'css') cssTestiAc();
   else if (b.dataset.bh === 'salon') {
-    if (!salonData()) { toast('Salon verisi yok. Bağlantıyı kontrol et.'); return; }
+    if (!salonData()) { toast('Kara verisi yok. Bağlantıyı kontrol et.'); return; }
     const liste = salonOneriListe(Number(b.dataset.dk) || 65);
     showSalonPlanSablon({ tur: 'oneri', hareketler: liste });
     if (sl.plan) { sl.plan.hedefTarih = b.dataset.t; renderSalonPlan(); }
@@ -1463,7 +1463,7 @@ function renderHaftaOzeti() {
   if (testZ) notlar.push('Eşik setleri hedefin altında → CSS testi önerilir');
   const or = yuk.oranDurum(yuk.yukOrani(G.g, son < G.bugun ? son : G.bugun, G.normal), { donus: G.donus });
   const prGun = salonProgram().filter((r) => r.tarih >= bas && r.tarih <= son).map((r) => r.tarih);
-  if (prGun.length) { const u = hazir.planUyumu(prGun, H.w.filter((x) => x.tur === 'salon').map((x) => x.tarih)); notlar.push(`Salon programı uyumu: ${u.yapilan}/${u.planli} gün (%${u.pay})`); }
+  if (prGun.length) { const u = hazir.planUyumu(prGun, H.w.filter((x) => x.tur === 'salon').map((x) => x.tarih)); notlar.push(`Kara programı uyumu: ${u.yapilan}/${u.planli} gün (%${u.pay})`); }
   if (or.durum === 'yuksek' || or.durum === 'sinirda') notlar.push(`Yük artış oranı: ${or.metin}`);
   const sag = { 'sag omuz': 'Omuz', 'sol omuz': 'Omuz', 'sag diz': 'Bacak', 'sol diz': 'Bacak', kalca: 'Kalça', bel: 'Sırt', boyun: 'Sırt' };
   const agK = {};
@@ -1472,7 +1472,7 @@ function renderHaftaOzeti() {
   $('hz-next').disabled = son >= G.bugun;
   $('hz-body').innerHTML = `
     <div class="stats4"><div><small>YÜZME</small><b class="n">${fmtDec(Math.round(H.km * 10) / 10)}<span>km</span></b>${kiy(H.km, O.km, (v) => `${fmtDec(Math.round(v * 10) / 10)} km`)}</div>
-      <div><small>SALON</small><b class="n">${H.set}<span>set</span></b>${kiy(H.set, O.set, (v) => `${v}`)}</div>
+      <div><small>KARA</small><b class="n">${H.set}<span>set</span></b>${kiy(H.set, O.set, (v) => `${v}`)}</div>
       <div><small>SEANS</small><b class="n">${H.gun}/${G.K.gunHafta}</b></div>
       <div><small>YÜK</small><b class="n">%${hd.pay}</b><em class="mu">${esc(hd.metin.toLocaleLowerCase('tr'))}</em></div></div>
     <p class="hz-yk">Haftalık yük <b>${fmtNum(H.yk)}</b>${O.yk ? ` · geçen hafta ${fmtNum(O.yk)} (${H.yk >= O.yk ? '+' : '−'}%${Math.abs(Math.round(((H.yk - O.yk) / O.yk) * 100))})` : ''}</p>
@@ -1500,7 +1500,7 @@ function takvimEk() {
     if (!salonVar && !g[t] && !msi[t]) continue;
     const ek = document.createElement('span');
     ek.className = 'wd-ek';
-    ek.innerHTML = `${salonVar ? '<em class="wd-s" title="Salon">⊢⊣</em>' : ''}${msi[t] ? '<em class="wd-a" title="Ağrı (MSI ≥ 1)">⚠</em>' : ''}${g[t] ? `<u class="wd-y"><i data-h="${Math.min(100, Math.round(g[t] / 6))}"></i></u>` : ''}`;
+    ek.innerHTML = `${salonVar ? '<em class="wd-s" title="Kara">⊢⊣</em>' : ''}${msi[t] ? '<em class="wd-a" title="Ağrı (MSI ≥ 1)">⚠</em>' : ''}${g[t] ? `<u class="wd-y"><i data-h="${Math.min(100, Math.round(g[t] / 6))}"></i></u>` : ''}`;
     for (const el of ek.querySelectorAll('[data-h]')) el.style.height = `${el.dataset.h}%`;
     b.append(ek);
   }
@@ -1556,7 +1556,7 @@ function renderHistory() {
       <button class="day-row hist-row is-salon" data-hist="${esc(r.id)}">
         <span class="dr-date"><b>${dt.getDate()}</b><small>${AY_KISA[dt.getMonth()].toLocaleUpperCase('tr')}</small></span>
         <span class="dr-info">
-          <span class="dr-name">Salon · ${GUNLER[dt.getDay()]} <em class="chip ${st.cls}">${st.ad}</em></span>
+          <span class="dr-name">Kara · ${GUNLER[dt.getDay()]} <em class="chip ${st.cls}">${st.ad}</em></span>
           <span class="dr-meta">${r.hareketler.length} hareket · ${sets} set${r.sure ? ` · ${esc(fmtDur(parseSec(r.sure)))}` : ''}</span>
         </span>
       </button>`;
@@ -1581,7 +1581,7 @@ function historyDetail(r) {
   if (turOf(r) === 'salon') {
     const box = document.createElement('div');
     box.className = 'hd';
-    box.innerHTML = `${r.sure ? `<p>Salon · Süre ${esc(fmtDur(parseSec(r.sure)))}</p>` : ''}<div class="hd-sets">${r.hareketler.map((x) => `
+    box.innerHTML = `${r.sure ? `<p>Kara · Süre ${esc(fmtDur(parseSec(r.sure)))}</p>` : ''}<div class="hd-sets">${r.hareketler.map((x) => `
       <div class="hd-set"><i data-bg="${grupInfo(x.hareket).renk}"></i><span><b>${esc(x.hareket)}</b>
         <small>${x.set} × ${esc(fmtDec(x.tekrar))} · ${esc(fmtKg(x.agirlik))}${x.sure ? ` · ${esc(x.sure)}` : ''}${x.rpe !== '' ? ` · RPE ${esc(fmtDec(x.rpe))}` : ''}${x.msi !== '' ? ` · MSI ${esc(fmtDec(x.msi))}` : ''}</small>
         ${x.aciklama ? `<small>${esc(x.aciklama)}</small>` : ''}</span></div>`).join('')}</div>`;
@@ -3738,7 +3738,7 @@ function renderGymGo(hz, ses) {
     if (!bugun) ana = 'Bu planla başla';
   } else {
     when = 'Plan yok';
-    meta = 'Sırada salon planı yok';
+    meta = 'Sırada kara planı yok';
     src = salonData() ? "Tabloda karaPlan'a yazabilir ya da burada planlayabilirsin." : 'Plan yükleniyor…';
     ana = '＋ İdman planla';
   }
@@ -3812,7 +3812,7 @@ function renderSalonStart() {
   const body = $('ss-body');
   if (!d) {
     body.innerHTML = sl.err
-      ? `<p class="empty">Salon verisi alınamadı: ${esc(sl.err.message)}</p><button class="btn btn-block" data-ss="retry">Tekrar dene</button>`
+      ? `<p class="empty">Kara verisi alınamadı: ${esc(sl.err.message)}</p><button class="btn btn-block" data-ss="retry">Tekrar dene</button>`
       : '<p class="empty">Yükleniyor…</p>';
     return;
   }
@@ -3831,7 +3831,7 @@ function renderSalonStart() {
   };
   body.innerHTML = `${gunler.length ? gunler.map(kart).join('') : `<p class="empty">karaPlan'da sırada plan yok. Tabloda yazabilir ya da burada planlayabilirsin.</p>`}
     <button class="btn btn-block set-gap${gunler.length ? '' : ' btn-primary'}" data-ss="plan">＋ Yeni idman planla</button>
-    <button class="btn btn-block set-gap" data-ss="prog">📅 Salon programı (hafta)</button>
+    <button class="btn btn-block set-gap" data-ss="prog">📅 Kara programı (hafta)</button>
     ${sl.err ? `<p class="muted set-gap">Çevrimdışı: son alınan veri gösteriliyor.</p>` : ''}`;
   paint(body);
 }
@@ -4730,7 +4730,7 @@ function saveGiris() {
 async function onSlBack() {
   const st = slst();
   const choice = await modal({
-    title: 'Salon idmanı',
+    title: 'Kara idmanı',
     body: st.basla == null ? '<p>İdman henüz başlamadı.</p>' : `<p>Süre ${fmtClock(salon.idmanMs(st, Date.now()))} · ${slH().filter((_, h) => st.per[h].sets.length).length} hareket başladı.</p>`,
     actions: [
       { label: 'Devam et', value: '', cls: 'btn-primary' },
@@ -4747,7 +4747,7 @@ async function onSlBack() {
     clearInterval(sl.ticker);
     showHome();
   } else if (choice === 'del') {
-    const ok = await modal({ title: 'İdman silinsin mi?', body: '<p>Bu salon idmanı telefondan silinir, tabloya yazılmaz.</p>', actions: [{ label: 'Evet, sil', value: true, cls: 'btn-danger' }, { label: 'Vazgeç', value: false }] });
+    const ok = await modal({ title: 'İdman silinsin mi?', body: '<p>Bu kara idmanı telefondan silinir, tabloya yazılmaz.</p>', actions: [{ label: 'Evet, sil', value: true, cls: 'btn-danger' }, { label: 'Vazgeç', value: false }] });
     if (ok) { slEnd(); showHome(); }
   }
 }
@@ -4860,7 +4860,7 @@ async function saveSalonForm() {
 
     slEnd();
     showHome();
-    toast(`Salon idmanı kaydedildi: ${payload.hareketler.length} hareket`, 3500);
+    toast(`Kara idmanı kaydedildi: ${payload.hareketler.length} hareket`, 3500);
   } catch (err) {
     if (err.code === 'DUPLICATE') {
       const close = await modal({ title: 'Bu gün zaten kayıtlı', body: `<p>${esc(fmtDateTR(payload.tarih))} için idman sayfasında kayıt var; ikinci kez yazılmadı.</p>`, actions: [{ label: 'İdmanı kapat', value: true, cls: 'btn-primary' }, { label: 'Özete dön', value: false }] });
@@ -4921,7 +4921,7 @@ function renderSalonProgram() {
     gunler.push(`<div class="pg-gun${t === bugun ? ' today' : ''}${yapildi ? ' done' : ''}" data-pg-gun="${t}">
       <div class="pg-h"><b>${ad[i]}</b><small>${esc(fmtDateTR(t).split(' ').slice(0, 2).join(' '))}</small>${yuzme.has(t) ? '<em class="pg-yz">🏊 yüzme</em>' : ''}${yapildi ? '<em class="pg-ok">✓ yapıldı</em>' : rows.length ? `<em>${rows.length} hareket · ${sure}</em>` : ''}</div>
       ${rows.length ? `<ul class="hgg-ls">${liste}</ul><div class="pg-act">${yapildi ? '' : `<button class="btn btn-primary" data-pg="basla" data-t="${t}">İdmana başla</button>`}<button class="btn" data-pg="duzenle" data-t="${t}">Düzenle</button><button class="btn" data-pg="sil" data-t="${t}">Sil</button></div>`
-        : t >= bugun ? `<button class="btn btn-block pg-ekle" data-pg="planla" data-t="${t}">＋ Bu güne salon planla</button>` : ''}</div>`);
+        : t >= bugun ? `<button class="btn btn-block pg-ekle" data-pg="planla" data-t="${t}">＋ Bu güne kara idmanı planla</button>` : ''}</div>`);
   }
   $('pg-body').innerHTML = `${destek ? '' : '<p class="bi-off">Programı tabloda tutmak için idman dosyasında karaPlan sayfası gerekir: ilk kez "Programa yaz" deyince betik sayfayı kendisi açar.</p>'}${gunler.join('')}
     <p class="sp-note">Program idman dosyasının karaPlan sayfasında durur; masada planla, salonda uygula. Yapılan idman karaVeri'ye yazılır, o günün satırları plandan silinir.</p>`;
@@ -5007,7 +5007,7 @@ const YERLER = { Salon: null, Ev: /^(band|bands|bodyweight|vücut|db|dumbbell|da
 
 function showSalonPlan() {
   const d = salonData();
-  if (!d) { toast('Salon verisi yok. Bağlantıyı kontrol et.'); loadSalon(); return; }
+  if (!d) { toast('Kara verisi yok. Bağlantıyı kontrol et.'); loadSalon(); return; }
   sl.plan = { step: 0, oncelik: {}, amac: [], ekipman: [], stcMin: 0, secili: [], liste: [], hmView: 'front', odak: null };
   if (prefs().yer && YERLER[prefs().yer]) { sl.plan.yer = prefs().yer; sl.plan.ekipman = [...new Set(d.katalog.map((k) => k.ekipman).filter((e) => e && YERLER[prefs().yer].test(e)))]; }
   harita.hitYukle().then(() => {}); // dokunma haritası arka planda
@@ -5036,7 +5036,7 @@ function renderSalonPlan() {
   const body = $('sp-body');
   const next = $('sp-next');
   if (P.step === 0) {
-    $('sp-title').textContent = 'Salon idmanı planla';
+    $('sp-title').textContent = 'Kara idmanı planla';
     const son4 = salon.dagilim(d.gecmis, d.etki, addDays(todayKey(), -28));
     const tum = salon.dagilim(d.gecmis, d.etki);
     const chips = (key, vals, fmt = (v) => v) => `<div class="es-chips">${vals.map((v) => `<button data-sp-chip="${key}" data-v="${esc(v)}" class="${(key === 'stc' ? P.stcMin === v : P[key].includes(v)) ? 'is-on' : ''}">${esc(fmt(v))}</button>`).join('')}</div>`;
@@ -5083,7 +5083,7 @@ function renderSalonPlan() {
     next.textContent = `Plana geç · ${P.secili.length} hareket`;
     next.disabled = !P.secili.length;
   } else {
-    $('sp-title').textContent = P.sablon ? (P.sablon === 'plan' ? 'Planı düzenle' : P.sablon === 'program' ? 'Programı düzenle' : P.sablon === 'oneri' ? 'Önerilen salon günü' : 'Son idmandan plan') : 'Plan';
+    $('sp-title').textContent = P.sablon ? (P.sablon === 'plan' ? 'Planı düzenle' : P.sablon === 'program' ? 'Programı düzenle' : P.sablon === 'oneri' ? 'Önerilen kara günü' : 'Son idmandan plan') : 'Plan';
     if (P.liste.length !== P.secili.length || P.liste.some((x, i) => x.ad !== P.secili[i])) {
       P.liste = P.secili.map((ad) => P.liste.find((x) => x.ad === ad) || salon.planHareket(d, ad, { bodyweight: (katalogOf(ad) || {}).ekipman === 'Bodyweight', uygula: false }));
     }
@@ -5305,7 +5305,7 @@ function onSalonPlanBack() {
 /** İdmanda Değiştir (aynı kas grubundan) / Sonrasına ekle: puanlı liste. */
 async function pickHareket(ctx) {
   const d = salonData();
-  if (!d) return toast('Salon verisi yok.');
+  if (!d) return toast('Kara verisi yok.');
   const cur = slH()[ctx.h];
   const g = grupOf(cur.ad);
   const oncelik = ctx.mode === 'swap' ? (g ? { [g]: 1 } : {}) : (sl.ses.oncelik || {});

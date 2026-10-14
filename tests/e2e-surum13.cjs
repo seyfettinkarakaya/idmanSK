@@ -107,7 +107,7 @@ sc('Salon programı: haftalık görünüm; boş güne planla → "Programa yaz" 
   assert.equal(plan.data.slice(1).filter((r) => r[2]).length, 1);
   // Sil
   await p.click('[data-pg="sil"][data-t="2026-09-24"]'); await s.waitModal('Programı sil'); await s.modalClick('Sil');
-  await p.waitForFunction(() => /Bu güne salon planla/.test(document.querySelector('[data-pg-gun="2026-09-24"]').textContent));
+  await p.waitForFunction(() => /Bu güne kara idmanı planla/.test(document.querySelector('[data-pg-gun="2026-09-24"]').textContent));
 });
 
 sc('Salon programı: bugünün programı tabloda varsa ana sayfa salon kartında (13.3: yüzme kartı gibi) → İdmanı aç programdaki değerlerle; süperset korunur', async ({ launch }) => {
@@ -223,26 +223,26 @@ sc('Yedek (P12) ve bildirim ayarı (P11): Ayarlar\'dan JSON yedeği iner (anahta
   assert.ok(j.veriler['ysk.hazir'] && !j.veriler['ysk.config'], 'anahtarlar yedekte yok');
 });
 
-sc('Bu hafta (M1–M10): faz, yük hedefi, sağlık bütçesi, 7 gün planı; önerilen salon günü düzenlenip plan sayfasına yazılır', async ({ launch }) => {
+sc('Bu hafta (M1–M10): faz, yük hedefi, sağlık bütçesi, 7 gün planı; önerilen kara günü düzenlenip plan sayfasına yazılır', async ({ launch }) => {
   const s = await launch({ salonSheets: salonV12(), ref: true, rows: [] }); const p = s.page;
   await s.waitScreen('home');
   await p.waitForFunction(() => localStorage.getItem('ysk.salon'));
-  assert.match(await txt(s, '[data-hw="buhafta"]'), /Bu hafta · yüzme \+ salon planı/);
+  assert.match(await txt(s, '[data-hw="buhafta"]'), /Bu hafta · yüzme \+ kara planı/);
   await p.click('[data-hw="buhafta"]'); await s.waitScreen('bu-hafta');
   const t = await txt(s, '#bh-body');
   assert.match(t, /DÖNGÜ KAPALI · varsayılan\s*Hacim/);
   assert.match(t, /HAFTALIK YÜK HEDEFİ.*kalan \d+/);
   assert.match(t, /SAĞLIK BÜTÇESİ · EKLEM\s*Omuz.*Kalça\s*0 \/ 10\s*% BR.*Diz\s*0 \/ 9\s*set/);
   // Çarşamba (bugün) salon, Perşembe aerobik yüzme, Cuma akşam yüzme; geçmiş günler boş
-  assert.match(await txt(s, '[data-bh-gun="2026-09-23"]'), /Çarşamba.*öneri.*🏋 Salon · stabilite \+ core.*sabah 80 \/ öğle 65 dk/);
+  assert.match(await txt(s, '[data-bh-gun="2026-09-23"]'), /Çarşamba.*öneri.*🏋 Kara · stabilite \+ core.*sabah 80 \/ öğle 65 dk/);
   assert.match(await txt(s, '[data-bh-gun="2026-09-24"]'), /Perşembe.*öneri.*🏊 Yüzme · aerobik hacim/);
   assert.match(await txt(s, '[data-bh-gun="2026-09-25"]'), /Cuma.*🏊 Yüzme · eşik \+ uzun aerobik.*akşam · sınırsız/);
   assert.doesNotMatch(await txt(s, '[data-bh-gun="2026-09-22"]'), /öneri/);
   assert.match(t, /ÖLÇÜM\s*📏 CSS testi/);
   if (process.env.SHOT) await p.screenshot({ path: `${process.env.SHOT}/buhafta.png`, fullPage: true });
-  // Önerilen salon günü → plan (düzenlenebilir) → Programa yaz
+  // Önerilen kara günü → plan (düzenlenebilir) → Programa yaz
   await p.click('[data-bh="salon"][data-t="2026-09-23"]'); await s.waitScreen('salon-plan');
-  assert.equal(await txt(s, '#sp-title'), 'Önerilen salon günü');
+  assert.equal(await txt(s, '#sp-title'), 'Önerilen kara günü');
   const n = await p.$$eval('.sp-pl', (e) => e.length);
   assert.ok(n >= 3 && n <= 7, `hareket sayısı ${n}`);
   assert.match(await txt(s, '#sp-body .sp-note'), /Plana yaz.*\(23 Eylül/);
@@ -254,7 +254,7 @@ sc('Bu hafta (M1–M10): faz, yük hedefi, sağlık bütçesi, 7 gün planı; ö
   // Bu hafta yeniden: Çarşamba artık "programda"
   await p.click('#pg-back'); await s.waitScreen('salon-start'); await p.click('#ss-back'); await s.waitScreen('home');
   await p.click('[data-hw="buhafta"]'); await s.waitScreen('bu-hafta');
-  assert.match(await txt(s, '[data-bh-gun="2026-09-23"]'), /programda.*Salon programı/);
+  assert.match(await txt(s, '[data-bh-gun="2026-09-23"]'), /programda.*Kara programı/);
   assert.equal(await p.$$eval('[data-bh="salon"]', (e) => e.length), 0);
   assert.equal(s.net.external.length, 0);
 });
@@ -267,11 +267,11 @@ sc('Bu hafta: hazır olma "dinlen" bugünü kapatır; yüzme programı 3 günü 
   const t = await txt(s, '#bh-body');
   assert.match(t, /DÖNGÜ · 2\. HAFTA\s*Hacim\+/);
   assert.match(await txt(s, '[data-bh-gun="2026-09-23"]'), /Bugün dinlen \(hazır olma\)/);
-  assert.match(t, /Bu hafta salon günü yok/);
+  assert.match(t, /Bu hafta kara günü yok/);
   await p.click('#bh-back'); await s.waitScreen('home');
   await p.click('#home-gym'); await s.waitScreen('salon-start');
   await p.click('[data-ss="plan"]'); await s.waitScreen('salon-plan');
-  assert.match(await txt(s, '.sp-faz'), /Döngü · 2\. hafta Hacim\+ — salon: çekiş kuvveti/);
+  assert.match(await txt(s, '.sp-faz'), /Döngü · 2\. hafta Hacim\+ — kara: çekiş kuvveti/);
 });
 
 // --- 13.2.0 ---------------------------------------------------------------------------------
@@ -282,23 +282,23 @@ sc('13.2.0 faz takvimi (fazBilgi) + döngü/yasak (kisit) ve yüzme/salon ayrı 
   ref.fazBilgi = new Sheet('fazBilgi', ['Sezon', 'Faz', 'Tarih_ilk', 'Tarih_son', 'Ad', 'Odak'], [['26-27', 'F1', D('2026-09-07'), D('2026-12-20'), 'Aerobik taban', 'omuz toleransı']]);
   const s = await launch({ salonSheets: salonV12(), ref: true, refSheets: ref, rows: [] }); const p = s.page;
   await s.waitScreen('home');
-  await p.waitForFunction(() => localStorage.getItem('ysk.ref') && /salon gün/.test(document.getElementById('home-week').textContent));
-  assert.match(await txt(s, '#home-week'), /0\/3\s*yüzme gün\s*0\/2\s*salon gün/);
+  await p.waitForFunction(() => localStorage.getItem('ysk.ref') && /kara gün/.test(document.getElementById('home-week').textContent));
+  assert.match(await txt(s, '#home-week'), /0\/3\s*yüzme gün\s*0\/2\s*kara gün/);
   await p.click('[data-hw="buhafta"]'); await s.waitScreen('bu-hafta');
   const t = await txt(s, '#bh-body');
   assert.match(t, /AEROBİK TABAN \(F1\) · 3\. HAFTA\s*Hacim\+\s*🎯 omuz toleransı\s*⊘ bu fazda yok: SP, KUVVET/);
-  assert.match(t, /GÜNLER \(3 yüzme \+ 2 salon;/);
+  assert.match(t, /GÜNLER \(3 yüzme \+ 2 kara;/);
   assert.match(await txt(s, '[data-bh-gun="2026-09-25"]'), /Cuma.*🏊 Yüzme · eşik \+ uzun aerobik/);
   assert.match(await txt(s, '[data-bh-gun="2026-09-24"]'), /Perşembe.*🏊 Yüzme/);
-  assert.match(await txt(s, '[data-bh-gun="2026-09-27"]'), /Pazar.*🏋 Salon · çekiş kuvveti.*~50 dk/);
+  assert.match(await txt(s, '[data-bh-gun="2026-09-27"]'), /Pazar.*🏋 Kara · çekiş kuvveti.*~50 dk/);
   await p.click('#bh-back'); await s.waitScreen('home');
   await p.click('#home-gym'); await s.waitScreen('salon-start');
   await p.click('[data-ss="plan"]'); await s.waitScreen('salon-plan');
-  assert.match(await txt(s, '.sp-faz'), /Aerobik taban \(F1\) · 3\. hafta Hacim\+ — salon: çekiş kuvveti/);
+  assert.match(await txt(s, '.sp-faz'), /Aerobik taban \(F1\) · 3\. hafta Hacim\+ — kara: çekiş kuvveti/);
   await p.click('#sp-back'); await s.waitScreen('salon-start'); await p.click('#ss-back'); await s.waitScreen('home');
   await p.click('#home-form'); await s.waitScreen('form');
   assert.match(await txt(s, '#fm-body'), /4 HAFTALIK DÖNGÜ\s*1\s*Hacim\s*2\s*Hacim\+\s*3\s*Hacim\+\s*4\s*Dinlenme\s*Aerobik taban \(F1\) · 3\. hafta · Hacim\+.*Bu fazda yok: SP, KUVVET/);
-  assert.match(await txt(s, '#fm-body'), /Normal hafta = yüzme 3 seans × 65 dk × RPE 6 \+ salon 2 × 50 dk × RPE 5/);
+  assert.match(await txt(s, '#fm-body'), /Normal hafta = yüzme 3 seans × 65 dk × RPE 6 \+ kara 2 × 50 dk × RPE 5/);
 });
 
 sc('13.2.0 yüzme: geçerli CSS yoksa uyarı ve bölge yok; çok kısa tekrar sorulur; biten setin tekrar süresi idmanda düzeltilir, özete yansır', async ({ launch }) => {

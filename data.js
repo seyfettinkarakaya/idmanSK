@@ -455,7 +455,7 @@ export function addCss(payload) {
 export async function getSalon() {
   if (!getCachedRef() && isConfigured('ref')) await getRef().catch(() => {}); // katalog idmanRef'ten
   const data = await call('getSalon', {}, 'salon', SLOW_TIMEOUT_MS); // büyük idman dosyası + soğuk başlangıç
-  if (!validSalon(data)) throw new ApiError('BAD_RESPONSE', 'Salon cevabı beklenen biçimde değil. Adres idman betiğinin mi (idman.gs), yeni sürüm dağıtıldı mı?');
+  if (!validSalon(data)) throw new ApiError('BAD_RESPONSE', 'Kara idmanı cevabı beklenen biçimde değil. Adres idman betiğinin mi (idman.gs), yeni sürüm dağıtıldı mı?');
   store(KEYS.salon, { data, savedAt: Date.now() });
   return refIle(data);
 }

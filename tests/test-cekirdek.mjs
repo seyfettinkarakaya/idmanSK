@@ -181,7 +181,7 @@ t('analiz: tempo, SWOLF, bölge payları, aynı setle kıyas ve rekor, ağrı ge
 t('yuk.cakisma: ağır omuz salonu + uzun yüzme aynı gün / art arda (B5)', () => {
   const sal = (tarih, omuz) => ({ tur: 'salon', tarih, yuk: 300, kas: { Omuz: omuz, Karın: 300 - omuz } });
   const yz = (tarih, fr) => ({ tur: 'yuzme', tarih, yuk: 300, stil: { FR: fr } });
-  assert.match(Y.cakisma([sal('2026-09-22', 150), yz('2026-09-23', 2000)], '2026-09-23').metin, /Ağır omuz salonu \(dün\) ile uzun yüzme \(bugün\) art arda/);
+  assert.match(Y.cakisma([sal('2026-09-22', 150), yz('2026-09-23', 2000)], '2026-09-23').metin, /Ağır omuz kara idmanı \(dün\) ile uzun yüzme \(bugün\) art arda/);
   assert.equal(Y.cakisma([sal('2026-09-22', 30), yz('2026-09-23', 2000)], '2026-09-23'), null, 'omuz payı düşük');
   assert.equal(Y.cakisma([sal('2026-09-21', 150), yz('2026-09-23', 2000)], '2026-09-23'), null, 'iki gün ara');
   assert.equal(Y.cakisma([yz('2026-09-23', 1000)], '2026-09-23', [], true), null, 'kısa yüzme');
@@ -287,10 +287,10 @@ t('model: hafta planı — Cuma yüzme, salon yüzmeye komşu olmayan güne, yap
   assert.match(M.haftaPlani({ bugun: '2026-09-28', bas: '2026-09-28', K: KK, hafiflet: true })[4].isler[0].hafif, /yük yüksek/);
   assert.match(M.haftaPlani({ bugun: '2026-09-28', bas: '2026-09-28', K: KK, fazNo: 3 })[1].isler[0].ad, /önleyici \+ mobilite/);
   assert.deepEqual(M.olcumZamani({ bugun: '2026-10-01', sonCssTarih: '2026-09-20' }), []);
-  assert.deepEqual(M.olcumZamani({ bugun: '2026-10-01', sonCssTarih: '2026-08-20', fazNo: 3 }), ['CSS testi (400 + 200): son test 42 gün önce', 'Dinlenme haftası: salonda tahmini 1RM ve ağrı (MSI) eğilimini gözden geçir']);
+  assert.deepEqual(M.olcumZamani({ bugun: '2026-10-01', sonCssTarih: '2026-08-20', fazNo: 3 }), ['CSS testi (400 + 200): son test 42 gün önce', 'Dinlenme haftası: kara idmanında tahmini 1RM ve ağrı (MSI) eğilimini gözden geçir']);
 });
 
-t('13.2.0: kisit — yüzme/salon gün ayrımı, döngü ve yasak satırları; normal hafta', () => {
+t('13.2.0: kisit — yüzme/kara gün ayrımı, döngü ve yasak satırları; normal hafta', () => {
   const KK = K.kurallar({ kisit: [{ kural: 'gun_hafta_yuzme', deger: 3 }, { kural: 'gun_hafta_salon', deger: 2 }, { kural: 'salon_dk', deger: 50 }, { kural: 'salon_rpe', deger: 5 },
     { kural: 'döngü_F1', deger: 'Hacim, Hacim+, Hacim+, Dinlenme' }, { kural: 'yasak_F1', deger: 'SP, Kuvvet' }] });
   assert.deepEqual([KK.gunHafta, KK.gunHaftaSalon, KK.salonDk, KK.salonRpe], [3, 2, 50, 5]);
