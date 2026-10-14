@@ -9,6 +9,16 @@ Tamamlandı (sürüm 8), bkz. Tamamlanan. Kalan: Code.gs'in yeniden dağıtılma
 
 ## Sıradaki
 
+### Açık işler özeti (temizlik 14.10.2026)
+- **Onaylandı, sırada:** P3 aynı kas grubundan otomatik alternatif; F.7 çevrimdışı açılış (service worker);
+  görünüm paketi (kurulum/form/"Kaydedildi" ekranları, simge seti, uygulama simgesi, animasyon, açık tema, yazı boyutu).
+- **Karar/bilgi bekliyor:** B20 (gün düzeni hangi sayfadan), B21 (parametrik: zaruri/seçimlik), B1 (örnek ekran),
+  B2, B3 (açıklama verildi), örnek ekran istenenler: B5, B7, B9, B10, B11, B16, B17, B18, P7, P8.
+- **Ertelendi:** uzak duvar ölçümü, P3-1 (+1 sn; veri gerekli), F4 saat verisi.
+- **İptal:** B4, B6, B8, B12, B13, B14, B19, B22, B23; Gym visual GIF seti.
+- **Tabloda (kullanıcı):** Hafta formülü "Sezon Hafta"; Hedef Zone formülü Kick/Drill/Test; idmanRef'te eski salonHar/salonHKEtki silinebilir.
+- **İzlenecek:** 13.4 ilk kara idmanı (karaVeri / karaSeans / karaPlan).
+
 ### Sürüm 12.1.0 (04.10.2026) — ekran görüntüleriyle bildirilen hatalar, YAPILDI
 - [x] Haritada seç/bırak: dokun = seç, tekrar dokun = bırak; renkler sabit (seçince diğerleri griye dönmüyor),
   seçilen kasta beyaz ✓ işareti ve parıltı. Ağırlık (1–5) haritanın altındaki "Seçili bölgeler" listesinde, ✕ ile bırak.
@@ -34,7 +44,7 @@ Tamamlandı (sürüm 8), bkz. Tamamlanan. Kalan: Code.gs'in yeniden dağıtılma
 Bugün: free-exercise-db (Unlicense) 2 fotoğraf/hareket; senin 16 hareketinden 9'u eşleşiyor, 7'sinde görsel yok
 (Band Chest Fly, Breathing Reset, Doorway Pec Stretch, Thread the Needle, Figure Four, Dead Hang, Band Glute Bridge
 yanlış ekipmanla). Seçenekler:
-- [ ] **exercises-dataset (hasaneyldrm, GitHub):** 1.324 hareket, her biri **animasyonlu GIF** + küçük resim, adımlar
+- [-] **exercises-dataset (hasaneyldrm, GitHub):** 1.324 hareket, her biri **animasyonlu GIF** + küçük resim, adımlar — İPTAL (kullanıcı: Gym visual GIF'leri kullanılmıyor)
   10 dilde (**Türkçe dahil**). Görseller Gym visual'a ait, izinle dağıtılıyor: yalnız 180×180, her kullanımda
   "© Gym visual" yazılmalı. Kişisel uygulama için en uygun içerik; lisans notu (NOTICE) kurulumdan önce okunmalı.
 - [ ] **wger:** ~800+ hareket, CC BY-SA 3.0 (kaynak gösterilir, aynı lisansla paylaşılır); görsel kapsamı düzensiz.
@@ -130,13 +140,13 @@ Bant hareketleri 61, esneme 57. Örnek ekranlar yerelde üretilir (`tasarim/v28/
   günün önerisi (tam / hafif / dinlen). Whoop/Garmin "readiness" mantığı, cihazsız.
 - [x] P2 **RIR (yedekte kalan tekrar) ile otomatik ilerleme:** set başına "2 tekrar daha yapabilirdim" → bir **(13.0.0)**
   sonraki ağırlık/tekrar (Alpha Progression, Juggernaut). RPE'nin yanında, isteğe bağlı.
-- [ ] P3 **Hareket değiştir (swap):** (idmanda "⇄ Değiştir" zaten var; aynı kas grubuna göre otomatik alternatif önerisi kalan) aynı kas grubunu çalıştıran, kısıta uygun ve ekipmanı olan alternatif
+- [ ] P3 **Hareket değiştir (swap):** (idmanda "⇄ Değiştir" zaten var; aynı kas grubuna göre otomatik alternatif önerisi kalan) aynı kas grubunu çalıştıran, kısıta uygun ve ekipmanı olan alternatif → KARAR 14.10: OLUR (sırada)
   (Fitbod). Salonda alet doluysa tek dokunuşla.
 - [x] P4 **Ekipman profilleri:** "Salon / Ev / Otel" — öneriler yalnızca o yerdeki ekipmanla. **(13.0.0)**
 - [x] P5 **Set türleri:** ısınma (var), ana, düşürme (drop), başarısızlık; özette ayrı sayılır. **(13.0.0)**
 - [x] P6 **Harekete sabit not:** "koltuk 4. delik, kablo 2. kademe" — her açılışta kartta görünür (Hevy/Strong). **(13.0.0)**
-- [ ] P7 **Plaka hesaplayıcı** (13.0.0: dambıl/kablo adım ayarı yapıldı; plaka hesaplayıcı kalan) (barda hangi plakalar) ve dambıl/kablo adım ayarı (2,5 kg yerine 2 kg vb.).
-- [ ] P8 **Tahmini 1RM ve hacim eğrisi** (13.0.0: kas grubu başına haftalık set yapıldı; 1RM/hacim eğrisi kalan) hareket başına; kas grubu başına haftalık set sayısı (10–20 hedef bandı,
+- [ ] P7 **Plaka hesaplayıcı** (13.0.0: dambıl/kablo adım ayarı yapıldı; plaka hesaplayıcı kalan) (barda hangi plakalar) ve dambıl/kablo adım ayarı (2,5 kg yerine 2 kg vb.). → örnek ekran istendi
+- [ ] P8 **Tahmini 1RM ve hacim eğrisi** (13.0.0: kas grubu başına haftalık set yapıldı; 1RM/hacim eğrisi kalan) hareket başına; kas grubu başına haftalık set sayısı (10–20 hedef bandı, → örnek ekran istendi
   ama omuz itişte kısıta göre üst sınır).
 - [x] P9 **Plan uyumu:** planlanan / yapılan (TrainingPeaks yeşil-sarı-kırmızı); haftalık özette yüzde. **(13.0.0)**
 - [x] P10 **Otomatik dinlenme haftası (deload):** yük oranı, ağrı ve hazır olma kötüleşince öneri (blokla birlikte). **(13.0.0)**
@@ -149,44 +159,44 @@ Bant hareketleri 61, esneme 57. Örnek ekranlar yerelde üretilir (`tasarim/v28/
 - [x] Arşiv kaldırıldı (günün havuzPlan satırları silinir). [x] P1-2 süre biçimleri. [x] P2-1 hesaplanan sütunlara
   dokunmama + formül kopyalama. [x] Uygulamada 2 bağlantı (salon = idman; katalog idmanRef'ten). [x] CSS testi kaynağı
   "idmanSK CSS testi".
-- [ ] **Kullanıcı:** iki betiği yapıştır + `tokenUret` + dağıt; telefonda Ayarlar → idman ve idmanRef bağlantıları.
+- [x] **Kullanıcı:** iki betiği yapıştır + `tokenUret` + dağıt; telefonda Ayarlar → idman ve idmanRef bağlantıları. — eski kurulum adımı, geçildi (13.4: idman / idmanRef / idmanKutuphane)
 ### Bütünleşik yüzme + salon modeli — araştırma önerileri (08.10.2026; "uygula" bekliyor)
 Rapor: `reports/Bütünleşik yüzme salon idman modeli.md` (notlar: `research_notes/…`). Kod incelemesine göre çoğu
 **dağıtım gerektirmez** (hesaplar telefonda; yeni ayarlar sporRef `kisit` satırı olarak; Plan'daki Alet sütunu zaten var).
-- [ ] B1 (Y) Yük oranı (7/28) → "Bu hafta / son 4 hafta" (mevcut hafta hariç), "risk" dili yok; eşikler ayarlanabilir.
-- [ ] B2 (Y) Seans sıçraması: yüzme son 4 haftanın en uzununu %10+ aşarsa uyarı (planlı uzun yüzme "onaylı").
-- [ ] B3 (Y) Omuz bütçesine pull buoy/palet metresi (ağırlıklı); palet kapısı (7 gün MSI 0, seansın ≤ %10–15).
-- [ ] B4 (Y) Girişim: ≥CSS yüzmeden sonraki 12–24 sa ağır üst vücut; kilit yüzmeden önceki akşam ağır üst vücut; aynı gün < 6 sa.
-- [ ] B5 (Y) Faza bağlı kuvvet reçetesi (set × tekrar × RIR hedefi; ilerleme önerisi buna göre).
-- [ ] B6 (Y) Taper modülü (yarış tarihi kisit'te; 10–14 gün, hacim −%41–60, yoğunluk/sıklık aynı).
-- [ ] B7 (O) Hazır olma kişisel tabana göre (28 gün), kartta en etkili 2 neden; eklem ağrısı yalnız o eklemi kısıtlar.
-- [ ] B8 (O) Ağrı izleme: seans sonrası sabah MSI sorusu; artmışsa bir renk aşağı; 2 hafta kötüleşen trend → dinlenme haftası.
-- [ ] B9 (O) Monotoni ve zorlanma (Foster).
-- [ ] B10 (O) CSS tabanlı yüzme stres puanı (tekrar süresinden, dinlenme hariç) + standart sette RPE kayması.
-- [ ] B11 (O) Yoğunluk dağılımı faz hedefine göre (piramidal), eksik bölge uyarısı.
-- [ ] B12 (O) Diz açı pencereleri (MSI ≥ 1 iken), her bacak gününde kalça + diz egzersizi.
-- [ ] B13 (O) Dinlenme haftası 3+1 / 2+1 ayarı, kırmızı bayrakla erken dinlenme.
-- [ ] B14 (O) Çift ilerleme + RIR üst sınırı (tekrar aralığı tamamlanınca yük artar).
-- [ ] B15 (D) Eklem bütçelerine taban / hedef bandı / tavan (RP MEV/MRV benzeri).
-- [ ] B16 (D) Plan/yapılan ±%20 uyum renkleri; kaçırılan seansta "uyarlama öner → Kabul et".
-- [ ] B17 (D) Form eğrisi "trend" etiketi; salon yükü yalnız yorgunluğa (ayar).
-- [ ] B18 (D) 14 günden uzun salon arası uyarısı.
-- [ ] B19 (D) Kural kaynağı rozeti: kanıt / gelenek / doktor-fizyoterapist onayı.
+- [ ] B1 (Y) Yük oranı (7/28) → "Bu hafta / son 4 hafta" (mevcut hafta hariç), "risk" dili yok; eşikler ayarlanabilir. → KARAR 14.10: olabilir; örnek ekran istendi (yüzme / kara / toplam)
+- [ ] B2 (Y) Seans sıçraması: yüzme son 4 haftanın en uzununu %10+ aşarsa uyarı (planlı uzun yüzme "onaylı"). → KARAR 14.10: kullanıcı "aşsa ne olur?" — açıklandı, karar bekliyor (yalnız uyarı)
+- [ ] B3 (Y) Omuz bütçesine pull buoy/palet metresi (ağırlıklı); palet kapısı (7 gün MSI 0, seansın ≤ %10–15). → KARAR 14.10: kullanıcı "ne gereği var?" — açıklandı (sağ omuz), karar bekliyor
+- [-] B4 (Y) Girişim: ≥CSS yüzmeden sonraki 12–24 sa ağır üst vücut; kilit yüzmeden önceki akşam ağır üst vücut; aynı gün < 6 sa. → İPTAL 14.10: bilgi olarak gelebilir; planlar ayrı YZ oturumunda yapılıyor ve orada izleniyor
+- [ ] B5 (Y) Faza bağlı kuvvet reçetesi (set × tekrar × RIR hedefi; ilerleme önerisi buna göre). → örnek ekran istendi
+- [-] B6 (Y) Taper modülü (yarış tarihi kisit'te; 10–14 gün, hacim −%41–60, yoğunluk/sıklık aynı). → İPTAL 14.10: YZ planlama oturumunun işi
+- [ ] B7 (O) Hazır olma kişisel tabana göre (28 gün), kartta en etkili 2 neden; eklem ağrısı yalnız o eklemi kısıtlar. → örnek ekran istendi
+- [-] B8 (O) Ağrı izleme: seans sonrası sabah MSI sorusu; artmışsa bir renk aşağı; 2 hafta kötüleşen trend → dinlenme haftası. → İPTAL 14.10: gereksiz
+- [ ] B9 (O) Monotoni ve zorlanma (Foster). → örnek ekran istendi
+- [ ] B10 (O) CSS tabanlı yüzme stres puanı (tekrar süresinden, dinlenme hariç) + standart sette RPE kayması. → örnek ekran istendi
+- [ ] B11 (O) Yoğunluk dağılımı faz hedefine göre (piramidal), eksik bölge uyarısı. → örnek ekran istendi
+- [-] B12 (O) Diz açı pencereleri (MSI ≥ 1 iken), her bacak gününde kalça + diz egzersizi. → İPTAL 14.10: gereksiz
+- [-] B13 (O) Dinlenme haftası 3+1 / 2+1 ayarı, kırmızı bayrakla erken dinlenme. → İPTAL 14.10: gereksiz
+- [-] B14 (O) Çift ilerleme + RIR üst sınırı (tekrar aralığı tamamlanınca yük artar). → İPTAL 14.10: gereksiz
+- [-] B15 (D) Eklem bütçelerine taban / hedef bandı / tavan (RP MEV/MRV benzeri). → BEKLEMEDE: kullanıcı yorum yapmadı; düşük öncelik
+- [ ] B16 (D) Plan/yapılan ±%20 uyum renkleri; kaçırılan seansta "uyarlama öner → Kabul et". → örnek ekran istendi
+- [ ] B17 (D) Form eğrisi "trend" etiketi; salon yükü yalnız yorgunluğa (ayar). → örnek ekran istendi
+- [ ] B18 (D) 14 günden uzun salon arası uyarısı. → örnek ekran istendi
+- [-] B19 (D) Kural kaynağı rozeti: kanıt / gelenek / doktor-fizyoterapist onayı. → İPTAL 14.10: gereksiz
 
 **Gerçek kapasite (kullanıcı, 08.10.2026; 2026 havuz + salon istatistikleri):** yüzme dönemlerinde hafta içi havuz
 ortalama ~2,5 gün (bazı haftalar 2, bazı 3), salon yalnız hafta sonu 1 gün. İdeal ve hedef: **hafta içi 3 sabah havuz +
 hafta sonu 1 salon**. Model bu gerçeğe göre kurulur (öneriler buna göre uyarlanır):
-- [ ] B20 (Y) Gün düzeni ayarı: `yuzme_gunleri` (ör. Pzt, Çar, Cum), `yuzme_saat` (sabah), `salon_gunleri` (Cmt, Paz),
+- [ ] B20 (Y) Gün düzeni ayarı: `yuzme_gunleri` (ör. Pzt, Çar, Cum), `yuzme_saat` (sabah), `salon_gunleri` (Cmt, Paz), → KARAR 14.10: hangi sayfadan okunacağı soruldu (öneri: idmanRef!bilgi satırları; kisit sayfası yok)
   `gun_hafta_salon` 1 — sporRef `kisit` satırları (dağıtım gerekmez). Planlayıcı bugünkü "Cuma akşam + Sal–Per"
   varsayımı yerine bu günleri kullanır; salon hafta sonuna, son yüzmeden ≥ 24 sa sonra.
-- [ ] B21 (Y) "2 kilit + 1 isteğe bağlı" yüzme haftası: kilit 1 = kalite (CSS/eşik), kilit 2 = uzun aerobik;
+- [ ] B21 (Y) "2 kilit + 1 isteğe bağlı" yüzme haftası: kilit 1 = kalite (CSS/eşik), kilit 2 = uzun aerobik; → KARAR 14.10: olabilir ama PARAMETRİK — hedefe göre öncelik/içerik değişir; bilgi sayfasında zaruri/seçimlik etiketi
   3. gün = teknik/kolay + omuz önleyici. Hafta 2 günle kalırsa kilitler korunur, 3. düşer; yük hedefi ve "normal
   hafta" 2,5 günlük gerçek ortalamaya göre (3 gün hedef, 2 gün de "tamam" sayılır).
-- [ ] B22 (Y) Tek salon günü = tam vücut, kuvvet öncelikli (~60 dk): omuz önleyici ısınma → çekiş kuvveti → kalça
+- [-] B22 (Y) Tek salon günü = tam vücut, kuvvet öncelikli (~60 dk): omuz önleyici ısınma → çekiş kuvveti → kalça → İPTAL 14.10: zaten öyle
   (abdüktör, kalça menteşesi, derin olmayan) → itiş (omuz sınırıyla) → core; faz reçetesi (B5) bu tek güne göre.
   Haftada 1 kuvvet seansı kazanımı yavaşlatır ama korumaya yeter (yaşlı yetişkin / dayanıklılık sporcusu
   çalışmaları; raporda) → 2. uyaran olarak B23.
-- [ ] B23 (O) Havuz sonrası "mini kara" 10–12 dk (bant dış rotasyon, Y kaldırış, ters fly, dead bug, Pallof):
+- [-] B23 (O) Havuz sonrası "mini kara" 10–12 dk (bant dış rotasyon, Y kaldırış, ters fly, dead bug, Pallof): → İPTAL 14.10: iptal
   2 yüzme gününde; omuz önleyici dozunu (6–8 hafta, haftada 2–3) salon gününe bağlı olmadan tamamlar; sabah
   süre bütçesinin içinde sayılır, önleyici borca yazılır.
 
@@ -214,26 +224,26 @@ hafta sonu 1 salon**. Model bu gerçeğe göre kurulur (öneriler buna göre uya
 
 ### Hata listesi (idman oturumu, 06.10.2026) — kodla karşılaştırıldı
 Kaynak: 30.09, 02.10, 06.10 yüzme ve 04.10 salon kayıtları. Her maddede: bulgu → yapılacak.
-- [ ] **P1-1 CSS.** Uygulama zaten tarih + alet + havuzla `css` sayfasından okuyor; gömülü 117 yalnız sporRef yokken
+- [x] **P1-1 CSS.** Uygulama zaten tarih + alet + havuzla `css` sayfasından okuyor; gömülü 117 yalnız sporRef yokken
   (`data.js` DEFAULT_PREFS) ve CSS testi başlangıcında. Tarihi kapsayan satır yoksa son satırı "güncel değil" notuyla
   kullanıyor. → Gömülü varsayılan kalkar; geçerli satır yoksa bölge verilmez, uyarı çıkar. Aletli sette o aletin satırı
   yoksa bugün bölge yok — ekipmansız CSS'e düşmek paddle/PB setlerini olduğundan zor gösterir, bu yüzden bölge yok kalır
   (oturumla teyit edilecek).
-- [ ] **P1-2 Süre biçimi.** `Code.gs` Gerçek'i gerçek süre değeri olarak yazıyor (değer doğru), yalnız görünüm `[mm]:ss.0`.
+- [x] **P1-2 Süre biçimi.** `Code.gs` Gerçek'i gerçek süre değeri olarak yazıyor (değer doğru), yalnız görünüm `[mm]:ss.0`.
   Hedef/Dinlen `eski`'ye Plan'daki hücreden aynen (değer + biçim) kopyalanıyor → Plan'da `07:00` yazılmışsa Sheets onu
   7 saat sanıyor (uygulama görünen metni okuduğu için 7 dk anlıyor). → Code.gs: planlanan `[h]:mm:ss`, ölçülen
   `[h]:mm:ss.0`; idmanda değişen Hedef/Dinlen de `[h]:mm:ss`. Plan yazımı `00:07:00` (rehberde).
-- [ ] **P1-3 Mikro tur.** "Turlar: …" notunu yalnızca sürüm ≤ 9'dan kalan eski seansı taşıyan kod yazıyor
+- [x] **P1-3 Mikro tur.** "Turlar: …" notunu yalnızca sürüm ≤ 9'dan kalan eski seansı taşıyan kod yazıyor
   (`migrateSession`): 30.09 seansı telefonda **eski bir uygulama sürümüyle** başlamış. Yeni modelde 1 tekrarlık sette
   ikinci dokunuş sonraki seti başlatır. P3-2 (Gerçek boş) de aynı nedenden. → Telefonda Ayarlar'da sürüm 13.0.0
   görünmeli. Yine de koruma: hedefin %20'sinden kısa tekrar yok sayılır ve Not'a "yoksayıldı: 0:02.3" yazılır.
-- [ ] **P1-4 Ağırlık +3** (kullanıcı açıkladı 07.10): uygulama idmana başlarken otomatik ilerlemeyi (+2,5 kg; tam sayı
+- [x] **P1-4 Ağırlık +3** (kullanıcı açıkladı 07.10): uygulama idmana başlarken otomatik ilerlemeyi (+2,5 kg; tam sayı
   görünümde +3) **sormadan** uyguladı; fark edilmeden artırılmış değerlerle idman yapıldı (bantla hiçbir şey
   değişmedi), tabloya bu değerler yazıldı, kullanıcı elle düzeltti. → Öneri artık kendiliğinden uygulanmaz:
   idman başında "3 harekette artış önerisi" tek ekran (Kabul / Hayır / tek tek), kabul edilmeyen hareket son yapılan
   değerle başlar. Bant ve vücut ağırlığında kg önerisi yok (+1 tekrar ya da bant kademesi notu). Kartta öneri
   uygulanmış hareket açıkça işaretli kalır. Test: "Son idmanı tekrarla" → değerler aynı, öneri ekranı; Kabul → artar.
-- [ ] **P2-1 Set Mesafe / Set Süre / Sıra** (karar 07.10: **uygulama boş gönderir, tablo hesaplar; boş gönderirken
+- [x] **P2-1 Set Mesafe / Set Süre / Sıra** (karar 07.10: **uygulama boş gönderir, tablo hesaplar; boş gönderirken
   sütun kaydırmasın**). Bugün `Code.gs` `eski`'ye satırı başlık genişliğinde yazıyor: bu üç sütuna ve başlığı Plan'da
   olmayan sütunlara (Hafta, Hedef Zone …) `''` yazıyor, yeni satırlara formül gelmiyor; yalnızca biçim kopyalanıyor.
   → Code.gs: tablonun hesapladığı sütunlara **hiç dokunmaz** (yalnız kendi sütunlarını yazar); üstteki eski satırda
@@ -241,23 +251,23 @@ Kaynak: 30.09, 02.10, 06.10 yüzme ve 04.10 salon kayıtları. Her maddede: bulg
   bırakır ki taşabilsin. Satır ekleme ve sütun sırası aynen. Doğrulama için `eski` 2. satırdaki Set Mesafe,
   Set Süre, Sıra ve Hafta hücrelerinin formül metni gerekli (kullanıcıdan). Test: formüllü/ARRAYFORMULA'lı sahte
   `eski` → yeni satırlarda doğru değer, diğer sütunlar kaymıyor.
-- [ ] **P2-2 Hafta.** Uygulama Hafta yazmıyor; tablo formülü sporRef `takvim`'de "Bu Hafta" satırını okuyor.
+- [x] **P2-2 Hafta.** Uygulama Hafta yazmıyor; tablo formülü sporRef `takvim`'de "Bu Hafta" satırını okuyor. — tablo tarafı ("Senin tarafında" bölümünde)
   → Formülde "Sezon Hafta" satırına geçilecek (tabloda, kullanıcı/oturum). İstenirse Code.gs yazar.
-- [ ] **P2-3 Kick/Drill bölgesi.** Uygulama Drill/Kick setlerinde bölge vermiyor (`ref.isDrill`); tablodaki
+- [x] **P2-3 Kick/Drill bölgesi.** Uygulama Drill/Kick setlerinde bölge vermiyor (`ref.isDrill`); tablodaki
   REC/SP1 tablo formülünden ("Hedef Zone" sütunu, uygulama okumaz/yazmaz). → Formül düzeltilir; uygulamada
   `Scull` da drill sayılır, ekranda "TEC" yazar, yoğunluk dağılımına girmez (bugün de girmiyor).
-- [ ] **P2-4 Nabız hepsi 113.** Doğrulandı. Neden: salonda nabız alanı bir önceki hareketin değeriyle hazır geliyor,
+- [x] **P2-4 Nabız hepsi 113.** Doğrulandı. Neden: salonda nabız alanı bir önceki hareketin değeriyle hazır geliyor,
   dokunup geçince kopyalanıyor. → Nabız boş başlar; yalnız girilirse yazılır.
 - [ ] **P3-1 Süreli harekette +1 sn.** Kodda süreli set tam `başlangıç + süre`de bitiyor, Tekrar'a planlanan saniye
   yazılıyor; +1 üreten yer bulunamadı. → 04.10 satırlarının Tekrar/Süre/Açıklama değerleri görülecek (Drive aracı
   yalnız örnek satır döndürdü); kaynak bulununca düzeltilir.
-- [ ] **P3-2 Gerçek boş.** P1-3 ile aynı neden (eski sürüm seansı). → Kaydetmeden önce süresi olmayan tamamlanmış
+- [x] **P3-2 Gerçek boş.** P1-3 ile aynı neden (eski sürüm seansı). → Kaydetmeden önce süresi olmayan tamamlanmış
   set varsa uyarı.
-- [ ] **P3-3 Test setine bölge.** Tablo formülü. → Uygulamada Tür `Test` olan sete bölge verilmez, hız payına girmez.
+- [x] **P3-3 Test setine bölge.** Tablo formülü. → Uygulamada Tür `Test` olan sete bölge verilmez, hız payına girmez.
 - [x] **P3-4 Mesafeye metin** — iptal: kullanıcı istemedi.
 
 ### Notlar (04.10.2026, 13.0.0 sonrası)
-- [ ] **Plan süreleri gerçekleşen sürelerden öğrensin.** İdman yapıldıkça planlardaki süre tahmini gerçek
+- [x] **Plan süreleri gerçekleşen sürelerden öğrensin.** İdman yapıldıkça planlardaki süre tahmini gerçek
   sürelere göre ayarlansın. Bugün tahminler sabit formülle:
   - Salon: `salon.tahminSn` = set × (tekrar × 3 sn + 60 sn) ya da set × (süre + 30 sn).
     Öneri: hareket başına son 3–5 idmandan gerçek set süresi + gerçek dinlenme (salon oturumunda olaylar var);
@@ -280,25 +290,25 @@ Kaynak: 30.09, 02.10, 06.10 yüzme ve 04.10 salon kayıtları. Her maddede: bulg
   - Program yazım kuralı (rehbere eklendi): tekrarlar mümkünse yakın duvarda bitsin; 25'ler çift
     (`4×50 · 25 hızlı + 25 kolay`), 75 yerine 100 (`75 + 25 kolay dönüş`).
   - Uzun vade: saat verisi (otomatik tur) bunu tamamen çözer (F4, sonra).
-- [ ] **CSS ekipmansız 126 sn, 117 ise Paddle + PB** (idman oturumu 05.10.2026). Uygulamada varsayılan CSS 117
+- [x] **CSS ekipmansız 126 sn, 117 ise Paddle + PB** (idman oturumu 05.10.2026). Uygulamada varsayılan CSS 117
   (`data.js` DEFAULT_PREFS, CSS testi başlangıcı, README). sporRef bağlıyken `css` sayfası kullanılır: alet sütunu
   boş satır ekipmansız setlere, `Paddle+PB` satırı o aletle yüzülen setlere; tarihi kapsayan satır yoksa en son
   satır ("CSS güncel değil"). Yapılacak: varsayılan 126; kullanıcı sporRef'e 09.10'a kadar `126 · alet boş` satırı
   ekler, 09.10 testinden sonra test sonucu. Ayarlar'da hangi satırın kullanıldığı (alet, tarih) açık yazsın.
-- [ ] **"Haftada 3 gün" yüzme içindir; salon ayrı** (idman oturumu 05.10.2026). Bugün uygulama tüm günleri
+- [x] **"Haftada 3 gün" yüzme içindir; salon ayrı** (idman oturumu 05.10.2026). Bugün uygulama tüm günleri
   sayıyor (`yuk.haftaGunleri` yüzme + salon), normal hafta 3 × 65 dk × RPE 6 = 1170 → Faz 1 (3 yüzme + 2 salon)
   sürekli "normalin üstünde / 3 gün tamam" görünür, Bu hafta 3. günden sonra öneri vermez. Yapılacak:
   sporRef `kisit`'e `gun_hafta_yuzme` (3), `gun_hafta_salon` (2), `salon_dk` (50), `salon_rpe` (5); normal hafta =
   yüzme 3 × 65 × 6 + salon 2 × 50 × 5; ana sayfa halkası yüzme ve salon ayrı; planlayıcı yüzme ve salon
   yuvalarını ayrı doldurur (salon yüzmeye bitişik olmayan güne). Eski `gun_hafta` okunmaya devam eder.
-- [ ] **Faz takvimi üstte, 4 haftalık döngü onun içinde** (idman oturumu 05.10.2026). sporRef `fazBilgi`
+- [x] **Faz takvimi üstte, 4 haftalık döngü onun içinde** (idman oturumu 05.10.2026). sporRef `fazBilgi`
   (Sezon, Faz, Tarih_ilk, Tarih_son, Ad, Odak) betikten zaten okunuyor ama uygulama kullanmıyor. Yapılacak:
   - `fazBilgi`'ye isteğe bağlı iki sütun: **Döngü** (ör. `Hacim, Hacim+, Hacim+, Dinlenme`) ve **Yasak**
     (ör. `SP, Kuvvet`). SporRef.gs bunları da okur (yalnızca ekleme; yeniden dağıtım).
   - Döngü fazın başladığı haftadan kendiliğinden işler (elle "başlat" gerekmez; elle başlatma faz yoksa kalır).
   - Faz bir işi yasaklıyorsa döngü onu önermez (Faz 0–1: SP yok, salon kuvvet yok; Kuvvet haftası ilk Faz 3'te).
   - Bu hafta ve Form ve denge: "Faz 1 · Hacim+ (2/4)" gibi; faz sonu yaklaşınca ölçüm/test hatırlatması.
-- [ ] **İdman anında biten seti düzeltme** (04.10.2026). Bugün:
+- [x] **İdman anında biten seti düzeltme** (04.10.2026). Bugün:
   - Yüzme: biten sete dokununca yalnız "Seti sıfırla" (tekrar süreleri silinir, set baştan yapılır); süre/tekrar
     elle düzeltilemez.
   - Salon: yalnız **son** setin tekrarı ± ile değişir; önceki setler değişmez; hareket "tamam" olunca Düzenle kapalı;
@@ -311,7 +321,7 @@ Kaynak: 30.09, 02.10, 06.10 yüzme ve 04.10 salon kayıtları. Her maddede: bulg
   - Seans bitip gönderilmeden önce özet ekranında da aynı düzeltme. Gönderilen kayıt değişmez (tabloda elle).
   - Eski olay kaydı biçimi bozulmaz (düzeltme ayrı alan: `duzelt[set]`); zamanlama hesapları (zaman.js) önce
     düzeltmeyi uygular. Test: düzelt → özet ve tabloya giden satır doğru; eski senaryolar aynen geçer.
-- [ ] **Uygulama adı: idmanSK — HER YERDE** (talep 04.10, kapsam genişledi 07.10.2026: "her yerde").
+- [x] **Uygulama adı: idmanSK — HER YERDE** (talep 04.10, kapsam genişledi 07.10.2026: "her yerde").
   - Görünen: `index.html` (title, ana ekran adı, başlık, noscript), `manifest.json` (name, short_name), Ayarlar,
     yedek dosyası (`idmansk-yedek-…json`, `uygulama` alanı; eski `YüzmeSK` yedeği de tanınır).
   - Betikler: `Code.gs`, `Salon.gs`, `SporRef.gs` başlık yorumları ve sağlık cevabındaki ad (`idmanSK`, `idmanSK Salon`,
@@ -363,9 +373,9 @@ Sıra önerisi: önce harita/plan sayfası/P maddeleri (sürüm 12.x), sonra Sü
 
 ### Sürüm 12 — tek seferde uygulanacak plan (04.10.2026) — **TAMAMLANDI, 12.0.0 yayında (04.10.2026)**
 Kurulum için yapılacaklar (senin tarafında):
-- [ ] sporRef: yeni `SporRef.gs`'i yapıştır → Dağıtımları yönet → Yeni sürüm (CSS testi yazımı için; adres ve anahtar aynı).
-- [ ] SalonTakip: yeni `Salon.gs`'i yapıştır → Yeni sürüm (H'deki Kısıt / Alternatif / Görsel başlıklarını okur).
-- [ ] İsteğe bağlı: sporRef'e `kisit`, `yuzmeKas`, `drill` sayfaları; H'ye Kısıt / Alternatif / Görsel (biçim README'de).
+- [x] sporRef: yeni `SporRef.gs`'i yapıştır → Dağıtımları yönet → Yeni sürüm (CSS testi yazımı için; adres ve anahtar aynı). — eski kurulum adımı, geçildi (13.4: idman / idmanRef / idmanKutuphane)
+- [x] SalonTakip: yeni `Salon.gs`'i yapıştır → Yeni sürüm (H'deki Kısıt / Alternatif / Görsel başlıklarını okur). — eski kurulum adımı, geçildi (13.4: idman / idmanRef / idmanKutuphane)
+- [x] İsteğe bağlı: sporRef'e `kisit`, `yuzmeKas`, `drill` sayfaları; H'ye Kısıt / Alternatif / Görsel (biçim README'de). — eski kurulum adımı, geçildi (13.4: idman / idmanRef / idmanKutuphane)
 Not: tüm testler yeşil (birim + uçtan uca 52/52 eski + 15 yeni). Eski senaryolardan yalnızca "son idmanı tekrarla"
 genişletildi (öneri artık uygulanıyor → "geri al" ile eski davranış doğrulanıyor).
 
@@ -404,10 +414,10 @@ maddelerde (A1–F5, salon senaryosu, hareket bilgi kartları). Garmin (F4) sonr
 **Sürüm 11 yayında (03.10.2026):** 3'lü dosya yapısı (YuzmeProgram · SalonTakip · sporRef, her birine
 kendi `@OnlyCurrentDoc` betiği), sporRef'ten CSS ve 7 bölge, idman anında düzenleme, metin boyu,
 salon idmanı + planlama + video. Kurulum için yapılacaklar (senin tarafında):
-- [ ] YuzmeProgram: `Code.gs`'i güncelle → Dağıtımları yönet → Yeni sürüm (eski'de Sıra/Set Mesafe/Set Süre artık boş yazılır).
-- [ ] SalonTakip: `Salon.gs`'i kur, `tokenUret`, web uygulaması olarak dağıt; telefonda Ayarlar → Salon.
-- [ ] sporRef: `SporRef.gs`'i kur, `tokenUret`, dağıt; telefonda Ayarlar → sporRef.
-- [ ] İsteğe bağlı: `H` sayfasına Video sütunu (E'den sonra); YouTube adresleri.
+- [x] YuzmeProgram: `Code.gs`'i güncelle → Dağıtımları yönet → Yeni sürüm (eski'de Sıra/Set Mesafe/Set Süre artık boş yazılır). — eski kurulum adımı, geçildi (13.4: idman / idmanRef / idmanKutuphane)
+- [x] SalonTakip: `Salon.gs`'i kur, `tokenUret`, web uygulaması olarak dağıt; telefonda Ayarlar → Salon. — eski kurulum adımı, geçildi (13.4: idman / idmanRef / idmanKutuphane)
+- [x] sporRef: `SporRef.gs`'i kur, `tokenUret`, dağıt; telefonda Ayarlar → sporRef. — eski kurulum adımı, geçildi (13.4: idman / idmanRef / idmanKutuphane)
+- [x] İsteğe bağlı: `H` sayfasına Video sütunu (E'den sonra); YouTube adresleri. — eski kurulum adımı, geçildi (13.4: idman / idmanRef / idmanKutuphane)
 
 Varsayım (kontrol et): süreli hareket adına göre tanınır (Plank, Hold, Hang, Wall Sit, Carry, L-sit,
 Hollow, Side Bridge) ya da açıklamasında "Setler: … sn" varsa; planda/idmanda Düzenle → Tür:
@@ -641,19 +651,19 @@ Sürüm 10.5 (sürüm 11 ile yayında):
   blok bazında dağılım; haftalık toplamlar.
 - [x] **F.3** (sürüm 12) Set başına kulaç sayısı / nabız girişi (isteğe bağlı alanlar).
 - [x] İdman sırasında ağrı (MSI) kaydı — karar: yüzmede seans sonu yeterli (salonda hareket başına).
-- [ ] **F.7** Service worker: uygulama dosyaları önbellekte, internet yokken de açılır.
+- [ ] **F.7** Service worker: uygulama dosyaları önbellekte, internet yokken de açılır. → KARAR 14.10: OLUR (sırada)
 
 ### Görsel
 
 Sürüm 8 görünümü korunuyor; v10/v11 önerileri beğenilmedi, görsel yenileme sonra konuşulacak.
 
-- [ ] Form, kurulum ve "Kaydedildi" ekranlarını yeni tasarıma uyarlamak; renk
+- [ ] Form, kurulum ve "Kaydedildi" ekranlarını yeni tasarıma uyarlamak; renk → KARAR 14.10: OLUR
   paletlerini (sarı set ekranı / turkuaz takvim / gri ana sayfa) tek sistemde toplamak.
-- [ ] Tutarlı simge seti (şu an elle çizilmiş karışık SVG ve karakterler).
-- [ ] Yeni uygulama simgesi.
-- [ ] Hareket ve kutlama: seans bitişinde kısa animasyon, geçişlerde yumuşaklık.
-- [ ] Açık tema (güneşli dış havuz için).
-- [ ] Ayarlar'da yazı boyutu seçimi.
+- [ ] Tutarlı simge seti (şu an elle çizilmiş karışık SVG ve karakterler). → KARAR 14.10: OLUR
+- [ ] Yeni uygulama simgesi. → KARAR 14.10: OLUR
+- [ ] Hareket ve kutlama: seans bitişinde kısa animasyon, geçişlerde yumuşaklık. → KARAR 14.10: OLUR
+- [ ] Açık tema (güneşli dış havuz için). → KARAR 14.10: OLUR
+- [ ] Ayarlar'da yazı boyutu seçimi. → KARAR 14.10: OLUR
 
 ## İzlenecek
 - 13.4 ilk kara idmanında kontrol: karaVeri hareket satırları, karaSeans tek satır, günün karaPlan satırları silindi mi (14.10: bağlantılar, ana sayfa ve katalog tamam).
@@ -674,12 +684,12 @@ Sürüm 8 görünümü korunuyor; v10/v11 önerileri beğenilmedi, görsel yenil
 
 - [x] `eski` sayfasında B1 = **Sıra** düzeltildi.
 - [x] Code.gs yeni sürüm olarak dağıtıldı (arsiv, en yeni üstte, @OnlyCurrentDoc).
-- [ ] Sürüm 9 için Code.gs'i yeniden yapıştırıp **yeni sürüm** olarak dağıt (program
+- [x] Sürüm 9 için Code.gs'i yeniden yapıştırıp **yeni sürüm** olarak dağıt (program — eski kurulum adımı, geçildi (13.4: idman / idmanRef / idmanKutuphane)
   hızlı açılış için tarih listesi setleri de gönderir).
 - [x] Anahtar yenilendi (`tokenUret`), telefon yeni anahtarla çalışıyor.
-- [ ] **Sürüm 13:** SalonTakip'te yeni `Salon.gs`'i yapıştır → Dağıtımları yönet → Yeni sürüm (adres ve anahtar aynı).
+- [x] **Sürüm 13:** SalonTakip'te yeni `Salon.gs`'i yapıştır → Dağıtımları yönet → Yeni sürüm (adres ve anahtar aynı). — eski kurulum adımı, geçildi (13.4: idman / idmanRef / idmanKutuphane)
   Salon programı (`plan` sayfası; ilk "Programa yaz"da betik açar) için gerekli. `idman` sayfası değişmez.
-- [ ] Sürüm 13: telefonda videoları bir kez dene (YouTube bu geliştirme ortamında kapalıydı; gömme kapalı olan
+- [x] Sürüm 13: telefonda videoları bir kez dene (YouTube bu geliştirme ortamında kapalıydı; gömme kapalı olan
   video "YouTube'da aç" bağlantısına düşer — beğenmediğini H · Video sütununa başka adresle yaz).
 
 ## Tamamlanan
