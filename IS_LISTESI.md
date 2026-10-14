@@ -656,6 +656,7 @@ Sürüm 8 görünümü korunuyor; v10/v11 önerileri beğenilmedi, görsel yenil
 - [ ] Ayarlar'da yazı boyutu seçimi.
 
 ## İzlenecek
+- 13.4 ilk kara idmanında kontrol: karaVeri hareket satırları, karaSeans tek satır, günün karaPlan satırları silindi mi (14.10: bağlantılar, ana sayfa ve katalog tamam).
 - E2E "Eski Code.gs (detay yok)" senaryosu tam takımda bir kez "geçmiş gün indirilmez" ile kaldı (14.10), tek başına iki kez geçti; zamanlamaya bağlı olabilir.
 - 13.2.0 (09.10.2026): "sporRef beklenmeyen cevap verirse çökmez" senaryosu tam koşuda bir kez zaman aşımı verdi, tek başına ve tekrar tam koşuda geçti (sahte saat).
 - Uçtan uca testlerde sahte saatle zaman ilerletmeli uzun yüzme senaryoları ("Tam idman", "Mola") tam takım
