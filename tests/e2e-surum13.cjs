@@ -394,5 +394,22 @@ sc('13.5 Ana sayfa ve Bu hafta: B7 hazır olma kişisel ortalamaya göre + 2 ned
   assert.match(await txt(s, '#modal-body'), /22 Eylül.*gününe al.*Uygulama tabloya yazmaz/);
 });
 
+sc('13.6 F7 çevrimdışı açılış: service worker uygulama dosyalarını önbelleğe alır; internet yokken sayfa yeniden yüklenince ana sayfa açılır', async ({ launch }) => {
+  const s = await launch({ sw: true }); const p = s.page;
+  await s.waitScreen('home');
+  await p.evaluate(() => navigator.serviceWorker.ready.then(() => true));
+  await p.waitForFunction(async () => {
+    const k = (await caches.keys()).find((x) => x.startsWith('idmansk-'));
+    return k && (await (await caches.open(k)).keys()).length >= 40;
+  }, null, { timeout: 15000 });
+  const ad = await p.evaluate(async () => (await caches.keys()).filter((x) => x.startsWith('idmansk-')));
+  assert.deepEqual(ad, [`idmansk-${await p.evaluate(() => document.getElementById('app-version').textContent.replace('Sürüm ', ''))}`]);
+  await s.ctx.setOffline(true);
+  await p.reload();
+  await s.waitScreen('home');
+  assert.match(await txt(s, '#home-week'), /BU HAFTA YÜK|Bugün/);
+  await s.ctx.setOffline(false);
+});
+
 const only = process.argv[2];
 if (require.main === module) runScenarios('Sürüm 13 senaryoları', only ? S.filter(([n]) => n.toLowerCase().includes(only.toLowerCase())) : S, 8160);

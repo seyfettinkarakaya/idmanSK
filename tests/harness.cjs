@@ -9,7 +9,7 @@ const API = 'https://script.google.com/macros/s/TEST/exec';
 const REF_API = 'https://script.google.com/macros/s/REF/exec';
 const SALON_API = 'https://script.google.com/macros/s/SALON/exec';
 const KUT_API = 'https://script.google.com/macros/s/KUT/exec';
-const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.png': 'image/png', '.woff2': 'font/woff2' };
+const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.png': 'image/png', '.woff2': 'font/woff2', '.webp': 'image/webp', '.svg': 'image/svg+xml' };
 
 function startServer(port) {
   const server = http.createServer((req, res) => {
@@ -111,7 +111,8 @@ async function launch(opts = {}) {
   if (opts.kut && salonSheets) envs.KUT = makeEnv({ karaHareket: salonSheets.H, karaEtki: salonSheets.hkEtki }, 'kutkey', 'idmanKutuphane.gs', { alias: false });
   const net = { offline: Boolean(opts.offline), delay: {}, override: null, calls: [], external: [] };
   const browser = opts.browser;
-  const ctx = await browser.newContext({ viewport: opts.viewport || { width: 440, height: 956 }, deviceScaleFactor: 1, hasTouch: true, isMobile: true });
+  // 13.6: service worker yalnız kendi testinde (opts.sw); diğerlerinde istekler doğrudan sahte sunucuya gitsin
+  const ctx = await browser.newContext({ viewport: opts.viewport || { width: 440, height: 956 }, deviceScaleFactor: 1, hasTouch: true, isMobile: true, serviceWorkers: opts.sw ? 'allow' : 'block' });
   // YouTube gömme (sürüm 13): gerçek ağa çıkmaz, sahte sayfa döner; dış istek sayılmaz, adresleri net.video'da
   net.video = [];
   ctx.on('request', (r) => { const u = new URL(r.url()); if (u.hostname === 'www.youtube-nocookie.com') { net.video.push(r.url()); return; } if (u.hostname !== 'localhost' && u.hostname !== 'script.google.com') net.external.push(r.url()); });
@@ -154,7 +155,7 @@ async function launch(opts = {}) {
     await page.reload();
   }
   const h = helpers(page);
-  return { env, envs, net, ctx, page, errors, ...h, close: () => ctx.close() };
+  return { env, envs, net, ctx, page, errors, port: opts.port, ...h, close: () => ctx.close() };
 }
 
 function helpers(page) {

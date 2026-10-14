@@ -5679,7 +5679,17 @@ function wire() {
   document.addEventListener('gesturestart', (e) => e.preventDefault());
 }
 
+/** 13.6 (F7): uygulama dosyaları önbellekte; internet yokken de açılır (sw.js). Desteklemeyen tarayıcıda sessizce atlanır. */
+function swKaydet() {
+  try {
+    if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    }
+  } catch { /* yok say */ }
+}
+
 function boot() {
+  swKaydet();
   wire();
   if (!data.isConfigured()) {
     showSetup(false);
