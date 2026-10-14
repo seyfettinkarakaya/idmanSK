@@ -13,9 +13,9 @@ Tamamlandı (sürüm 8), bkz. Tamamlanan. Kalan: Code.gs'in yeniden dağıtılma
 - **Onaylandı, sırada:** P3 aynı kas grubundan otomatik alternatif; F.7 çevrimdışı açılış (service worker);
   görünüm paketi (kurulum/form/"Kaydedildi" ekranları, simge seti, uygulama simgesi, animasyon, açık tema, yazı boyutu).
 - **Karar/bilgi bekliyor:** B20 (gün düzeni hangi sayfadan), B21 (parametrik: zaruri/seçimlik), B1 (örnek ekran),
-  B2, B3 (açıklama verildi), örnek ekran istenenler: B5, B7, B9, B10, B11, B16, B17, B18, P7, P8.
+  B2, B3 (açıklama verildi), örnek ekranları gösterildi, karar bekliyor: B5, B7, B9, B10, B11, B16, B17, B18, P8.
 - **Ertelendi:** uzak duvar ölçümü, P3-1 (+1 sn; veri gerekli), F4 saat verisi.
-- **İptal:** B4, B6, B8, B12, B13, B14, B19, B22, B23; Gym visual GIF seti.
+- **İptal:** B4, B6, B8, B12, B13, B14, B19, B22, B23, P7 (barbell yok); Gym visual GIF seti.
 - **Tabloda (kullanıcı):** Hafta formülü "Sezon Hafta"; Hedef Zone formülü Kick/Drill/Test; idmanRef'te eski salonHar/salonHKEtki silinebilir.
 - **İzlenecek:** 13.4 ilk kara idmanı (karaVeri / karaSeans / karaPlan).
 
@@ -145,7 +145,7 @@ Bant hareketleri 61, esneme 57. Örnek ekranlar yerelde üretilir (`tasarim/v28/
 - [x] P4 **Ekipman profilleri:** "Salon / Ev / Otel" — öneriler yalnızca o yerdeki ekipmanla. **(13.0.0)**
 - [x] P5 **Set türleri:** ısınma (var), ana, düşürme (drop), başarısızlık; özette ayrı sayılır. **(13.0.0)**
 - [x] P6 **Harekete sabit not:** "koltuk 4. delik, kablo 2. kademe" — her açılışta kartta görünür (Hevy/Strong). **(13.0.0)**
-- [ ] P7 **Plaka hesaplayıcı** (13.0.0: dambıl/kablo adım ayarı yapıldı; plaka hesaplayıcı kalan) (barda hangi plakalar) ve dambıl/kablo adım ayarı (2,5 kg yerine 2 kg vb.). → örnek ekran istendi
+- [-] P7 **Plaka hesaplayıcı** (13.0.0: dambıl/kablo adım ayarı yapıldı; plaka hesaplayıcı kalan) (barda hangi plakalar) ve dambıl/kablo adım ayarı (2,5 kg yerine 2 kg vb.). → İPTAL 14.10: barbell kullanılmıyor
 - [ ] P8 **Tahmini 1RM ve hacim eğrisi** (13.0.0: kas grubu başına haftalık set yapıldı; 1RM/hacim eğrisi kalan) hareket başına; kas grubu başına haftalık set sayısı (10–20 hedef bandı, → örnek ekran istendi
   ama omuz itişte kısıta göre üst sınır).
 - [x] P9 **Plan uyumu:** planlanan / yapılan (TrainingPeaks yeşil-sarı-kırmızı); haftalık özette yüzde. **(13.0.0)**
