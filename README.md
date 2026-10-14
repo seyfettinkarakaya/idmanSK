@@ -33,6 +33,7 @@ dosyasından okunur.
 | `harita.js` | Dokunmatik kas haritası (ön/arka figür, dokunma haritası `img/kas/`) |
 | `analiz.js` | Yüzme analizi: SWOLF, bölgelerde süre, aynı setle kıyas ve rekor, ağrı geçmişi, CSS testi, derece tahmini |
 | `bilgi.js`, `hareketdb.js` | Hareket bilgi kartları: ad eşleme ve free-exercise-db verisi (36 harekete Türkçe metin + `img/hareket/` fotoğrafları) |
+| `sw.js` | Service worker: uygulama dosyaları önbellekte (internet yokken açılış) |
 | `gosterge.js` | 13.5 göstergeleri: yük oranı, monotoni, form trendi, kara arası, reçete, kişisel hazır olma, stres puanı, bölge dağılımı, plan uyumu |
 | `model.js` | Sürüm 13 entegre model: ortak döngü fazı, haftalık yük hedefi, eklem bütçeleri, 7 günlük plan, ölçüm zamanı |
 | `hazir.js` | Günlük hazır olma skoru, dinlenme haftası önerisi, haftalık set / kas grubu, plan uyumu, ağırlık adımı |
@@ -368,6 +369,17 @@ Hata kodları: `AUTH`, `LOCKED`, `DUPLICATE`, `NOT_FOUND`, `PLAN_MISMATCH`,
    `frame-src https://www.youtube-nocookie.com` eklendi. İnternet yokken fotoğraf ve adımlar gösterilir.
 3. Telefonda yeni yerel anahtarlar: `ysk.hazir` (hazır olma kontrolleri, 60 gün), `ysk.hareketNot` (harekete sabit not);
    ayarlar: `yer` (Salon/Ev/Otel), `bildirim`. Ayarlar → Yedek indir: anahtarlar hariç JSON.
+
+## Sürüm 13.6'da neler var (dağıtım gerekmez)
+
+- **Hareket değiştir (P3):** idmanda "Değiştir" listesinin üstünde aynı ana kas grubundan, kısıta ve yerdeki
+  ekipmana uygun en iyi 3 alternatif (kas örtüşmesine göre); planlamada her hareketin altında "⇄ yerine: …".
+- **Çevrimdışı açılış (F7):** `sw.js` uygulama dosyalarını telefonda saklar; internet yokken de uygulama açılır.
+  Tablo (Apps Script) istekleri önbelleğe alınmaz. Yeni sürüm internet varken ilk açılışta gelir.
+- **Görünüm:** Ayarlar → Görünüm'de tema (Koyu / Açık / Sistem) ve yazı boyutu (Küçük / Normal / Büyük / Çok büyük);
+  yeni uygulama simgesi (dambıl + dalga; ana ekrandan silip yeniden ekleyince görünür), SVG geri/ileri okları,
+  kurulumda bağlantı kartları, "Kaydedildi"de çizilen onay, kısa ekran geçişleri (telefonda "hareketi azalt"
+  açıksa kapalı).
 
 ## Sürüm 13.5'te neler var (dağıtım gerekmez)
 

@@ -1,7 +1,7 @@
 {
   "name": "idmanSK",
   "short_name": "idmanSK",
-  "description": "Havuz kenarı idman programı",
+  "description": "Yüzme ve kara idmanı programı",
   "lang": "tr",
   "start_url": "./",
   "scope": "./",

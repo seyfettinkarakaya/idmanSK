@@ -411,5 +411,27 @@ sc('13.6 F7 çevrimdışı açılış: service worker uygulama dosyalarını ön
   await s.ctx.setOffline(false);
 });
 
+sc('13.6 Görünüm: Ayarlar → tema (koyu / açık / sistem) ve yazı boyutu; tercih telefonda kalır, yeniden açılışta uygulanır; tutarlı simgeler', async ({ launch }) => {
+  const s = await launch({ ref: true }); const p = s.page;
+  await s.waitScreen('home');
+  assert.equal(await p.evaluate(() => document.documentElement.dataset.theme), 'dark');
+  assert.equal(await p.$$eval('.icon-btn', (e) => e.filter((x) => x.textContent.trim() === '‹').length), 0, 'geri okları SVG');
+  await p.click('#home-settings'); await s.waitScreen('setup');
+  await p.click('#pref-tema [data-v="acik"]');
+  assert.equal(await p.evaluate(() => document.documentElement.dataset.theme), 'light');
+  assert.equal(await p.evaluate(() => getComputedStyle(document.body).backgroundColor), 'rgb(243, 245, 248)');
+  await p.click('#pref-yazi [data-v="1.12"]');
+  assert.equal(await p.evaluate(() => document.documentElement.style.zoom), '1.12');
+  assert.deepEqual((await s.ls('ysk.prefs')), { ...(await s.ls('ysk.prefs')), tema: 'acik', yazi: 1.12 });
+  await p.reload(); await s.waitScreen('home');
+  assert.equal(await p.evaluate(() => document.documentElement.dataset.theme), 'light');
+  await p.click('#home-settings'); await s.waitScreen('setup');
+  assert.equal(await p.getAttribute('#pref-tema [data-v="acik"]', 'class'), 'is-on');
+  await p.click('#pref-tema [data-v="koyu"]'); await p.click('#pref-yazi [data-v="1"]');
+  assert.equal(await p.evaluate(() => document.documentElement.dataset.theme), 'dark');
+  assert.equal(await p.evaluate(() => document.documentElement.style.zoom), '');
+  assert.equal((await s.ls('ysk.prefs')).tema, null);
+});
+
 const only = process.argv[2];
 if (require.main === module) runScenarios('Sürüm 13 senaryoları', only ? S.filter(([n]) => n.toLowerCase().includes(only.toLowerCase())) : S, 8160);

@@ -10,8 +10,8 @@ Tamamlandı (sürüm 8), bkz. Tamamlanan. Kalan: Code.gs'in yeniden dağıtılma
 ## Sıradaki
 
 ### Açık işler özeti (temizlik 14.10.2026)
-- **Onaylandı, sırada:** P3 aynı kas grubundan otomatik alternatif; F.7 çevrimdışı açılış (service worker);
-  görünüm paketi (kurulum/form/"Kaydedildi" ekranları, simge seti, uygulama simgesi, animasyon, açık tema, yazı boyutu).
+- **Yapıldı (13.6.0, 14.10):** P3 aynı kas grubundan alternatif; F.7 çevrimdışı açılış; görünüm paketi (kurulum kartları,
+  "Kaydedildi" animasyonu, SVG simgeler, yeni uygulama simgesi, ekran geçişi, açık tema, yazı boyutu).
 - **Beklemede (kullanıcı 14.10):** B20 gün düzeni ve B21 zaruri/seçimlik — bilgi sayfası önerisi hazır (aşağıda maddelerde).
 - **Yapıldı (13.5.0, 14.10):** B1, B5, B7, B9, B10, B11, B16, B17, B18.
 - **Karar bekliyor:** B2, B3 (açıklama verildi).
@@ -141,7 +141,7 @@ Bant hareketleri 61, esneme 57. Örnek ekranlar yerelde üretilir (`tasarim/v28/
   günün önerisi (tam / hafif / dinlen). Whoop/Garmin "readiness" mantığı, cihazsız.
 - [x] P2 **RIR (yedekte kalan tekrar) ile otomatik ilerleme:** set başına "2 tekrar daha yapabilirdim" → bir **(13.0.0)**
   sonraki ağırlık/tekrar (Alpha Progression, Juggernaut). RPE'nin yanında, isteğe bağlı.
-- [ ] P3 **Hareket değiştir (swap):** (idmanda "⇄ Değiştir" zaten var; aynı kas grubuna göre otomatik alternatif önerisi kalan) aynı kas grubunu çalıştıran, kısıta uygun ve ekipmanı olan alternatif → KARAR 14.10: OLUR (sırada)
+- [x] P3 **Hareket değiştir (swap):** (idmanda "⇄ Değiştir" zaten var; aynı kas grubuna göre otomatik alternatif önerisi kalan) aynı kas grubunu çalıştıran, kısıta uygun ve ekipmanı olan alternatif → YAPILDI 13.6.0
   (Fitbod). Salonda alet doluysa tek dokunuşla.
 - [x] P4 **Ekipman profilleri:** "Salon / Ev / Otel" — öneriler yalnızca o yerdeki ekipmanla. **(13.0.0)**
 - [x] P5 **Set türleri:** ısınma (var), ana, düşürme (drop), başarısızlık; özette ayrı sayılır. **(13.0.0)**
@@ -652,21 +652,22 @@ Sürüm 10.5 (sürüm 11 ile yayında):
   blok bazında dağılım; haftalık toplamlar.
 - [x] **F.3** (sürüm 12) Set başına kulaç sayısı / nabız girişi (isteğe bağlı alanlar).
 - [x] İdman sırasında ağrı (MSI) kaydı — karar: yüzmede seans sonu yeterli (salonda hareket başına).
-- [ ] **F.7** Service worker: uygulama dosyaları önbellekte, internet yokken de açılır. → KARAR 14.10: OLUR (sırada)
+- [x] **F.7** Service worker: uygulama dosyaları önbellekte, internet yokken de açılır. → YAPILDI 13.6.0
 
 ### Görsel
 
 Sürüm 8 görünümü korunuyor; v10/v11 önerileri beğenilmedi, görsel yenileme sonra konuşulacak.
 
-- [ ] Form, kurulum ve "Kaydedildi" ekranlarını yeni tasarıma uyarlamak; renk → KARAR 14.10: OLUR
+- [x] Form, kurulum ve "Kaydedildi" ekranlarını yeni tasarıma uyarlamak; renk → YAPILDI 13.6.0
   paletlerini (sarı set ekranı / turkuaz takvim / gri ana sayfa) tek sistemde toplamak.
-- [ ] Tutarlı simge seti (şu an elle çizilmiş karışık SVG ve karakterler). → KARAR 14.10: OLUR
-- [ ] Yeni uygulama simgesi. → KARAR 14.10: OLUR
-- [ ] Hareket ve kutlama: seans bitişinde kısa animasyon, geçişlerde yumuşaklık. → KARAR 14.10: OLUR
-- [ ] Açık tema (güneşli dış havuz için). → KARAR 14.10: OLUR
-- [ ] Ayarlar'da yazı boyutu seçimi. → KARAR 14.10: OLUR
+- [x] Tutarlı simge seti (şu an elle çizilmiş karışık SVG ve karakterler). → YAPILDI 13.6.0
+- [x] Yeni uygulama simgesi. → YAPILDI 13.6.0
+- [x] Hareket ve kutlama: seans bitişinde kısa animasyon, geçişlerde yumuşaklık. → YAPILDI 13.6.0
+- [x] Açık tema (güneşli dış havuz için). → YAPILDI 13.6.0
+- [x] Ayarlar'da yazı boyutu seçimi. → YAPILDI 13.6.0
 
 ## İzlenecek
+- 14.10 (13.6.0): "13.2.0 yüzme … biten setin tekrar süresi idmanda düzeltilir" sürüm 13 dosyası tam koşuda 3'te 1 "Bu seti sıfırla?" modalını bekleyip zaman aşımına düşüyor (13.5'te de bir kez); tek başına hep geçiyor. Kök neden araştırılacak (sahte saat + çift dokunma koruması?).
 - 14.10 (13.5.0): tam takımda yüzme senaryoları ara sıra zaman aşımıyla kalıyor ("Mola", "Tam idman", "Eski Code.gs"); tek başına hep geçiyor. Ağır yükte sahte saat zamanlaması; ayrı bir düzeltme işi olabilir.
 - 13.4 ilk kara idmanında kontrol: karaVeri hareket satırları, karaSeans tek satır, günün karaPlan satırları silindi mi (14.10: bağlantılar, ana sayfa ve katalog tamam).
 - E2E "Eski Code.gs (detay yok)" senaryosu tam takımda bir kez "geçmiş gün indirilmez" ile kaldı (14.10), tek başına iki kez geçti; zamanlamaya bağlı olabilir.

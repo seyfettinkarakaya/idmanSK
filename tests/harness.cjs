@@ -112,7 +112,7 @@ async function launch(opts = {}) {
   const net = { offline: Boolean(opts.offline), delay: {}, override: null, calls: [], external: [] };
   const browser = opts.browser;
   // 13.6: service worker yalnız kendi testinde (opts.sw); diğerlerinde istekler doğrudan sahte sunucuya gitsin
-  const ctx = await browser.newContext({ viewport: opts.viewport || { width: 440, height: 956 }, deviceScaleFactor: 1, hasTouch: true, isMobile: true, serviceWorkers: opts.sw ? 'allow' : 'block' });
+  const ctx = await browser.newContext({ viewport: opts.viewport || { width: 440, height: 956 }, deviceScaleFactor: 1, hasTouch: true, isMobile: true, serviceWorkers: opts.sw ? 'allow' : 'block', reducedMotion: opts.motion ? 'no-preference' : 'reduce' }); // 13.6: animasyonlar testte kapalı (opts.motion ile açık)
   // YouTube gömme (sürüm 13): gerçek ağa çıkmaz, sahte sayfa döner; dış istek sayılmaz, adresleri net.video'da
   net.video = [];
   ctx.on('request', (r) => { const u = new URL(r.url()); if (u.hostname === 'www.youtube-nocookie.com') { net.video.push(r.url()); return; } if (u.hostname !== 'localhost' && u.hostname !== 'script.google.com') net.external.push(r.url()); });

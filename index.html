@@ -18,23 +18,23 @@
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-  <link rel="stylesheet" href="fonts/fonts.css?v=13.5.0">
-  <link rel="stylesheet" href="style.css?v=13.5.0">
-  <script type="module" src="app.js?v=13.5.0"></script>
+  <link rel="stylesheet" href="fonts/fonts.css?v=13.6.0">
+  <link rel="stylesheet" href="style.css?v=13.6.0">
+  <script type="module" src="app.js?v=13.6.0"></script>
 </head>
 <body>
 
   <!-- Kurulum / Ayarlar: 2 bağlantı (idman, idmanRef), ses, CSS temposu -->
   <section id="screen-setup" class="screen" hidden>
     <header class="topbar">
-      <button class="icon-btn" id="setup-back" aria-label="Geri" hidden>‹</button>
+      <button class="icon-btn" id="setup-back" aria-label="Geri" hidden><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
       <h1 class="topbar-title" id="setup-title">Kurulum</h1>
     </header>
     <div class="scroll pad">
       <h2 class="set-h">Bağlantılar</h2>
       <p class="muted">Üç tablo, her birinin kendi Apps Script'i var; her biri yalnızca kendi dosyasını görür. Adres <b>/exec</b> ile biter. Bilgiler yalnızca bu cihazda saklanır.</p>
 
-      <h3 class="conn-h">idman <small>yüzme + kara girişleri · gerekli</small></h3>
+      <div class="conn-card"><h3 class="conn-h">idman <small>yüzme + kara girişleri · gerekli</small></h3>
       <label class="field">
         <span>Apps Script adresi</span>
         <input id="setup-url" type="url" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="https://script.google.com/macros/s/…/exec">
@@ -42,9 +42,8 @@
       <label class="field">
         <span>Gizli anahtar (token)</span>
         <input id="setup-token" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="tokenUret() çıktısı">
-      </label>
-
-      <h3 class="conn-h">idmanRef <small>CSS, bölgeler, faz, vücut ağırlığı · gerekli</small></h3>
+      </label></div>
+      <div class="conn-card"><h3 class="conn-h">idmanRef <small>CSS, bölgeler, faz, vücut ağırlığı · gerekli</small></h3>
       <label class="field">
         <span>Apps Script adresi</span>
         <input id="setup-ref-url" type="url" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="boş: CSS elle girilir">
@@ -52,8 +51,8 @@
       <label class="field">
         <span>Gizli anahtar (token)</span>
         <input id="setup-ref-token" type="text" autocomplete="off" autocapitalize="off" spellcheck="false">
-      </label>
-      <h3 class="conn-h">idmanKutuphane <small>kara hareketleri, kas etkileri · kara için gerekli</small></h3>
+      </label></div>
+      <div class="conn-card"><h3 class="conn-h">idmanKutuphane <small>kara hareketleri, kas etkileri · kara için gerekli</small></h3>
       <label class="field">
         <span>Apps Script adresi</span>
         <input id="setup-lib-url" type="url" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="https://script.google.com/macros/s/…/exec">
@@ -61,12 +60,17 @@
       <label class="field">
         <span>Gizli anahtar (token)</span>
         <input id="setup-lib-token" type="text" autocomplete="off" autocapitalize="off" spellcheck="false">
-      </label>
+      </label></div>
       <p id="setup-msg" class="msg" hidden></p>
       <button id="setup-save" class="btn btn-primary btn-block">Kaydet ve bağlan</button>
       <button id="setup-forget" class="btn btn-ghost btn-block set-gap" hidden>Anahtarı unut</button>
 
       <div id="setup-prefs" hidden>
+        <h2 class="set-h">Görünüm</h2>
+        <p class="muted">Tema ve yazı boyutu yalnız bu telefonda saklanır. Açık tema güneşli dış havuzda daha rahat okunur.</p>
+        <div class="seg" id="pref-tema"><button data-v="koyu">Koyu</button><button data-v="acik">Açık</button><button data-v="sistem">Sistem</button></div>
+        <div class="seg set-gap" id="pref-yazi"><button data-v="0.9">Küçük</button><button data-v="1">Normal</button><button data-v="1.12">Büyük</button><button data-v="1.25">Çok büyük</button></div>
+
         <h2 class="set-h">Çıkış sesi</h2>
         <p class="muted">Dinlenmede çıkışa 3-2-1 saniye kala kısa bip, çıkışta uzun bip; DUR'da kısa onay sesi. İdman ekranındaki ses düğmesiyle de açılıp kapanır. iPhone sessiz moddaysa ses çıkmaz.</p>
         <div class="seg" id="pref-ses">
@@ -139,15 +143,15 @@
       </div>
       <button class="home-row" id="home-form">
         <span><b>Form ve denge</b><small>Yük, toparlanma, stil, blok</small></span>
-        <em>›</em>
+        <em><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></em>
       </button>
       <button class="home-row" id="home-hafta">
         <span><b>Haftanın özeti</b><small id="home-hafta-meta">Bu hafta</small></span>
-        <em>›</em>
+        <em><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></em>
       </button>
       <button class="home-row" id="home-history">
         <span><b>Yapılmış idmanlar</b><small id="home-history-meta"></small></span>
-        <em>›</em>
+        <em><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></em>
       </button>
       <p class="app-version" id="app-version"></p>
     </div>
@@ -156,7 +160,7 @@
   <!-- Form ve denge: yük eğrisi, oran, toparlanma, denge, iskelet, blok -->
   <section id="screen-form" class="screen days form" hidden>
     <header class="days-top">
-      <button class="icon-btn" id="fm-back" aria-label="Ana sayfa">‹</button>
+      <button class="icon-btn" id="fm-back" aria-label="Ana sayfa"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
       <h1 class="days-title">Form ve denge</h1>
     </header>
     <div class="scroll pad" id="fm-body"></div>
@@ -165,17 +169,17 @@
   <!-- Haftanın özeti (kişisel; paylaşım yok) -->
   <section id="screen-hafta" class="screen days hafta" hidden>
     <header class="days-top">
-      <button class="icon-btn" id="hz-back" aria-label="Ana sayfa">‹</button>
+      <button class="icon-btn" id="hz-back" aria-label="Ana sayfa"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
       <h1 class="days-title">Haftanın özeti</h1>
     </header>
-    <div class="hz-nav"><button class="icon-btn" id="hz-prev" aria-label="Önceki hafta">‹</button><b id="hz-title"></b><button class="icon-btn" id="hz-next" aria-label="Sonraki hafta">›</button></div>
+    <div class="hz-nav"><button class="icon-btn" id="hz-prev" aria-label="Önceki hafta"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><b id="hz-title"></b><button class="icon-btn" id="hz-next" aria-label="Sonraki hafta"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button></div>
     <div class="scroll pad" id="hz-body"></div>
   </section>
 
   <!-- Bu hafta (sürüm 13): yüzme + salon tek plan, yük hedefi, sağlık bütçesi -->
   <section id="screen-bu-hafta" class="screen days bu-hafta" hidden>
     <header class="days-top">
-      <button class="icon-btn" id="bh-back" aria-label="Ana sayfa">‹</button>
+      <button class="icon-btn" id="bh-back" aria-label="Ana sayfa"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
       <h1 class="days-title">Bu hafta</h1>
     </header>
     <div class="scroll pad" id="bh-body"></div>
@@ -184,7 +188,7 @@
   <!-- Salon: başlangıç (son idmanı tekrarla / yeni plan) -->
   <section id="screen-salon-start" class="screen days salon-start" hidden>
     <header class="days-top">
-      <button class="icon-btn" id="ss-back" aria-label="Ana sayfa">‹</button>
+      <button class="icon-btn" id="ss-back" aria-label="Ana sayfa"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
       <h1 class="days-title">Kara idmanı</h1>
     </header>
     <div class="scroll pad" id="ss-body"></div>
@@ -193,17 +197,17 @@
   <!-- Salon programı: idman!salonPlan sayfası, haftalık -->
   <section id="screen-salon-prog" class="screen days salon-prog" hidden>
     <header class="days-top">
-      <button class="icon-btn" id="pg-back" aria-label="Geri">‹</button>
+      <button class="icon-btn" id="pg-back" aria-label="Geri"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
       <h1 class="days-title">Kara programı</h1>
     </header>
-    <div class="hz-nav"><button class="icon-btn" id="pg-prev" aria-label="Önceki hafta">‹</button><b id="pg-title"></b><button class="icon-btn" id="pg-next" aria-label="Sonraki hafta">›</button></div>
+    <div class="hz-nav"><button class="icon-btn" id="pg-prev" aria-label="Önceki hafta"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><b id="pg-title"></b><button class="icon-btn" id="pg-next" aria-label="Sonraki hafta"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button></div>
     <div class="scroll pad" id="pg-body"></div>
   </section>
 
   <!-- Salon planlama: hedef kaslar → hareket seç → plan (plan yalnızca telefonda) -->
   <section id="screen-salon-plan" class="screen days salon-plan" hidden>
     <header class="days-top">
-      <button class="icon-btn" id="sp-back" aria-label="Geri">‹</button>
+      <button class="icon-btn" id="sp-back" aria-label="Geri"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
       <h1 class="days-title" id="sp-title">Kara idmanı planla</h1>
     </header>
     <div class="sp-steps" id="sp-steps"><i></i><i></i><i></i></div>
@@ -216,7 +220,7 @@
     <div class="prog-amb"></div>
     <header class="prog-head">
       <div class="prog-row">
-        <button class="icon-btn" id="sl-back" aria-label="Geri / idmanı bitir">‹</button>
+        <button class="icon-btn" id="sl-back" aria-label="Geri / idmanı bitir"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
         <div class="prog-stat"><span class="lbl">SÜRE</span><b class="fit"><span id="sl-clock">0:00</span><small id="sl-end" class="y"></small></b></div>
         <div class="prog-stat end"><span class="lbl">HAREKET</span><b class="fit" id="sl-count">0</b></div>
       </div>
@@ -238,7 +242,7 @@
     </div>
     <!-- Hareket düzenleme -->
     <div class="eset" id="sl-edit" hidden>
-      <header class="es-head"><button class="icon-btn" id="se-back" aria-label="Vazgeç">‹</button><div><p class="es-tag" id="se-tag"></p><h2 class="es-title" id="se-title"></h2></div></header>
+      <header class="es-head"><button class="icon-btn" id="se-back" aria-label="Vazgeç"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><div><p class="es-tag" id="se-tag"></p><h2 class="es-title" id="se-title"></h2></div></header>
       <div class="es-scroll" id="se-body"></div>
       <footer class="es-foot"><button class="btn" id="se-cancel">Vazgeç</button><button class="btn btn-primary" id="se-save">Kaydet</button></footer>
     </div>
@@ -254,14 +258,14 @@
 
   <!-- Hareket bilgi kartı (her ekrandan açılır) -->
   <div class="bilgi" id="bilgi" hidden>
-    <header class="es-head"><button class="icon-btn" id="bi-close" aria-label="Kapat">‹</button><div><p class="es-tag" id="bi-tag"></p><h2 class="es-title" id="bi-title"></h2></div></header>
+    <header class="es-head"><button class="icon-btn" id="bi-close" aria-label="Kapat"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><div><p class="es-tag" id="bi-tag"></p><h2 class="es-title" id="bi-title"></h2></div></header>
     <div class="es-scroll" id="bi-body"></div>
   </div>
 
   <!-- Salon özeti ve kayıt -->
   <section id="screen-salon-ozet" class="screen days salon-ozet" hidden>
     <header class="days-top">
-      <button class="icon-btn" id="so-back" aria-label="İdmana dön">‹</button>
+      <button class="icon-btn" id="so-back" aria-label="İdmana dön"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
       <h1 class="days-title">Kara özeti</h1>
     </header>
     <div class="scroll pad" id="so-body"></div>
@@ -271,7 +275,7 @@
   <!-- Telefonda yapılmış idmanlar -->
   <section id="screen-history" class="screen days" hidden>
     <header class="days-top">
-      <button class="icon-btn" id="hist-back" aria-label="Ana sayfa">‹</button>
+      <button class="icon-btn" id="hist-back" aria-label="Ana sayfa"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
       <h1 class="days-title">Yapılmış idmanlar</h1>
     </header>
     <div class="scroll pad">
@@ -286,7 +290,7 @@
   <!-- Gün seçimi: hafta takvimi -->
   <section id="screen-days" class="screen days" hidden>
     <header class="days-top">
-      <button class="icon-btn" id="days-back" aria-label="Ana sayfa">‹</button>
+      <button class="icon-btn" id="days-back" aria-label="Ana sayfa"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
       <h1 class="days-brand">Yüzme</h1>
       <button class="icon-btn" id="days-refresh" aria-label="Yenile"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.4-5.7"/><path d="M20 4v5h-5"/></svg></button>
     </header>
@@ -311,7 +315,7 @@
     <div class="prog-amb" id="prog-amb"></div>
     <header class="prog-head">
       <div class="prog-row">
-        <button class="icon-btn" id="prog-back" aria-label="Geri / idmanı bitir">‹</button>
+        <button class="icon-btn" id="prog-back" aria-label="Geri / idmanı bitir"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
         <div class="prog-stat"><span class="lbl">SÜRE</span><b class="fit"><span id="prog-clock">0:00</span><small id="prog-end" class="y"></small></b></div>
         <div class="prog-stat end"><span class="lbl">MESAFE</span><b class="fit" id="prog-dist">0</b></div>
       </div>
@@ -329,7 +333,7 @@
     <!-- Set düzenleme: Düzenle / Sonrasına ekle (duzen.js) -->
     <div class="eset" id="eset" hidden>
       <header class="es-head">
-        <button class="icon-btn" id="eset-back" aria-label="Vazgeç">‹</button>
+        <button class="icon-btn" id="eset-back" aria-label="Vazgeç"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
         <div><p class="es-tag" id="eset-tag"></p><h2 class="es-title" id="eset-title"></h2></div>
       </header>
       <div class="es-scroll">
@@ -353,7 +357,7 @@
 
   <!-- Seans sonu 1/3: RPE -->
   <section id="screen-rpe" class="screen fin" hidden>
-    <header class="fin-top"><button class="icon-btn" id="rpe-back" aria-label="İdmana dön">‹</button><div class="steps"><i class="on"></i><i></i><i></i></div></header>
+    <header class="fin-top"><button class="icon-btn" id="rpe-back" aria-label="İdmana dön"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><div class="steps"><i class="on"></i><i></i><i></i></div></header>
     <div class="scroll pad">
       <button class="fin-undo" id="rpe-undo" hidden>↶ Yanlışlıkla mı bitti? İdmana dön</button>
       <h1 class="fin-h">İdman nasıldı?</h1>
@@ -365,7 +369,7 @@
 
   <!-- Seans sonu 2/3: MSI -->
   <section id="screen-msi" class="screen fin" hidden>
-    <header class="fin-top"><button class="icon-btn" id="msi-back" aria-label="Geri">‹</button><div class="steps"><i class="on"></i><i class="on"></i><i></i></div></header>
+    <header class="fin-top"><button class="icon-btn" id="msi-back" aria-label="Geri"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><div class="steps"><i class="on"></i><i class="on"></i><i></i></div></header>
     <div class="scroll pad">
       <h1 class="fin-h">Ağrı / rahatsızlık</h1>
       <p class="fin-sub">MSI — ağrı varsa bölgeye dokun; her dokunuş değeri artırır (0,5 → 1 → 1,5 → 2 → 3 → boş)</p>
@@ -380,7 +384,7 @@
 
   <!-- Seans sonu 3/3: Özet ve kaydet -->
   <section id="screen-ozet" class="screen fin" hidden>
-    <header class="fin-top"><button class="icon-btn" id="oz-back" aria-label="Geri">‹</button><div class="steps"><i class="on"></i><i class="on"></i><i class="on"></i></div></header>
+    <header class="fin-top"><button class="icon-btn" id="oz-back" aria-label="Geri"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><div class="steps"><i class="on"></i><i class="on"></i><i class="on"></i></div></header>
     <div class="scroll pad">
       <h1 class="fin-h">Özet ve kaydet</h1>
       <div class="oz-sum">
@@ -418,7 +422,7 @@
   <!-- Onay -->
   <section id="screen-done" class="screen" hidden>
     <div class="done-wrap">
-      <div class="done-icon" id="done-icon">✓</div>
+      <div class="done-icon" id="done-icon"><svg viewBox="0 0 52 52" aria-hidden="true"><circle class="dn-c" cx="26" cy="26" r="24"/><path class="dn-k" d="M15 27l7 7 15-16"/></svg></div>
       <h2 id="done-title">Kaydedildi</h2>
       <p id="done-text" class="muted"></p>
       <button class="btn btn-primary btn-xl btn-block" id="done-back">Gün seçimine dön</button>

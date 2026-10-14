@@ -1,7 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" fill="#04131d"/>
-  <circle cx="318" cy="150" r="46" fill="#33d1ff"/>
-  <path d="M120 250 C170 190 250 175 330 205 L392 228" fill="none" stroke="#33d1ff" stroke-width="40" stroke-linecap="round"/>
-  <path d="M60 330 q49 -40 98 0 t98 0 t98 0 t98 0" fill="none" stroke="#ffffff" stroke-width="26" stroke-linecap="round"/>
-  <path d="M60 400 q49 -40 98 0 t98 0 t98 0 t98 0" fill="none" stroke="#1d7fa3" stroke-width="26" stroke-linecap="round"/>
+  <!-- idmanSK 13.6: yüzme (dalga, turkuaz) + kara idmanı (dambıl, kehribar) — tam alanı kaplar (maskable güvenli bölge içinde) -->
+  <rect width="512" height="512" fill="#0B0F14"/>
+  <circle cx="256" cy="256" r="196" fill="#12181F"/>
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M150 196 h212 M176 162 v68 M204 146 v100 M308 146 v100 M336 162 v68" stroke="#F5A524" stroke-width="26"/>
+    <path d="M124 318 q33 -30 66 0 t66 0 t66 0 t66 0" stroke="#2DD4BF" stroke-width="24"/>
+    <path d="M140 372 q29 -26 58 0 t58 0 t58 0 t58 0" stroke="#1F8A80" stroke-width="20"/>
+  </g>
 </svg>

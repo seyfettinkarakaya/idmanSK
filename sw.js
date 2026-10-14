@@ -1,6 +1,6 @@
 // idmanSK service worker (13.6, F7): uygulama dosyaları önbellekte, internet yokken de açılır.
 // Yalnızca bu sitenin dosyaları önbelleğe alınır; Apps Script (tablo) istekleri ve YouTube hiç dokunulmadan ağa gider.
-const SURUM = '13.5.0';
+const SURUM = '13.6.0';
 const AD = 'idmansk-';
 const ONBELLEK = AD + SURUM;
 const MODULLER = ['app.js', 'data.js', 'wheel.js', 'zaman.js', 'ref.js', 'duzen.js', 'salon.js', 'grup.js', 'kisit.js', 'yuk.js', 'harita.js',

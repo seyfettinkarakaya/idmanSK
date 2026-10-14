@@ -1,25 +1,25 @@
 // idmanSK — arayüz. Veriye yalnızca data.js üzerinden erişir.
 
-import * as data from './data.js?v=13.5.0';
-import { Wheel } from './wheel.js?v=13.5.0';
-import * as zaman from './zaman.js?v=13.5.0';
-import * as ref from './ref.js?v=13.5.0';
-import * as duzen from './duzen.js?v=13.5.0';
-import * as salon from './salon.js?v=13.5.0';
-import * as grup from './grup.js?v=13.5.0';
-import * as kisit from './kisit.js?v=13.5.0';
-import * as yuk from './yuk.js?v=13.5.0';
-import * as harita from './harita.js?v=13.5.0';
-import * as bilgi from './bilgi.js?v=13.5.0';
-import * as analiz from './analiz.js?v=13.5.0';
-import * as video from './video.js?v=13.5.0';
-import * as hazir from './hazir.js?v=13.5.0';
-import { VIDEOLAR } from './videolar.js?v=13.5.0';
-import * as model from './model.js?v=13.5.0';
-import * as gosterge from './gosterge.js?v=13.5.0';
+import * as data from './data.js?v=13.6.0';
+import { Wheel } from './wheel.js?v=13.6.0';
+import * as zaman from './zaman.js?v=13.6.0';
+import * as ref from './ref.js?v=13.6.0';
+import * as duzen from './duzen.js?v=13.6.0';
+import * as salon from './salon.js?v=13.6.0';
+import * as grup from './grup.js?v=13.6.0';
+import * as kisit from './kisit.js?v=13.6.0';
+import * as yuk from './yuk.js?v=13.6.0';
+import * as harita from './harita.js?v=13.6.0';
+import * as bilgi from './bilgi.js?v=13.6.0';
+import * as analiz from './analiz.js?v=13.6.0';
+import * as video from './video.js?v=13.6.0';
+import * as hazir from './hazir.js?v=13.6.0';
+import { VIDEOLAR } from './videolar.js?v=13.6.0';
+import * as model from './model.js?v=13.6.0';
+import * as gosterge from './gosterge.js?v=13.6.0';
 
 // Telefonun güncel kodu çalıştırıp çalıştırmadığını görmek için ekranda gösterilir.
-export const APP_VERSION = '13.5.0';
+export const APP_VERSION = '13.6.0';
 
 const $ = (id) => document.getElementById(id);
 
@@ -521,6 +521,8 @@ function renderPrefs() {
   refreshPrefs();
   const p = prefs();
   for (const b of $('pref-ses').children) b.classList.toggle('is-on', (b.dataset.v === '1') === p.ses);
+  for (const b of $('pref-tema').children) b.classList.toggle('is-on', b.dataset.v === (p.tema || 'koyu'));
+  for (const b of $('pref-yazi').children) b.classList.toggle('is-on', Number(b.dataset.v) === (p.yazi || 1));
   // sporRef bağlıysa CSS oradan (bugün, son havuz, aletsiz); elle girilen alan gizlenir.
   const r = data.isConfigured('ref') ? sporRef() : null;
   const fromRef = Boolean(r && r.css.length);
@@ -3658,7 +3660,7 @@ function queueAndClose(payload, err) {
 // ---------------------------------------------------------------------------
 
 function showDone({ ok, result }) {
-  $('done-icon').textContent = ok ? '✓' : '⏳';
+  $('done-icon').innerHTML = ok ? '<svg viewBox="0 0 52 52" aria-hidden="true"><circle class="dn-c" cx="26" cy="26" r="24"/><path class="dn-k" d="M15 27l7 7 15-16"/></svg>' : '⏳'; // 13.6: çizilen onay
   $('done-icon').classList.toggle('is-wait', !ok);
   $('done-title').textContent = ok ? 'Kaydedildi' : 'Kaydedilemedi';
   let text;
@@ -4367,8 +4369,8 @@ function slPlusSet() {
 
 let hdb = null; // hareketdb.js (yalnızca kart açılınca yüklenir)
 let adb = null; // adimlar.js (Türkçe adımlar, yalnızca kart açılınca)
-const adimYukle = () => adb || (adb = import('./adimlar.js?v=13.5.0').then((m) => m.ADIMLAR).catch(() => ({})));
-const hdbYukle = () => hdb || (hdb = import('./hareketdb.js?v=13.5.0'));
+const adimYukle = () => adb || (adb = import('./adimlar.js?v=13.6.0').then((m) => m.ADIMLAR).catch(() => ({})));
+const hdbYukle = () => hdb || (hdb = import('./hareketdb.js?v=13.6.0'));
 let bilgiTimer = null;
 
 /** Hareketin videosu (H · Video önce, sonra uygulamadaki liste) ya da null. */
@@ -5551,6 +5553,8 @@ function wire() {
   wireSalon();
   $('home-history').addEventListener('click', showHistory);
   $('home-form').addEventListener('click', showForm);
+  $('pref-tema').addEventListener('click', (e) => { const b = e.target.closest('[data-v]'); if (!b) return; data.setPrefs({ tema: b.dataset.v === 'koyu' ? null : b.dataset.v }); state.prefs = null; gorunumUygula(); renderPrefs(); });
+  $('pref-yazi').addEventListener('click', (e) => { const b = e.target.closest('[data-v]'); if (!b) return; data.setPrefs({ yazi: Number(b.dataset.v) === 1 ? null : Number(b.dataset.v) }); state.prefs = null; gorunumUygula(); renderPrefs(); });
   $('pref-bildirim').addEventListener('click', async () => {
     let ac = !prefs().bildirim;
     if (ac && 'Notification' in window && Notification.permission !== 'granted') ac = (await Notification.requestPermission().catch(() => 'denied')) === 'granted';
@@ -5688,7 +5692,20 @@ function swKaydet() {
   } catch { /* yok say */ }
 }
 
+/** 13.6: tema (koyu / açık / sistem) ve yazı boyutu (yakınlaştırma) — yalnız bu telefonda. */
+function gorunumUygula() {
+  const p = prefs();
+  let acik = p.tema === 'acik';
+  try { if (p.tema === 'sistem') acik = window.matchMedia('(prefers-color-scheme: light)').matches; } catch { /* eski tarayıcı */ }
+  document.documentElement.dataset.theme = acik ? 'light' : 'dark';
+  document.documentElement.style.zoom = p.yazi && p.yazi !== 1 ? String(p.yazi) : '';
+  const m = document.querySelector('meta[name="theme-color"]');
+  if (m) m.setAttribute('content', acik ? '#F3F5F8' : '#0B0F14');
+}
+
 function boot() {
+  gorunumUygula();
+  try { window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', () => { if (prefs().tema === 'sistem') gorunumUygula(); }); } catch { /* yok say */ }
   swKaydet();
   wire();
   if (!data.isConfigured()) {
