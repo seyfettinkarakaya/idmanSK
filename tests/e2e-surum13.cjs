@@ -1,7 +1,7 @@
 // Sürüm 13 uçtan uca senaryoları (videolar, salon programı, pratik öneriler, entegre model).
 //   NODE_PATH=$(npm root -g) node tests/e2e-surum13.cjs [filtre]
 const assert = require('assert');
-const { runScenarios, D, sampleRef } = require('./harness.cjs');
+const { runScenarios, D, sampleRef, prow, samplePlan } = require('./harness.cjs');
 const { Sheet } = require('./fakegas.cjs');
 const { salonV12, toPlanList, gymBasla, bugunPlanli } = require('./e2e-surum12.cjs');
 
@@ -272,6 +272,10 @@ sc('Bu hafta: hazır olma "dinlen" bugünü kapatır; yüzme programı 3 günü 
   await p.click('#home-gym'); await s.waitScreen('salon-start');
   await p.click('[data-ss="plan"]'); await s.waitScreen('salon-plan');
   assert.match(await txt(s, '.sp-faz'), /Döngü · 2\. hafta Hacim\+ — kara: çekiş kuvveti/);
+  // 13.5 (B5): döngü haftasının reçetesi ve geçen idmana göre öneri (3 × 10, RPE 7,5 → RIR 2,5)
+  await p.click('[data-sp-grup="Shoulders"]'); await p.click('#sp-next');
+  await p.click('[data-sp-ex="Dumbbell Shoulder Press"]'); await p.click('#sp-next');
+  assert.match(await txt(s, '.sp-rc'), /hedef 3 × 10–12 · RIR 2 \(Hacim\+\) · aynı ağırlık, tekrarı artır/);
 });
 
 // --- 13.2.0 ---------------------------------------------------------------------------------
@@ -341,6 +345,49 @@ sc('13.2.0 salon: artış önerisinde "Hiçbiri" plandaki değerlerle başlar; b
   await s.modalClick('Kaydet');
   ses = await s.ls('ysk.salonSession');
   assert.deepEqual([ses.reps[ses.hareketler[0]._k].slice(0, 2), ses.hareketler[0].agirlik], [[9, 10], 15]);
+});
+
+// --- 13.5 göstergeleri (örnek ekranlar) ---------------------------------------------------------
+const yzKayit = (tarih, gercek = '01:38.0') => ({ id: `h${tarih}`, tarih, savedAt: 1, status: 'sent', endedAt: Date.parse(`${tarih}T08:00:00`),
+  seans: { sure: '01:00:00', mesafe: 2000, rpe: 6, msi: '' },
+  setler: [{ sira: 1, blok: 'MS', tekrar: 10, mesafe: 100, stil: 'FR', tur: 'Swim', hedef: '00:01:40', dinlen: '00:00:20', tamamlandi: true, gercek, yapilan: 10 }] });
+
+sc('13.5 Form ve denge: B1 bu hafta / son 4 hafta (toplam, yüzme, kara), B9 monotoni, B17 form eğrisi + "kara yalnız yorgunluğa" ayarı, B11 faz hedefine göre bölge dağılımı', async ({ launch }) => {
+  const hist = ['2026-08-25', '2026-08-28', '2026-09-01', '2026-09-04', '2026-09-08', '2026-09-11', '2026-09-15', '2026-09-18', '2026-09-21', '2026-09-22'].map((t) => yzKayit(t));
+  const s = await launch({ salonSheets: salonV12(), ref: true, storage: { 'ysk.history': hist } }); const p = s.page;
+  await s.waitScreen('home');
+  await p.waitForFunction(() => localStorage.getItem('ysk.salon') && localStorage.getItem('ysk.ref'));
+  await p.click('[data-hw="form"]'); await s.waitScreen('form');
+  const t = await txt(s, '#fm-body');
+  assert.match(t, /BU HAFTA \/ SON 4 HAFTA \(yük oranı\)\s*Toplam\s*[\d,]+×\s*Yüzme\s*[\d,]+×\s*Kara\s*(?:[\d,]+×|—)\s*Bu hafta toplam yük son 4 haftanın ortalamasından/);
+  assert.doesNotMatch(t, /risk/i);
+  assert.match(t, /YÜKÜN HAFTAYA DAĞILIMI \(son 7 gün\).*Monotoni\s*[\d,]+.*Zorlanma\s*[\d.]+\s*haftalık yük × monotoni/);
+  assert.equal(await p.$$eval('.g-mono > div', (e) => e.length), 7);
+  assert.match(t, /FORM EĞRİSİ · SON 6 HAFTA.*Kondisyon (↑ yükseliyor|→ dengeli|↓ düşüyor).*Kara yükü yalnız yorgunluğa sayılsın KAPALI/);
+  assert.match(t, /BU HAFTA YOĞUNLUK · FAZ HEDEFİ \(Faz 1 varsayılanı\)\s*EN1 · kolay.*hedef 50.*EN3 · eşik.*hedef 12/);
+  await p.click('[data-fm="karayorg"]');
+  await p.waitForFunction(() => /yorgunluğa sayılsın AÇIK/.test(document.getElementById('fm-body').textContent));
+  assert.equal((await s.ls('ysk.prefs')).karaYorgunluk, true);
+});
+
+sc('13.5 Ana sayfa ve Bu hafta: B7 hazır olma kişisel ortalamaya göre + 2 neden, B18 uzun kara arası uyarısı, B16 plan / yapılan uyumu ve uyarlama önerisi', async ({ launch }) => {
+  const sh = salonV12();
+  sh.idman.data = [sh.idman.data[0], [D('2026-09-01'), 1, 'Dumbbell Shoulder Press', 3, 10, 12.5, 128, 7.5, 0, '']];
+  const H = {};
+  for (let i = 1; i <= 10; i++) H[`2026-09-${String(23 - i).padStart(2, '0')}`] = { uyku: 4, agri: 1, enerji: 4, eklem: 0 };
+  H['2026-09-23'] = { uyku: 2, agri: 1, enerji: 4, eklem: 0 };
+  const rows = [...samplePlan(), prow('2026-09-22', 1, 'WU', 1, 200, 'Swim', '04:00', '00:20')];
+  const s = await launch({ salonSheets: sh, ref: true, rows, storage: { 'ysk.hazir': H } }); const p = s.page;
+  await s.waitScreen('home');
+  await p.waitForFunction(() => /Hazır olma/.test(document.getElementById('home-week').textContent));
+  assert.match(await txt(s, '#home-week'), /Hazır olma %73 \(ortalaman %87\) · Ortalamanın altında: planı hafif tut · Uyku 2 \/ 5 · ortalaman 4/);
+  await p.waitForFunction(() => /Son kara idmanı/.test(document.getElementById('home-gym-go').textContent));
+  assert.match(await txt(s, '#home-gym-go'), /⚠ Son kara idmanı 22 gün önce\s*2 haftadan uzun ara/);
+  await p.click('[data-hw="buhafta"]'); await s.waitScreen('bu-hafta');
+  const t = await txt(s, '#bh-body');
+  assert.match(t, /PLAN \/ YAPILAN.*Sal\s*Yüzme · yapılmadı.*Çar\s*Yüzme · planlı\s*bekliyor/);
+  await p.click('[data-bh="uyarla"]'); await s.waitModal('Uyarlama önerisi');
+  assert.match(await txt(s, '#modal-body'), /22 Eylül.*gününe al.*Uygulama tabloya yazmaz/);
 });
 
 const only = process.argv[2];

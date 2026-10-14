@@ -33,6 +33,7 @@ dosyasından okunur.
 | `harita.js` | Dokunmatik kas haritası (ön/arka figür, dokunma haritası `img/kas/`) |
 | `analiz.js` | Yüzme analizi: SWOLF, bölgelerde süre, aynı setle kıyas ve rekor, ağrı geçmişi, CSS testi, derece tahmini |
 | `bilgi.js`, `hareketdb.js` | Hareket bilgi kartları: ad eşleme ve free-exercise-db verisi (36 harekete Türkçe metin + `img/hareket/` fotoğrafları) |
+| `gosterge.js` | 13.5 göstergeleri: yük oranı, monotoni, form trendi, kara arası, reçete, kişisel hazır olma, stres puanı, bölge dağılımı, plan uyumu |
 | `model.js` | Sürüm 13 entegre model: ortak döngü fazı, haftalık yük hedefi, eklem bütçeleri, 7 günlük plan, ölçüm zamanı |
 | `hazir.js` | Günlük hazır olma skoru, dinlenme haftası önerisi, haftalık set / kas grubu, plan uyumu, ağırlık adımı |
 | `video.js`, `videolar.js` | Hareket videoları: YouTube adresi çözme, çerezsiz gömme adresi; 61 hareketlik liste (`tasarim/video/liste.csv`'den üretilir) |
@@ -367,6 +368,19 @@ Hata kodları: `AUTH`, `LOCKED`, `DUPLICATE`, `NOT_FOUND`, `PLAN_MISMATCH`,
    `frame-src https://www.youtube-nocookie.com` eklendi. İnternet yokken fotoğraf ve adımlar gösterilir.
 3. Telefonda yeni yerel anahtarlar: `ysk.hazir` (hazır olma kontrolleri, 60 gün), `ysk.hareketNot` (harekete sabit not);
    ayarlar: `yer` (Salon/Ev/Otel), `bildirim`. Ayarlar → Yedek indir: anahtarlar hariç JSON.
+
+## Sürüm 13.5'te neler var (dağıtım gerekmez)
+
+- **Form ve denge:** bu hafta / son 4 hafta yük oranı (toplam, yüzme, kara; 0,8–1,3 yeşil · 1,3–1,5 sarı · üstü
+  turuncu), yükün haftaya dağılımı (monotoni ve zorlanma), form eğrisi (kondisyon / yorgunluk, trend etiketi; "kara
+  yükü yalnız yorgunluğa" ayarı), bu haftanın bölge dağılımı faz hedefine göre ve eksik bölge uyarısı.
+- **Ana sayfa:** hazır olma senin son 28 günlük ortalamana göre (en az 7 kontrol) ve en etkili 2 neden; son kara
+  idmanından 14 günden fazla geçtiyse kara kartında uyarı.
+- **Bu hafta:** plan / yapılan uyumu (yüzme süresi plana göre ±%20 yeşil, kaçan gün kırmızı) ve uyarlama önerisi
+  (tabloya yazmaz).
+- **Yüzme özeti:** CSS'e göre stres puanı (RPE girilmese de) ve aynı standart sette RPE kayması.
+- **Kara planlama:** döngü haftasının reçetesi (Hacim 3 × 12–15 RIR 2–3 … Kuvvet 3 × 6–8) ve geçen idmana göre öneri.
+- Hesaplar `gosterge.js`'te (saf işlevler, `tests/test-gosterge.mjs`).
 
 ## Sürüm 13.4'te neler var
 

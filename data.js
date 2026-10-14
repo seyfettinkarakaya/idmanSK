@@ -122,6 +122,7 @@ export function getPrefs() {
     if (p.yer === 'Ev' || p.yer === 'Otel') out.yer = p.yer; // yalnızca ayarlandıysa (sürüm 13)
     if (p.bildirim === true) out.bildirim = true;
     if (typeof p.blokBas === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(p.blokBas)) out.blokBas = p.blokBas; // yalnızca ayarlandıysa
+    if (p.karaYorgunluk === true) out.karaYorgunluk = true; // 13.5 (B17): kara yükü yalnız yorgunluğa
   }
   return out;
 }
@@ -508,7 +509,7 @@ export function saveSalonProgram(tarih, hareketler) {
   return call('savePlan', { tarih, hareketler }, 'salon');
 }
 
-/** Salon programı: o günün salonPlan satırlarını siler (13.4.0; saveSalon da siler). */
+/** Salon programı: o günün salonPlan satırlarını siler (13.5.0; saveSalon da siler). */
 export function salonProgramYapildi(tarih) {
   return call('planYapildi', { tarih }, 'salon');
 }

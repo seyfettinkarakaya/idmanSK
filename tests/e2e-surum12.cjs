@@ -363,6 +363,7 @@ sc('Yüzme: drill videosu; set sonu kulaç + nabız (norm üstü uyarısı), aer
   assert.deepEqual(Object.values((await s.session()).yz.rahat), ['yap']);
   await s.finishToOzet();
   assert.match(await txt(s, '#oz-analiz'), /BÖLGELERDE SÜRE/);
+  assert.match(await txt(s, '#oz-analiz'), /STRES PUANI.*STRES PUANI\s*\d+.*hız CSS'e göre %\d+/, '13.5 (B10)');
   const oz = await p.$$eval('.oz-set', (e) => e.map((x) => x.textContent.replace(/\s+/g, ' ').trim()));
   assert.match(oz[0], /Kulaç 16\/25 m · SWOLF \d+ · Nabız 145.*⚠ Kulaç 16\/25 m \(norm 13–15\)/);
   await p.click('#oz-save'); await s.waitScreen('done');

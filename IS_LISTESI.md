@@ -13,10 +13,10 @@ Tamamlandı (sürüm 8), bkz. Tamamlanan. Kalan: Code.gs'in yeniden dağıtılma
 - **Onaylandı, sırada:** P3 aynı kas grubundan otomatik alternatif; F.7 çevrimdışı açılış (service worker);
   görünüm paketi (kurulum/form/"Kaydedildi" ekranları, simge seti, uygulama simgesi, animasyon, açık tema, yazı boyutu).
 - **Beklemede (kullanıcı 14.10):** B20 gün düzeni ve B21 zaruri/seçimlik — bilgi sayfası önerisi hazır (aşağıda maddelerde).
-- **Karar bekliyor:** B1,
-  B2, B3 (açıklama verildi), örnek ekranları gösterildi, karar bekliyor: B5, B7, B9, B10, B11, B16, B17, B18, P8.
+- **Yapıldı (13.5.0, 14.10):** B1, B5, B7, B9, B10, B11, B16, B17, B18.
+- **Karar bekliyor:** B2, B3 (açıklama verildi).
 - **Ertelendi:** uzak duvar ölçümü, P3-1 (+1 sn; veri gerekli), F4 saat verisi.
-- **İptal:** B4, B6, B8, B12, B13, B14, B19, B22, B23, P7 (barbell yok); Gym visual GIF seti.
+- **İptal:** B4, B6, B8, B12, B13, B14, B19, B22, B23, P7 (barbell yok), P8; Gym visual GIF seti.
 - **Tabloda (kullanıcı):** Hafta formülü "Sezon Hafta"; Hedef Zone formülü Kick/Drill/Test; idmanRef'te eski salonHar/salonHKEtki silinebilir.
 - **İzlenecek:** 13.4 ilk kara idmanı (karaVeri / karaSeans / karaPlan).
 
@@ -147,7 +147,7 @@ Bant hareketleri 61, esneme 57. Örnek ekranlar yerelde üretilir (`tasarim/v28/
 - [x] P5 **Set türleri:** ısınma (var), ana, düşürme (drop), başarısızlık; özette ayrı sayılır. **(13.0.0)**
 - [x] P6 **Harekete sabit not:** "koltuk 4. delik, kablo 2. kademe" — her açılışta kartta görünür (Hevy/Strong). **(13.0.0)**
 - [-] P7 **Plaka hesaplayıcı** (13.0.0: dambıl/kablo adım ayarı yapıldı; plaka hesaplayıcı kalan) (barda hangi plakalar) ve dambıl/kablo adım ayarı (2,5 kg yerine 2 kg vb.). → İPTAL 14.10: barbell kullanılmıyor
-- [ ] P8 **Tahmini 1RM ve hacim eğrisi** (13.0.0: kas grubu başına haftalık set yapıldı; 1RM/hacim eğrisi kalan) hareket başına; kas grubu başına haftalık set sayısı (10–20 hedef bandı, → örnek ekran istendi
+- [-] P8 **Tahmini 1RM ve hacim eğrisi** (13.0.0: kas grubu başına haftalık set yapıldı; 1RM/hacim eğrisi kalan) hareket başına; kas grubu başına haftalık set sayısı (10–20 hedef bandı, → İPTAL 14.10
   ama omuz itişte kısıta göre üst sınır).
 - [x] P9 **Plan uyumu:** planlanan / yapılan (TrainingPeaks yeşil-sarı-kırmızı); haftalık özette yüzde. **(13.0.0)**
 - [x] P10 **Otomatik dinlenme haftası (deload):** yük oranı, ağrı ve hazır olma kötüleşince öneri (blokla birlikte). **(13.0.0)**
@@ -164,24 +164,24 @@ Bant hareketleri 61, esneme 57. Örnek ekranlar yerelde üretilir (`tasarim/v28/
 ### Bütünleşik yüzme + salon modeli — araştırma önerileri (08.10.2026; "uygula" bekliyor)
 Rapor: `reports/Bütünleşik yüzme salon idman modeli.md` (notlar: `research_notes/…`). Kod incelemesine göre çoğu
 **dağıtım gerektirmez** (hesaplar telefonda; yeni ayarlar sporRef `kisit` satırı olarak; Plan'daki Alet sütunu zaten var).
-- [ ] B1 (Y) Yük oranı (7/28) → "Bu hafta / son 4 hafta" (mevcut hafta hariç), "risk" dili yok; eşikler ayarlanabilir. → KARAR 14.10: olabilir; örnek ekran istendi (yüzme / kara / toplam)
+- [x] B1 (Y) Yük oranı (7/28) → "Bu hafta / son 4 hafta" (mevcut hafta hariç), "risk" dili yok; eşikler ayarlanabilir. → KARAR 14.10: olabilir; örnek ekran istendi (yüzme / kara / toplam) → YAPILDI 13.5.0
 - [ ] B2 (Y) Seans sıçraması: yüzme son 4 haftanın en uzununu %10+ aşarsa uyarı (planlı uzun yüzme "onaylı"). → KARAR 14.10: kullanıcı "aşsa ne olur?" — açıklandı, karar bekliyor (yalnız uyarı)
 - [ ] B3 (Y) Omuz bütçesine pull buoy/palet metresi (ağırlıklı); palet kapısı (7 gün MSI 0, seansın ≤ %10–15). → KARAR 14.10: kullanıcı "ne gereği var?" — açıklandı (sağ omuz), karar bekliyor
 - [-] B4 (Y) Girişim: ≥CSS yüzmeden sonraki 12–24 sa ağır üst vücut; kilit yüzmeden önceki akşam ağır üst vücut; aynı gün < 6 sa. → İPTAL 14.10: bilgi olarak gelebilir; planlar ayrı YZ oturumunda yapılıyor ve orada izleniyor
-- [ ] B5 (Y) Faza bağlı kuvvet reçetesi (set × tekrar × RIR hedefi; ilerleme önerisi buna göre). → örnek ekran istendi
+- [x] B5 (Y) Faza bağlı kuvvet reçetesi (set × tekrar × RIR hedefi; ilerleme önerisi buna göre). → örnek ekran istendi → YAPILDI 13.5.0
 - [-] B6 (Y) Taper modülü (yarış tarihi kisit'te; 10–14 gün, hacim −%41–60, yoğunluk/sıklık aynı). → İPTAL 14.10: YZ planlama oturumunun işi
-- [ ] B7 (O) Hazır olma kişisel tabana göre (28 gün), kartta en etkili 2 neden; eklem ağrısı yalnız o eklemi kısıtlar. → örnek ekran istendi
+- [x] B7 (O) Hazır olma kişisel tabana göre (28 gün), kartta en etkili 2 neden; eklem ağrısı yalnız o eklemi kısıtlar. → örnek ekran istendi → YAPILDI 13.5.0
 - [-] B8 (O) Ağrı izleme: seans sonrası sabah MSI sorusu; artmışsa bir renk aşağı; 2 hafta kötüleşen trend → dinlenme haftası. → İPTAL 14.10: gereksiz
-- [ ] B9 (O) Monotoni ve zorlanma (Foster). → örnek ekran istendi
-- [ ] B10 (O) CSS tabanlı yüzme stres puanı (tekrar süresinden, dinlenme hariç) + standart sette RPE kayması. → örnek ekran istendi
-- [ ] B11 (O) Yoğunluk dağılımı faz hedefine göre (piramidal), eksik bölge uyarısı. → örnek ekran istendi
+- [x] B9 (O) Monotoni ve zorlanma (Foster). → örnek ekran istendi → YAPILDI 13.5.0
+- [x] B10 (O) CSS tabanlı yüzme stres puanı (tekrar süresinden, dinlenme hariç) + standart sette RPE kayması. → örnek ekran istendi → YAPILDI 13.5.0
+- [x] B11 (O) Yoğunluk dağılımı faz hedefine göre (piramidal), eksik bölge uyarısı. → örnek ekran istendi → YAPILDI 13.5.0
 - [-] B12 (O) Diz açı pencereleri (MSI ≥ 1 iken), her bacak gününde kalça + diz egzersizi. → İPTAL 14.10: gereksiz
 - [-] B13 (O) Dinlenme haftası 3+1 / 2+1 ayarı, kırmızı bayrakla erken dinlenme. → İPTAL 14.10: gereksiz
 - [-] B14 (O) Çift ilerleme + RIR üst sınırı (tekrar aralığı tamamlanınca yük artar). → İPTAL 14.10: gereksiz
 - [-] B15 (D) Eklem bütçelerine taban / hedef bandı / tavan (RP MEV/MRV benzeri). → BEKLEMEDE: kullanıcı yorum yapmadı; düşük öncelik
-- [ ] B16 (D) Plan/yapılan ±%20 uyum renkleri; kaçırılan seansta "uyarlama öner → Kabul et". → örnek ekran istendi
-- [ ] B17 (D) Form eğrisi "trend" etiketi; salon yükü yalnız yorgunluğa (ayar). → örnek ekran istendi
-- [ ] B18 (D) 14 günden uzun salon arası uyarısı. → örnek ekran istendi
+- [x] B16 (D) Plan/yapılan ±%20 uyum renkleri; kaçırılan seansta "uyarlama öner → Kabul et". → örnek ekran istendi → YAPILDI 13.5.0
+- [x] B17 (D) Form eğrisi "trend" etiketi; salon yükü yalnız yorgunluğa (ayar). → örnek ekran istendi → YAPILDI 13.5.0
+- [x] B18 (D) 14 günden uzun salon arası uyarısı. → örnek ekran istendi → YAPILDI 13.5.0
 - [-] B19 (D) Kural kaynağı rozeti: kanıt / gelenek / doktor-fizyoterapist onayı. → İPTAL 14.10: gereksiz
 
 **Gerçek kapasite (kullanıcı, 08.10.2026; 2026 havuz + salon istatistikleri):** yüzme dönemlerinde hafta içi havuz
@@ -667,6 +667,7 @@ Sürüm 8 görünümü korunuyor; v10/v11 önerileri beğenilmedi, görsel yenil
 - [ ] Ayarlar'da yazı boyutu seçimi. → KARAR 14.10: OLUR
 
 ## İzlenecek
+- 14.10 (13.5.0): tam takımda yüzme senaryoları ara sıra zaman aşımıyla kalıyor ("Mola", "Tam idman", "Eski Code.gs"); tek başına hep geçiyor. Ağır yükte sahte saat zamanlaması; ayrı bir düzeltme işi olabilir.
 - 13.4 ilk kara idmanında kontrol: karaVeri hareket satırları, karaSeans tek satır, günün karaPlan satırları silindi mi (14.10: bağlantılar, ana sayfa ve katalog tamam).
 - E2E "Eski Code.gs (detay yok)" senaryosu tam takımda bir kez "geçmiş gün indirilmez" ile kaldı (14.10), tek başına iki kez geçti; zamanlamaya bağlı olabilir.
 - 13.2.0 (09.10.2026): "sporRef beklenmeyen cevap verirse çökmez" senaryosu tam koşuda bir kez zaman aşımı verdi, tek başına ve tekrar tam koşuda geçti (sahte saat).

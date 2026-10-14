@@ -1,7 +1,7 @@
 // Antrenman yükü ve toparlanma: saf işlevler (DOM yok).
 // Seans yükü = RPE × dakika (Foster sRPE). Yüzme ve salon aynı ölçekte.
 // Kaynaklar: telefondaki geçmiş (ysk.history: yüzme + salon kayıtları) ve SalonTakip "idman" geçmişi.
-import { grupKey, haritaGruplari } from './grup.js?v=13.4.0';
+import { grupKey, haritaGruplari } from './grup.js?v=13.5.0';
 
 /** "01:18:20", "18:20", "4:10" → saniye; geçersizse 0. */
 export function sureSn(s) {
@@ -138,7 +138,7 @@ export function gunluk(liste) {
  * Form eğrisi (TrainingPeaks PMC mantığı): kondisyon = 42 günlük, yorgunluk = 7 günlük üstel ortalama; form = kondisyon − yorgunluk
  * (önceki günün değerleriyle). Son `gun` gün: [{ tarih, yuk, kondisyon, yorgunluk, form }].
  */
-export function formEgrisi(g, bugun, gun = 56) {
+export function formEgrisi(g, bugun, gun = 56, gKond = null) { // 13.5 (B17): gKond verilirse kondisyon yalnız ondan (ör. kara yükü yalnız yorgunluğa)
   const dates = Object.keys(g).sort();
   const bas = dates.length ? (dates[0] < gunEkle(bugun, -gun) ? dates[0] : gunEkle(bugun, -gun)) : gunEkle(bugun, -gun);
   let ctl = 0, atl = 0;
@@ -146,7 +146,7 @@ export function formEgrisi(g, bugun, gun = 56) {
   for (let t = bas; t <= bugun; t = gunEkle(t, 1)) {
     const L = g[t] || 0;
     const form = ctl - atl;
-    ctl += (L - ctl) / 42;
+    ctl += ((gKond ? gKond[t] || 0 : L) - ctl) / 42;
     atl += (L - atl) / 7;
     out.push({ tarih: t, yuk: L, kondisyon: Math.round(ctl), yorgunluk: Math.round(atl), form: Math.round(form) });
   }
