@@ -276,6 +276,10 @@ sc('Bu hafta: hazır olma "dinlen" bugünü kapatır; yüzme programı 3 günü 
   await p.click('[data-sp-grup="Shoulders"]'); await p.click('#sp-next');
   await p.click('[data-sp-ex="Dumbbell Shoulder Press"]'); await p.click('#sp-next');
   assert.match(await txt(s, '.sp-rc'), /hedef 3 × 10–12 · RIR 2 \(Hacim\+\) · aynı ağırlık, tekrarı artır/);
+  // 13.6 (P3): planda aynı ana gruptan alternatif → tek dokunuşla değiştir
+  assert.equal(await txt(s, '[data-sp-alt="0"]'), '⇄ yerine: Band External Rotation');
+  await p.click('[data-sp-alt="0"]');
+  await p.waitForFunction(() => document.querySelector('.sp-pl .sp-m b').textContent === 'Band External Rotation');
 });
 
 // --- 13.2.0 ---------------------------------------------------------------------------------

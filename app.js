@@ -5246,8 +5246,9 @@ function renderSalonPlan() {
         const o = oneriOf(x.ad);
         const kn = kisitOf(x.ad).notlar;
         const rc = receteSatiri(x);
+        const al = altOneriler(x.ad, P.liste.map((y) => y.ad), 1)[0];
         return `<div class="sp-pl"><span class="sp-n n">${i + 1}</span>
-          <span class="sp-m"><b>${esc(x.ad)}</b><small>${esc(grupAd(grupOf(x.ad)))}${x._oneri ? ` · öneri uygulandı: <em>${esc(x._oneri.text)}</em>` : o ? ` · öneri: <em class="${o.warn ? 'warn' : ''}">${esc(o.text)}</em>` : ''}</small>${rc}${kn.map((t) => `<small class="sp-kn">⚠ ${esc(t)}</small>`).join('')}</span>
+          <span class="sp-m"><b>${esc(x.ad)}</b><small>${esc(grupAd(grupOf(x.ad)))}${x._oneri ? ` · öneri uygulandı: <em>${esc(x._oneri.text)}</em>` : o ? ` · öneri: <em class="${o.warn ? 'warn' : ''}">${esc(o.text)}</em>` : ''}</small>${rc}${al ? `<button class="sp-alt" data-sp-alt="${i}" data-ad="${esc(al.ad)}">⇄ yerine: ${esc(al.ad)}</button>` : ''}${kn.map((t) => `<small class="sp-kn">⚠ ${esc(t)}</small>`).join('')}</span>
           <button class="sp-v n" data-sp-ed="${i}" aria-label="${esc(x.ad)} düzenle">${x.set} × ${x.sure ? `${x.sure} sn` : x.tekrar}<small>${esc(fmtKg(x.agirlik))} ✎</small></button>
           <span class="sp-mv"><button data-sp-mv="${i}:-1" aria-label="Yukarı" ${i ? '' : 'disabled'}>↑</button><button data-sp-mv="${i}:1" aria-label="Aşağı" ${i < P.liste.length - 1 ? '' : 'disabled'}>↓</button><button data-sp-rm="${i}" aria-label="Çıkar">✕</button></span></div>
           ${i < P.liste.length - 1 ? `<button class="sp-ss${x.ss && P.liste[i + 1].ss === x.ss ? ' is-on' : ''}" data-sp-ss="${i}">${x.ss && P.liste[i + 1].ss === x.ss ? '⛓ süperset · ayır' : '⛓ süperset yap'}</button>` : ''}`;
@@ -5424,6 +5425,14 @@ function onSalonPlanClick(e) {
     return;
   } else if (t.dataset.spAdd != null) {
     P.step = 1;
+  } else if (t.dataset.spAlt != null) { // 13.6 (P3): aynı gruptan alternatifle değiştir (set/tekrar son yapılandan)
+    const i = Number(t.dataset.spAlt);
+    const ad = t.dataset.ad;
+    const nx = salon.planHareket(salonData(), ad, { bodyweight: (katalogOf(ad) || {}).ekipman === 'Bodyweight', uygula: false });
+    if (P.liste[i].ss) nx.ss = P.liste[i].ss;
+    toast(`${P.liste[i].ad} → ${ad}`);
+    P.liste[i] = nx;
+    P.secili = P.liste.map((x) => x.ad);
   } else if (t.dataset.spRm) {
     P.liste.splice(Number(t.dataset.spRm), 1);
     P.secili = P.liste.map((x) => x.ad);
@@ -5455,6 +5464,15 @@ function onSalonPlanBack() {
 }
 
 /** İdmanda Değiştir (aynı kas grubundan) / Sonrasına ekle: puanlı liste. */
+/** 13.6 (P3): aynı ana kas grubundan, kısıta uygun ve yerdeki ekipmanla yapılabilen alternatifler. */
+function altOneriler(ad, haric = [], n = 3) {
+  const d = salonData();
+  if (!d) return [];
+  const yer = prefs().yer;
+  const ekipman = yer && YERLER[yer] ? [...new Set(d.katalog.map((k) => k.ekipman).filter((e) => e && YERLER[yer].test(e)))] : [];
+  return salon.alternatifler(d, ad, { haric, ekipman, uygun: (x) => kisitOf(x).durum !== 'yasak', n });
+}
+
 async function pickHareket(ctx) {
   const d = salonData();
   if (!d) return toast('Kara verisi yok.');
@@ -5464,7 +5482,8 @@ async function pickHareket(ctx) {
   const rows = planRows(d, { oncelik, haric: slH().map((x) => x.ad) }).rows.slice(0, 20); // yasaklılar önerilmez
   const body = document.createElement('div');
   body.className = 'pick-list sp-pick';
-  body.innerHTML = rows.map((r) => `<button class="pick" data-value="${esc(r.ad)}"><b>${r.puan} · ${esc(r.ad)}${r.oneri && r.oneri.warn ? ' ⚠' : ''}</b><small>${esc(Object.keys(r.pay).map(grupAd).join(', '))} · ${esc(sonText(r.son))}</small></button>`).join('') || '<p class="empty">Uygun hareket yok.</p>';
+  const alt = ctx.mode === 'swap' ? altOneriler(cur.ad, slH().map((x) => x.ad)) : [];
+  body.innerHTML = (alt.length ? `<p class="sp-lb">ÖNERİLEN · AYNI KAS GRUBU</p>${alt.map((r) => `<button class="pick pick-on" data-value="${esc(r.ad)}"><b>⇄ ${esc(r.ad)}</b><small>${esc(r.neden)}</small></button>`).join('')}<p class="sp-lb">TÜMÜ</p>` : '') + rows.map((r) => `<button class="pick" data-value="${esc(r.ad)}"><b>${r.puan} · ${esc(r.ad)}${r.oneri && r.oneri.warn ? ' ⚠' : ''}</b><small>${esc(Object.keys(r.pay).map(grupAd).join(', '))} · ${esc(sonText(r.son))}</small></button>`).join('') || '<p class="empty">Uygun hareket yok.</p>';
   const ad = await modal({
     title: ctx.mode === 'swap' ? `${cur.ad} yerine (${grupAd(g) || 'aynı grup'})` : `${cur.ad} sonrasına ekle`,
     body,

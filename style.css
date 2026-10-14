@@ -1837,3 +1837,5 @@ b.bad, .bad { color: var(--danger); }
 .hz-ned { margin: 6px 0 0; font-size: 13px; color: #C3CCD6; }
 .fd-r.g-or > small { flex: 1; min-width: 0; }
 b.tur, .tur { color: #F97316; }
+.pick.pick-on { border-color: rgba(52, 211, 153, .5); background: #0f2219; }
+.sp-alt { display: inline-block; margin-top: 4px; padding: 3px 10px; border-radius: 10px; border: 1px solid #1E2731; background: #12181F; color: #8CC4FF; font-size: 12px; font-weight: 700; }

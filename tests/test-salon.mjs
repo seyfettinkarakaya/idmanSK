@@ -143,4 +143,20 @@ t('sürüm 12: öneri uygula / geri al, önleyici doz, rekor, hacim', () => {
   assert.equal(S.hacim([{ set: 3, tekrar: 10, agirlik: 15 }, { set: 3, tekrar: 10, agirlik: 'Vücut' }]), 450);
 });
 
+t('13.6 alternatifler (P3): aynı ana grup, kas örtüşmesine göre sıra, ekipman ve kısıt süzgeci, hariç tutulanlar', () => {
+  const d = {
+    katalog: [{ ad: 'DB Press', ekipman: 'Dumbbell', stc: 0.7 }, { ad: 'Band Press', ekipman: 'Band', stc: 0.8 }, { ad: 'Pike Push-up', ekipman: 'Bodyweight', stc: 0.6 },
+      { ad: 'Lateral Raise', ekipman: 'Dumbbell', stc: 0.5 }, { ad: 'Push-up', ekipman: 'Bodyweight', stc: 0.7 }, { ad: 'Row', ekipman: 'Band', stc: 0.8 }],
+    etki: [['DB Press', 'Shoulders', 0.8], ['DB Press', 'Triceps', 0.2], ['Band Press', 'Shoulders', 0.7], ['Band Press', 'Triceps', 0.3], ['Pike Push-up', 'Shoulders', 0.6], ['Pike Push-up', 'Triceps', 0.4],
+      ['Lateral Raise', 'Shoulders', 1], ['Push-up', 'Chest', 0.7], ['Push-up', 'Shoulders', 0.3], ['Row', 'Back', 1]].map(([ad, grup, oran]) => ({ ad, grup, oran })),
+    gecmis: [],
+  };
+  const a = S.alternatifler(d, 'DB Press');
+  assert.deepEqual(a.map((x) => x.ad), ['Band Press', 'Pike Push-up', 'Lateral Raise'], 'göğüs ağırlıklı Push-up ve sırt yok');
+  assert.match(a[0].neden, /aynı ana grup · kas örtüşmesi %90 · kısıta uygun/);
+  assert.deepEqual(S.alternatifler(d, 'DB Press', { ekipman: ['Band', 'Bodyweight'] }).map((x) => x.ad), ['Band Press', 'Pike Push-up']);
+  assert.deepEqual(S.alternatifler(d, 'DB Press', { uygun: (ad) => ad !== 'Band Press', haric: ['Lateral Raise'] }).map((x) => x.ad), ['Pike Push-up']);
+  assert.deepEqual(S.alternatifler(d, 'Yok'), []);
+});
+
 console.log(`salon.js testleri: TAMAM (${n})`);

@@ -264,6 +264,35 @@ export function puanla(d, { oncelik = {}, amac = [], ekipman = [], stcMin = 0, h
   return rows.sort((a, b) => b.ham - a.ham || a.ad.localeCompare(b.ad));
 }
 
+/**
+ * 13.6 (P3): aynı ana kas grubunu çalıştıran, kısıta uygun ve ekipmanı olan alternatifler.
+ * Benzerlik = kas payı örtüşmesi (her gruptaki küçük payların toplamı) × yüzme aktarımı; ağrılı geçmiş yarım puan.
+ * opts: { haric: [ad], ekipman: [izinli ekipman] (boş = hepsi), uygun: (ad) => bool (kısıt), n }
+ * → [{ ad, ekipman, benzer (0–100), neden }]
+ */
+export function alternatifler(d, ad, { haric = [], ekipman = [], uygun = () => true, n = 3 } = {}) {
+  if (!d) return [];
+  const p0 = grupPay(d.etki, ad);
+  const ana = Object.entries(p0).sort((a, b) => b[1] - a[1])[0];
+  if (!ana) return [];
+  const out = [];
+  for (const k of d.katalog || []) {
+    if (k.ad === ad || haric.includes(k.ad)) continue;
+    if (ekipman.length && !ekipman.includes(k.ekipman)) continue;
+    const p = grupPay(d.etki, k.ad);
+    if (!(p[ana[0]] > 0)) continue;
+    const ust = Object.entries(p).sort((a, b) => b[1] - a[1])[0][0];
+    if (ust !== ana[0]) continue; // ana grubu aynı olmalı
+    if (!uygun(k.ad)) continue;
+    const ortak = Object.keys(p0).reduce((a, g) => a + Math.min(p0[g], p[g] || 0), 0);
+    const o = oneri(d.gecmis, k.ad);
+    const stc = k.stc == null ? 0.5 : k.stc;
+    out.push({ ad: k.ad, ekipman: k.ekipman, skor: ortak * (0.5 + stc / 2) * (o && o.agrili ? 0.5 : 1), benzer: Math.round(ortak * 100) });
+  }
+  return out.sort((a, b) => b.skor - a.skor || a.ad.localeCompare(b.ad)).slice(0, n)
+    .map(({ skor, ...x }) => ({ ...x, neden: `aynı ana grup · kas örtüşmesi %${x.benzer} · kısıta uygun${ekipman.length ? ' · ekipman var' : ''}` }));
+}
+
 /** Plan hareketi: son yapılan değerler + ilerleme önerisi (⚠ varsa aynı). uygula: false → yalnız son değerler. */
 export function planHareket(d, ad, { bodyweight = false, uygula = true, ekipman = '' } = {}) {
   const last = historyOf(d.gecmis, ad)[0];

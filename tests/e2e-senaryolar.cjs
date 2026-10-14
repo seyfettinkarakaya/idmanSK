@@ -1084,8 +1084,10 @@ sc('Salon planlama: dağılım, öncelik, puanlı liste (⚠ ağrı), sıra, pla
   await p.click('#sl-detail [data-sact="swap"]');
   await s.waitModal('Band Lat Pulldown yerine');
   const opts = await p.$$eval('#modal-body .pick b', (e) => e.map((x) => x.textContent));
-  assert.ok(opts.length === 1 && /Standard Pull-up/.test(opts[0]), JSON.stringify(opts));
-  await p.click('#modal-body .pick');
+  // 13.6 (P3, bilinçli değişiklik): en üstte "ÖNERİLEN · AYNI KAS GRUBU" (aynı ana grup, kısıta uygun), altında tüm liste
+  assert.deepStrictEqual(opts.map((x) => x.replace(/ ⚠$/, '')), ['⇄ Standard Pull-up', '100 · Standard Pull-up'], JSON.stringify(opts));
+  assert.match(await s.text('#modal-body .pick-on small'), /aynı ana grup · kas örtüşmesi %\d+ · kısıta uygun/);
+  await p.click('#modal-body .pick-on');
   await p.waitForFunction(() => document.querySelector('#sl-wheel .w-item.is-active .sl-ad').textContent.trim() === 'Standard Pull-up');
   // Sil + Geri al
   await p.click('#sl-wheel .w-item.is-active .w-card');
