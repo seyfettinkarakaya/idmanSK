@@ -1,25 +1,25 @@
 // idmanSK — arayüz. Veriye yalnızca data.js üzerinden erişir.
 
-import * as data from './data.js?v=13.6.0';
-import { Wheel } from './wheel.js?v=13.6.0';
-import * as zaman from './zaman.js?v=13.6.0';
-import * as ref from './ref.js?v=13.6.0';
-import * as duzen from './duzen.js?v=13.6.0';
-import * as salon from './salon.js?v=13.6.0';
-import * as grup from './grup.js?v=13.6.0';
-import * as kisit from './kisit.js?v=13.6.0';
-import * as yuk from './yuk.js?v=13.6.0';
-import * as harita from './harita.js?v=13.6.0';
-import * as bilgi from './bilgi.js?v=13.6.0';
-import * as analiz from './analiz.js?v=13.6.0';
-import * as video from './video.js?v=13.6.0';
-import * as hazir from './hazir.js?v=13.6.0';
-import { VIDEOLAR } from './videolar.js?v=13.6.0';
-import * as model from './model.js?v=13.6.0';
-import * as gosterge from './gosterge.js?v=13.6.0';
+import * as data from './data.js?v=13.7.0';
+import { Wheel } from './wheel.js?v=13.7.0';
+import * as zaman from './zaman.js?v=13.7.0';
+import * as ref from './ref.js?v=13.7.0';
+import * as duzen from './duzen.js?v=13.7.0';
+import * as salon from './salon.js?v=13.7.0';
+import * as grup from './grup.js?v=13.7.0';
+import * as kisit from './kisit.js?v=13.7.0';
+import * as yuk from './yuk.js?v=13.7.0';
+import * as harita from './harita.js?v=13.7.0';
+import * as bilgi from './bilgi.js?v=13.7.0';
+import * as analiz from './analiz.js?v=13.7.0';
+import * as video from './video.js?v=13.7.0';
+import * as hazir from './hazir.js?v=13.7.0';
+import { VIDEOLAR } from './videolar.js?v=13.7.0';
+import * as model from './model.js?v=13.7.0';
+import * as gosterge from './gosterge.js?v=13.7.0';
 
 // Telefonun güncel kodu çalıştırıp çalıştırmadığını görmek için ekranda gösterilir.
-export const APP_VERSION = '13.6.0';
+export const APP_VERSION = '13.7.0';
 
 const $ = (id) => document.getElementById(id);
 
@@ -2590,6 +2590,39 @@ async function duzeltSet(i) {
   toast('Tekrar süreleri düzeltildi', 1500);
 }
 
+/**
+ * 13.7: setin yüzülen mesafesini düzeltir (ör. 1500 yerine 1600). Set anında, bitince ya da özette kullanılır;
+ * yapılan tekrarlar da yeni mesafeyle sayılır (tempo, toplam mesafe). Tabloya Mesafe yeni değerle, Not'a plan
+ * farkı ("Plan: 1×1500 → 1×1600") yazılır. Olaylar (dokunuşlar) değişmez.
+ */
+async function mesafeDuzelt(i) {
+  const s = state.plan && state.plan.setler[i];
+  if (!s) return;
+  const eski = Number(s.mesafe) || 0;
+  let m = eski;
+  const adim = Number(prefs().havuz) || 25;
+  const el = document.createElement('div');
+  const ciz = () => {
+    el.innerHTML = `<p class="oy-not">Yüzdüğün mesafe plandan farklıysa düzelt. ${tekrarOf(s) > 1 ? `Her tekrar için geçerli (${tekrarOf(s)} tekrar). ` : ''}Tekrar süreleri aynı kalır, tempo yeni mesafeye göre hesaplanır.</p>
+      <div class="mz-r"><button data-mz="-100">−100</button><button data-mz="-${adim}">−${adim}</button><b class="n">${fmtNum(m)}<small> m</small></b><button data-mz="${adim}">+${adim}</button><button data-mz="100">+100</button></div>
+      ${m !== eski ? `<p class="oy-not">Plan ${fmtNum(eski)} m → ${fmtNum(m)} m · toplam ${tekrarOf(s) > 1 ? `${tekrarOf(s)} × ` : ''}${fmtNum(m)} m</p>` : ''}`;
+  };
+  ciz();
+  el.addEventListener('click', (e) => { const b = e.target.closest('[data-mz]'); if (!b) return; m = Math.max(adim, m + Number(b.dataset.mz)); ciz(); });
+  const ok = await modal({ title: `${setTitle(s)} · mesafe`, body: el, actions: [{ label: 'Kaydet', value: true, cls: 'btn-primary' }, { label: 'Vazgeç', value: false }] });
+  if (!ok || !state.session || m === eski) return;
+  const base = keyedPlan();
+  base.setler[i] = { ...base.setler[i], mesafe: m };
+  const ss = state.session;
+  ss.setler = base.setler;
+  state.plan = { ...state.plan, setler: base.setler };
+  state.zst = null;
+  persist();
+  if (state.screen === 'ozet') renderOzet();
+  else { refreshAllItems(); updateProgram(); }
+  toast(`Mesafe düzeltildi: ${fmtNum(eski)} → ${fmtNum(m)} m`, 2000);
+}
+
 /** Tamamlanan seti sıfırlar: o setin YÜZ/DUR olayları silinir, set yeniden yapılabilir. */
 async function askResetSet(i) {
   const set = state.plan.setler[i];
@@ -2599,11 +2632,13 @@ async function askResetSet(i) {
     body: `<p>${esc(setTitle(set))} · ${zaman.doneReps(st, i)}/${tekrarOf(set)} tekrar. Tekrar süreleri silinir, set yeniden yapılabilir.</p>`,
     actions: [
       ...(zaman.repTimes(st, i).length ? [{ label: 'Tekrar sürelerini düzelt', value: 'duzelt', cls: 'btn-primary' }] : []),
+      { label: 'Mesafeyi düzelt', value: 'mesafe' },
       { label: 'Seti sıfırla', value: 'sifirla' },
       { label: 'Vazgeç', value: '' },
     ],
   });
   if (choice === 'duzelt') return duzeltSet(i);
+  if (choice === 'mesafe') return mesafeDuzelt(i);
   if (choice !== 'sifirla' || !state.session || zst().phase === 'swim') return;
   state.session.events = zaman.withoutSet(ev(), i);
   state.zst = null;
@@ -2804,6 +2839,7 @@ function detailActions(i) {
   const why = zst().phase === 'swim' ? 'Yüzerken düzenlenemez' : !r.canEdit ? 'Biten set düzenlenemez' : !r.canDelete ? 'Başlanan set silinemez' : '';
   const b = (act, icon, label, on, cls = '') => `<button class="dt-act ${cls}" data-dact="${act}"${on ? '' : ' disabled'}><i>${icon}</i>${label}</button>`;
   return `<div class="dt-acts">${b('edit', '✎', 'Düzenle', r.canEdit)}${b('add', '＋', 'Sonrasına ekle', r.canInsert)}${b('del', '🗑', 'Sil', r.canDelete, 'del')}</div>
+    <button class="dt-act dt-mz" data-dact="mesafe"><i>📏</i>Mesafeyi düzelt (yüzülen ${fmtNum(Number(state.plan.setler[i].mesafe) || 0)} m)</button>
     ${why ? `<p class="dt-why">${why}</p>` : ''}`;
 }
 
@@ -2816,6 +2852,7 @@ function onDetailClick(e) {
   if (btn.dataset.dact === 'edit') openSetEdit('edit', i);
   else if (btn.dataset.dact === 'add') openSetEdit('add', i);
   else if (btn.dataset.dact === 'del') deleteSet(i);
+  else if (btn.dataset.dact === 'mesafe') mesafeDuzelt(i);
 }
 
 function closeDetail() {
@@ -3425,7 +3462,7 @@ function renderOzet() {
     }).join('');
     const ls = lines.map((l) => `<button class="oz-line" data-set="${k}" data-line="${l.id}"><i class="cb${l.on ? ' on' : ''}">${l.on ? '✓' : ''}</i><span>${esc(l.text)}</span></button>`).join('');
     const x = ozetEk(i, eff);
-    blocks.push(`<div class="oz-set"><div class="oz-st"><b>${esc(title)}</b><span class="n">ort. ${eff.avgMs ? fmtAvg(eff.avgMs) : '—'}</span></div>${x}${ls}${susHtml}</div>`);
+    blocks.push(`<div class="oz-set"><div class="oz-st"><b>${esc(title)}</b><span class="n">ort. ${eff.avgMs ? fmtAvg(eff.avgMs) : '—'}</span></div>${x}${ls}${susHtml}</div><button class="oz-mz" data-mz-set="${i}">📏 Mesafe ${fmtNum(Number(s.mesafe) || 0)} m · düzelt</button>`);
   });
   $('oz-analiz').innerHTML = ozetAnaliz();
   paint($('oz-analiz'));
@@ -3458,6 +3495,8 @@ function onOzetClick(e) {
     persist();
     return renderOzet();
   }
+  const mz = e.target.closest('button.oz-mz');
+  if (mz) return mesafeDuzelt(Number(mz.dataset.mzSet));
   const sus = e.target.closest('button.oz-sus');
   if (sus) return openEdit(Number(sus.dataset.set), Number(sus.dataset.rep));
   if (e.target.closest('#oz-rpe-box')) return openRpe();
@@ -4369,8 +4408,8 @@ function slPlusSet() {
 
 let hdb = null; // hareketdb.js (yalnızca kart açılınca yüklenir)
 let adb = null; // adimlar.js (Türkçe adımlar, yalnızca kart açılınca)
-const adimYukle = () => adb || (adb = import('./adimlar.js?v=13.6.0').then((m) => m.ADIMLAR).catch(() => ({})));
-const hdbYukle = () => hdb || (hdb = import('./hareketdb.js?v=13.6.0'));
+const adimYukle = () => adb || (adb = import('./adimlar.js?v=13.7.0').then((m) => m.ADIMLAR).catch(() => ({})));
+const hdbYukle = () => hdb || (hdb = import('./hareketdb.js?v=13.7.0'));
 let bilgiTimer = null;
 
 /** Hareketin videosu (H · Video önce, sonra uygulamadaki liste) ya da null. */

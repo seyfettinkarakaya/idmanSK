@@ -1,6 +1,6 @@
 // Sürüm 13 — yüzme + salon tek model: haftalık planlayıcı, ortak yük hedefi, sağlık bütçeleri, ortak periyot, ölçüm.
 // Saf işlevler (DOM yok). Dayanak: kisit.js (Perthes sağ kalça, sağ omuz, sağ diz, MSI, haftada 3 gün, süre bütçeleri).
-import { gunEkle, cakisma } from './yuk.js?v=13.6.0';
+import { gunEkle, cakisma } from './yuk.js?v=13.7.0';
 
 const GUN = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
 const haftaGunu = (t) => { const [y, m, d] = t.split('-').map(Number); return new Date(Date.UTC(y, m - 1, d)).getUTCDay(); };

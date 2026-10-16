@@ -370,6 +370,12 @@ Hata kodları: `AUTH`, `LOCKED`, `DUPLICATE`, `NOT_FOUND`, `PLAN_MISMATCH`,
 3. Telefonda yeni yerel anahtarlar: `ysk.hazir` (hazır olma kontrolleri, 60 gün), `ysk.hareketNot` (harekete sabit not);
    ayarlar: `yer` (Salon/Ev/Otel), `bildirim`. Ayarlar → Yedek indir: anahtarlar hariç JSON.
 
+## Sürüm 13.7'de neler var (dağıtım gerekmez)
+
+- **Mesafeyi düzelt:** set yüzülürken (karta dokun → ayrıntı paneli), bitince (biten sete dokun) ya da özette
+  setin yüzülen mesafesi değiştirilebilir (± havuz boyu, ±100). Yapılan tekrarlar yeni mesafeyle sayılır (tempo,
+  toplam); tabloya Mesafe yeni değerle, Not'a "Plan: 1×1500 → 1×1600" yazılır. Dokunuşlar ve süreler değişmez.
+
 ## Sürüm 13.6'da neler var (dağıtım gerekmez)
 
 - **Hareket değiştir (P3):** idmanda "Değiştir" listesinin üstünde aynı ana kas grubundan, kısıta ve yerdeki

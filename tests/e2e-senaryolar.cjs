@@ -797,6 +797,39 @@ sc('Seti sıfırla: SET TAMAM\'a dokununca onay; set silinir, yeniden yapılır;
   assert.match(notes[1], /1\/4 tekrar yapıldı/);
 });
 
+sc('13.7 Mesafe düzelt: yüzerken ayrıntı panelinden, bitince sete dokunarak, özette; tempo ve toplam yeni mesafeyle; tabloya Mesafe + plan farkı notu', async ({ launch }) => {
+  const s = await launch(); const p = s.page;
+  await s.openToday();
+  await s.tap(120);                                             // 1×200 yüzülüyor
+  await p.click('#wheel .w-item.is-active .w-card'); await p.waitForSelector('#detail:not([hidden])');
+  assert.match(await p.textContent('#detail'), /Mesafeyi düzelt \(yüzülen 200 m\)/);
+  await p.click('#detail [data-dact="mesafe"]'); await s.waitModal('mesafe');
+  await p.click('#modal-body [data-mz="100"]');
+  assert.match(await p.textContent('#modal-body'), /Plan 200 m → 300 m/);
+  await s.modalClick('Kaydet');
+  assert.strictEqual((await s.session()).setler[0].mesafe, 300);
+  assert.strictEqual(await s.label(), 'DUR', 'yüzme sürer');
+  await s.tap(120);                                             // set biter (4:00)
+  await p.waitForTimeout(700);
+  assert.strictEqual((await p.textContent('#prog-dist')).replace(/\s/g, '').split('/')[0], '300');
+  // Bitince: sete dokun → Mesafeyi düzelt → −25 (havuz boyu adımı)
+  await s.goTo(0); await s.press(); await s.waitModal('Bu seti sıfırla?');
+  await s.modalClick('Mesafeyi düzelt'); await s.waitModal('mesafe');
+  await p.click('#modal-body [data-mz="-25"]'); await s.modalClick('Kaydet');
+  assert.strictEqual((await s.session()).setler[0].mesafe, 275);
+  await s.finishToOzet();
+  assert.match(await p.textContent('.oz-mz'), /Mesafe 275 m · düzelt/);
+  await p.click('.oz-mz'); await s.waitModal('mesafe');
+  await p.click('#modal-body [data-mz="25"]'); await s.modalClick('Kaydet');
+  await p.waitForFunction(() => /Mesafe 300 m/.test(document.querySelector('.oz-mz').textContent));
+  assert.strictEqual((await p.textContent('#oz-mesafe')).replace(/\D/g, ''), '300');
+  await p.click('#oz-save'); await s.waitScreen('done');
+  const E = s.env.sheets.eski.data;
+  const row = E[1];
+  assert.strictEqual(row[col('Mesafe')], 300);
+  assert.match(row[col('Not')], /Plan: 1×200 → 1×300/);
+});
+
 sc('Set kartı: stil · tür hazır kartta başlığın altında, boşluksuz; kartın alt satırı kesilmez (320–430 px)', async ({ launch }) => {
   const rows = [
     prow(T23, 1, 'WU', 1, 200, 'Swim', '04:45', '00:30'),

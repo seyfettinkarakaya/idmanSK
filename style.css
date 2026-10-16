@@ -1888,3 +1888,11 @@ b.tur, .tur { color: #F97316; }
 @keyframes onayCiz { from { stroke-dashoffset: 40; } to { stroke-dashoffset: 0; } }
 #setup-save { margin-top: 14px; }
 :root[data-theme="light"] .hw-today small { color: #A16207; }
+
+/* 13.7: mesafe düzeltme */
+.mz-r { display: flex; align-items: center; gap: 6px; margin: 10px 0; }
+.mz-r button { flex: none; min-width: 52px; height: 48px; border-radius: 12px; border: 1px solid var(--n4); background: var(--n2); color: var(--text); font-weight: 800; font-size: 15px; }
+.mz-r b { flex: 1; text-align: center; font-family: var(--num); font-size: 34px; }
+.mz-r b small { font-size: 16px; color: var(--muted); }
+.dt-mz { width: 100%; margin-top: 8px; flex-direction: row; justify-content: center; gap: 8px; }
+.oz-mz { display: block; margin: -4px 0 10px; padding: 6px 10px; border-radius: 10px; border: 1px solid var(--n4); background: var(--n2); color: var(--s1); font-size: 13px; font-weight: 700; }

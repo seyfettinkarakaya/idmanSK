@@ -697,6 +697,7 @@ Sürüm 8 görünümü korunuyor; v10/v11 önerileri beğenilmedi, görsel yenil
 
 ## Tamamlanan
 
+- [x] Sürüm 13.7.0 (16.10): yüzme setinin mesafesini set anında / sonunda / özette düzeltme (kullanıcı: 1500 yerine 1600 yüzdüm).
 - [x] Sürüm 13.4.0 (dağıtım: idman.gs yeni sürüm + idmanKutuphane.gs yeni betik):
   - idman sayfa adları yuzme… / kara… (eski adlar yedek); karaSeans (Tarih, Süre, RPE, MSI, Yer, Açıklama) yazımı,
     kara özetinde "İdmanın geneli" adımı; yük karaSeans'tan.
