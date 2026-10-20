@@ -1,25 +1,25 @@
 // idmanSK — arayüz. Veriye yalnızca data.js üzerinden erişir.
 
-import * as data from './data.js?v=13.7.0';
-import { Wheel } from './wheel.js?v=13.7.0';
-import * as zaman from './zaman.js?v=13.7.0';
-import * as ref from './ref.js?v=13.7.0';
-import * as duzen from './duzen.js?v=13.7.0';
-import * as salon from './salon.js?v=13.7.0';
-import * as grup from './grup.js?v=13.7.0';
-import * as kisit from './kisit.js?v=13.7.0';
-import * as yuk from './yuk.js?v=13.7.0';
-import * as harita from './harita.js?v=13.7.0';
-import * as bilgi from './bilgi.js?v=13.7.0';
-import * as analiz from './analiz.js?v=13.7.0';
-import * as video from './video.js?v=13.7.0';
-import * as hazir from './hazir.js?v=13.7.0';
-import { VIDEOLAR } from './videolar.js?v=13.7.0';
-import * as model from './model.js?v=13.7.0';
-import * as gosterge from './gosterge.js?v=13.7.0';
+import * as data from './data.js?v=13.8.0';
+import { Wheel } from './wheel.js?v=13.8.0';
+import * as zaman from './zaman.js?v=13.8.0';
+import * as ref from './ref.js?v=13.8.0';
+import * as duzen from './duzen.js?v=13.8.0';
+import * as salon from './salon.js?v=13.8.0';
+import * as grup from './grup.js?v=13.8.0';
+import * as kisit from './kisit.js?v=13.8.0';
+import * as yuk from './yuk.js?v=13.8.0';
+import * as harita from './harita.js?v=13.8.0';
+import * as bilgi from './bilgi.js?v=13.8.0';
+import * as analiz from './analiz.js?v=13.8.0';
+import * as video from './video.js?v=13.8.0';
+import * as hazir from './hazir.js?v=13.8.0';
+import { VIDEOLAR } from './videolar.js?v=13.8.0';
+import * as model from './model.js?v=13.8.0';
+import * as gosterge from './gosterge.js?v=13.8.0';
 
 // Telefonun güncel kodu çalıştırıp çalıştırmadığını görmek için ekranda gösterilir.
-export const APP_VERSION = '13.7.0';
+export const APP_VERSION = '13.8.0';
 
 const $ = (id) => document.getElementById(id);
 
@@ -2623,6 +2623,31 @@ async function mesafeDuzelt(i) {
   toast(`Mesafe düzeltildi: ${fmtNum(eski)} → ${fmtNum(m)} m`, 2000);
 }
 
+/** 13.8: setin etiketini yazar / değiştirir (yüzerken ve biten sette de); yuzmeVeri Etiket sütununa gider. */
+async function etiketDuzelt(i) {
+  const s = state.plan && state.plan.setler[i];
+  if (!s) return;
+  const el = document.createElement('div');
+  el.innerHTML = `<label class="es-blk"><span class="es-l">ETİKET</span><input id="etk-in" type="text" maxlength="60" autocomplete="off" placeholder="ör. Aerobik Taban -1"></label>`;
+  el.querySelector('#etk-in').value = s.etiket || '';
+  const p = modal({ title: `${setTitle(s)} · etiket`, body: el, actions: [{ label: 'Kaydet', value: true, cls: 'btn-primary' }, { label: 'Vazgeç', value: false }] });
+  const inp = el.querySelector('#etk-in');
+  let v = inp.value;
+  inp.addEventListener('input', () => { v = inp.value; });
+  if (!(await p) || !state.session) return;
+  v = String(v || '').trim().slice(0, 60);
+  if (v === (s.etiket || '')) return;
+  const base = keyedPlan();
+  base.setler[i] = { ...base.setler[i], etiket: v };
+  state.session.setler = base.setler;
+  state.plan = { ...state.plan, setler: base.setler };
+  state.zst = null;
+  persist();
+  if (state.screen === 'ozet') renderOzet();
+  else { refreshAllItems(); updateProgram(); }
+  toast(v ? `Etiket: ${v}` : 'Etiket silindi', 1800);
+}
+
 /** Tamamlanan seti sıfırlar: o setin YÜZ/DUR olayları silinir, set yeniden yapılabilir. */
 async function askResetSet(i) {
   const set = state.plan.setler[i];
@@ -2633,12 +2658,14 @@ async function askResetSet(i) {
     actions: [
       ...(zaman.repTimes(st, i).length ? [{ label: 'Tekrar sürelerini düzelt', value: 'duzelt', cls: 'btn-primary' }] : []),
       { label: 'Mesafeyi düzelt', value: 'mesafe' },
+      { label: 'Etiketi yaz', value: 'etiket' },
       { label: 'Seti sıfırla', value: 'sifirla' },
       { label: 'Vazgeç', value: '' },
     ],
   });
   if (choice === 'duzelt') return duzeltSet(i);
   if (choice === 'mesafe') return mesafeDuzelt(i);
+  if (choice === 'etiket') return etiketDuzelt(i);
   if (choice !== 'sifirla' || !state.session || zst().phase === 'swim') return;
   state.session.events = zaman.withoutSet(ev(), i);
   state.zst = null;
@@ -2820,6 +2847,7 @@ function openDetail(i) {
     <div class="dt-tag">${esc(blok)}${b.ad ? ` · ${esc(b.ad.toLocaleUpperCase('tr'))}` : ''} · ${i + 1}/${state.plan.setler.length}</div>
     <div class="dt-title">${esc(`${tekrarOf(s)} × ${s.mesafe}`)}</div>
     ${styleTur ? `<div class="dt-sub">${esc(styleTur)}</div>` : ''}
+    ${s.etiket ? `<p class="dt-etiket">🏷 ${esc(s.etiket)}</p>` : ''}
     ${s.aciklama ? `<p class="dt-desc">${esc(s.aciklama)}</p>` : ''}
     <div class="dt-tiles">${s.hedef ? `<div><small>HEDEF</small><b>${esc(short(s.hedef))}</b></div>` : ''}${s.dinlen ? `<div><small>DİNLEN</small><b>${esc(short(s.dinlen))}</b></div>` : ''}</div>
     ${pace}
@@ -2840,6 +2868,7 @@ function detailActions(i) {
   const b = (act, icon, label, on, cls = '') => `<button class="dt-act ${cls}" data-dact="${act}"${on ? '' : ' disabled'}><i>${icon}</i>${label}</button>`;
   return `<div class="dt-acts">${b('edit', '✎', 'Düzenle', r.canEdit)}${b('add', '＋', 'Sonrasına ekle', r.canInsert)}${b('del', '🗑', 'Sil', r.canDelete, 'del')}</div>
     <button class="dt-act dt-mz" data-dact="mesafe"><i>📏</i>Mesafeyi düzelt (yüzülen ${fmtNum(Number(state.plan.setler[i].mesafe) || 0)} m)</button>
+    <button class="dt-act dt-mz" data-dact="etiket"><i>🏷</i>${state.plan.setler[i].etiket ? 'Etiketi değiştir' : 'Etiket yaz'}</button>
     ${why ? `<p class="dt-why">${why}</p>` : ''}`;
 }
 
@@ -2853,6 +2882,7 @@ function onDetailClick(e) {
   else if (btn.dataset.dact === 'add') openSetEdit('add', i);
   else if (btn.dataset.dact === 'del') deleteSet(i);
   else if (btn.dataset.dact === 'mesafe') mesafeDuzelt(i);
+  else if (btn.dataset.dact === 'etiket') etiketDuzelt(i);
 }
 
 function closeDetail() {
@@ -2892,6 +2922,7 @@ function openSetEdit(mode, i) {
   d.mesafe = Number(src.mesafe) || 0;
   state.eset = { mode, i, d, r, orig: { ...d } };
   $('eset-desc').value = d.aciklama;
+  $('eset-etiket').value = d.etiket || '';
   renderSetEdit();
   $('eset').hidden = false;
 }
@@ -2986,7 +3017,7 @@ async function saveSetEdit() {
   const E = state.eset;
   if (!E || !state.session) return;
   if (zst().phase === 'swim') { closeSetEdit(); return toast('Yüzerken düzenlenemez'); }
-  const d = { ...E.d, aciklama: $('eset-desc').value.trim() };
+  const d = { ...E.d, aciklama: $('eset-desc').value.trim(), etiket: $('eset-etiket').value.trim() };
   const base = keyedPlan();
   if (E.mode === 'add') {
     const ns = duzen.newSet(d);
@@ -3456,13 +3487,14 @@ function renderOzet() {
     if (!st.per[i].reps.length) return;
     const { k, lines, eff, sus } = setNotes(i);
     const title = `${setTitle(s)} ${s.tur || ''}`.trim();
+    const etk = s.etiket ? `<p class="oz-etiket">🏷 ${esc(s.etiket)}</p>` : '';
     const susHtml = sus.map((r) => {
       const x = eff.all[r];
       return `<button class="oz-sus" data-set="${i}" data-rep="${r}">⚠ ${r + 1}. tekrar ${fmtShort(x.ms)}${x.edited ? ' (düzeltildi)' : x.dropped ? ' (çıkarıldı)' : ''} — düzelt</button>`;
     }).join('');
     const ls = lines.map((l) => `<button class="oz-line" data-set="${k}" data-line="${l.id}"><i class="cb${l.on ? ' on' : ''}">${l.on ? '✓' : ''}</i><span>${esc(l.text)}</span></button>`).join('');
     const x = ozetEk(i, eff);
-    blocks.push(`<div class="oz-set"><div class="oz-st"><b>${esc(title)}</b><span class="n">ort. ${eff.avgMs ? fmtAvg(eff.avgMs) : '—'}</span></div>${x}${ls}${susHtml}</div><button class="oz-mz" data-mz-set="${i}">📏 Mesafe ${fmtNum(Number(s.mesafe) || 0)} m · düzelt</button>`);
+    blocks.push(`<div class="oz-set"><div class="oz-st"><b>${esc(title)}</b><span class="n">ort. ${eff.avgMs ? fmtAvg(eff.avgMs) : '—'}</span></div>${etk}${x}${ls}${susHtml}</div><button class="oz-mz" data-mz-set="${i}">📏 Mesafe ${fmtNum(Number(s.mesafe) || 0)} m · düzelt</button>`);
   });
   $('oz-analiz').innerHTML = ozetAnaliz();
   paint($('oz-analiz'));
@@ -3611,7 +3643,7 @@ function keepInHistory(payload, status) {
       const p = payload.setler[i] || {}; // aynı sırayla üretilir (idmanda eklenen setlerin sırası yok)
       return {
         sira: set.sira, blok: set.blok, tekrar: set.tekrar, mesafe: set.mesafe, stil: set.stil, tur: set.tur,
-        aciklama: set.aciklama, hedef: set.hedef, dinlen: set.dinlen, alet: set.alet,
+        aciklama: set.aciklama, hedef: set.hedef, dinlen: set.dinlen, alet: set.alet, etiket: set.etiket || '',
         tamamlandi: Boolean(p.tamamlandi), gercek: p.gercek || '', not: p.not || '', kulac: p.kulac || '', nabiz: p.nabiz || '',
         yapilan: zaman.doneReps(st, i),
       };
@@ -4408,8 +4440,8 @@ function slPlusSet() {
 
 let hdb = null; // hareketdb.js (yalnızca kart açılınca yüklenir)
 let adb = null; // adimlar.js (Türkçe adımlar, yalnızca kart açılınca)
-const adimYukle = () => adb || (adb = import('./adimlar.js?v=13.7.0').then((m) => m.ADIMLAR).catch(() => ({})));
-const hdbYukle = () => hdb || (hdb = import('./hareketdb.js?v=13.7.0'));
+const adimYukle = () => adb || (adb = import('./adimlar.js?v=13.8.0').then((m) => m.ADIMLAR).catch(() => ({})));
+const hdbYukle = () => hdb || (hdb = import('./hareketdb.js?v=13.8.0'));
 let bilgiTimer = null;
 
 /** Hareketin videosu (H · Video önce, sonra uygulamadaki liste) ya da null. */
@@ -5663,6 +5695,7 @@ function wire() {
   $('detail').addEventListener('click', onDetailClick);
   $('eset').addEventListener('click', onSetEditClick);
   $('eset-desc').addEventListener('input', (e) => { if (state.eset) state.eset.d.aciklama = e.target.value; });
+  $('eset-etiket').addEventListener('input', (e) => { if (state.eset) state.eset.d.etiket = e.target.value; });
   $('btn-sound').addEventListener('click', onSoundButton);
 
   $('rpe-back').addEventListener('click', backToWorkout);

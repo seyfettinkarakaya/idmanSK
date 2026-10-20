@@ -48,7 +48,8 @@ var COL = {
   nabiz: 'Nabız',
   rpe: 'RPE',
   msi: 'MSI',
-  not: 'Not'
+  not: 'Not',
+  etiket: 'Etiket' // 13.8: isteğe bağlı; plandan gelir, idmanda değişebilir, yuzmeVeri'ye yazılır
 };
 
 // seans sütun başlıkları.
@@ -82,7 +83,8 @@ var PLAN_EDIT_FIELDS = {
   aciklama: 'text',
   hedef: 'duration',
   dinlen: 'duration',
-  alet: 'text'
+  alet: 'text',
+  etiket: 'text' // 13.8
 };
 
 // eski sayfasında boş bırakılan sütunlar: tablo bunları kendi formülleriyle doldurur.
@@ -220,7 +222,8 @@ function planColumns_(plan, siraRequired) {
     aciklama: col_(plan, COL.aciklama, false),
     hedef: col_(plan, COL.hedef, false),
     dinlen: col_(plan, COL.dinlen, false),
-    alet: col_(plan, COL.alet, false)
+    alet: col_(plan, COL.alet, false),
+    etiket: col_(plan, COL.etiket, false)
   };
 }
 
@@ -228,7 +231,7 @@ function planColumns_(plan, siraRequired) {
 function planSet_(plan, c, i) {
   var row = plan.values[i];
   var disp = plan.display[i];
-  return {
+  var set = {
     _satir: i,
     sira: toNumber_(cell_(row, c.sira)),
     blok: text_(disp, c.blok),
@@ -241,6 +244,8 @@ function planSet_(plan, c, i) {
     dinlen: durationText_(cell_(disp, c.dinlen)),
     alet: text_(disp, c.alet)
   };
+  if (c.etiket >= 0) set.etiket = text_(disp, c.etiket); // sütun yoksa alan da yok (eski tablolar aynı)
+  return set;
 }
 
 // ---------------------------------------------------------------------------

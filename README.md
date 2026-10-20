@@ -54,7 +54,7 @@ dosyasından okunur.
 Üç Google tablosu kullanılır; başlıklar **1. satırda**. Eski sayfa adları (havuz…, salon…) da tanınır.
 
 **idman** — giriş verileri (yüzme + kara idmanı):
-- **yuzmePlan** (eski havuzPlan): `Tarih, Sıra, Blok, Tekrar, Mesafe, Stil, Tür, Açıklama, Hedef, Dinlen, Alet, Gerçek, Kulaç, Nabız, RPE, MSI, Not`
+- **yuzmePlan** (eski havuzPlan): `Tarih, Sıra, Blok, Tekrar, Mesafe, Stil, Tür, Açıklama, Hedef, Dinlen, Alet, Gerçek, Kulaç, Nabız, RPE, MSI, Not`, isteğe bağlı `Etiket` (13.8)
   (yanında Yığımlı Mesafe, Hedef Zone gibi türetilmiş sütunlar olabilir; uygulama onları okumaz, yazmaz.)
 - **yuzmeVeri** (eski havuzVeri): yuzmePlan'daki 17 başlık; tablonun kendi hesapladığı sütunlar (Set Mesafe, Set Süre,
   Hafta …) olabilir — betik bunlara değer yazmaz, üstteki satırda formül varsa yeni satırlara kopyalar.
@@ -369,6 +369,12 @@ Hata kodları: `AUTH`, `LOCKED`, `DUPLICATE`, `NOT_FOUND`, `PLAN_MISMATCH`,
    `frame-src https://www.youtube-nocookie.com` eklendi. İnternet yokken fotoğraf ve adımlar gösterilir.
 3. Telefonda yeni yerel anahtarlar: `ysk.hazir` (hazır olma kontrolleri, 60 gün), `ysk.hareketNot` (harekete sabit not);
    ayarlar: `yer` (Salon/Ev/Otel), `bildirim`. Ayarlar → Yedek indir: anahtarlar hariç JSON.
+
+## Sürüm 13.8'de neler var (dağıtım: idman.gs yeni sürüm)
+
+- **Etiket:** yuzmePlan / yuzmeVeri'de isteğe bağlı **Etiket** sütunu. Plandan okunur; ayrıntı panelinde ve özette
+  "🏷" ile görünür; idmanda Düzenle'den ya da (yüzerken / biten sette) "Etiket yaz" ile değiştirilir; yuzmeVeri'nin
+  Etiket sütununa yazılır (yalnız etiket değişince Not'a plan farkı yazılmaz). Sütun yoksa hiçbir şey değişmez.
 
 ## Sürüm 13.7'de neler var (dağıtım gerekmez)
 

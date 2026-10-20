@@ -6,7 +6,7 @@
 // Olaylar set indeksini taşıdığı için ekleme/silmede indeksler kaydırılır.
 
 /** Düzenlenebilir alanlar (tabloya yazılan plan sütunları). */
-export const FIELDS = ['blok', 'tekrar', 'mesafe', 'stil', 'tur', 'aciklama', 'hedef', 'dinlen', 'alet'];
+export const FIELDS = ['blok', 'tekrar', 'mesafe', 'stil', 'tur', 'aciklama', 'hedef', 'dinlen', 'alet', 'etiket']; // 13.8: etiket (kendi sütununa yazılır, nota girmez)
 
 const pick = (s) => Object.fromEntries(FIELDS.map((f) => [f, s[f] == null ? '' : s[f]]));
 
@@ -74,7 +74,7 @@ export function planNote(set) {
     if (f in c) parts.push(`${label[f]} ${short(o[f])} → ${short(set[f])}`);
   }
   if ('aciklama' in c) parts.push('açıklama değişti');
-  return `Plan: ${parts.join(', ')}`;
+  return parts.length ? `Plan: ${parts.join(', ')}` : ''; // yalnız etiket değiştiyse not yok
 }
 
 /** Tabloya giden set: özgün setlerde değişen alanlar, eklenen setlerde tüm alanlar. */

@@ -1,7 +1,7 @@
 // Uçtan uca senaryolar: her biri temiz tarayıcı bağlamında, sahte Apps Script ile.
 //   NODE_PATH=$(npm root -g) node tests/e2e-senaryolar.cjs [filtre]
 const assert = require('assert');
-const { runScenarios, prow, D, REF_API, SALON_API, KUT_API, sampleSalon } = require('./harness.cjs');
+const { runScenarios, prow, D, REF_API, SALON_API, KUT_API, sampleSalon, PLAN_H: HP, ESKI_H: HE } = require('./harness.cjs');
 const { Sheet } = require('./fakegas.cjs');
 
 const T23 = '2026-09-23';
@@ -795,6 +795,35 @@ sc('Seti sıfırla: SET TAMAM\'a dokununca onay; set silinir, yeniden yapılır;
   const notes = await p.$$eval('.oz-set', (e) => e.map((x) => x.innerText.replace(/\s+/g, ' ')));
   assert.match(notes[0], /ort\. 3:50/);
   assert.match(notes[1], /1\/4 tekrar yapıldı/);
+});
+
+sc('13.8 Etiket: plandan gelir (ayrıntı paneli, özet), idmanda Düzenle ile değişir; yuzmeVeri Etiket sütununa yazılır, Not\'a plan farkı girmez', async ({ launch }) => {
+  const rows = [[...prow(T23, 1, 'WU', 1, 100, 'Swim', '02:00', '00:20'), 'Isınma'], [...prow(T23, 2, 'MS', 1, 100, 'Swim', '01:40', ''), 'Aerobik Taban -1']];
+  const s = await launch({ rows, planH: [...HP, 'Etiket'], eskiH: [...HE, 'Etiket'] }); const p = s.page;
+  await s.openToday();
+  await p.click('#wheel .w-item.is-active .w-card'); await p.waitForSelector('#detail:not([hidden])');
+  assert.match(await p.textContent('#detail'), /🏷 Isınma/);
+  await p.click('#detail [data-dact="edit"]'); await p.waitForSelector('#eset:not([hidden])');
+  assert.strictEqual(await p.inputValue('#eset-etiket'), 'Isınma');
+  await p.fill('#eset-etiket', 'Isınma kolay');
+  await p.click('#eset-save');
+  await p.waitForFunction(() => document.getElementById('eset').hidden);
+  assert.strictEqual((await s.session()).setler[0].etiket, 'Isınma kolay');
+  await s.tap(120); await s.tap(20);                            // 1. set
+  await p.waitForTimeout(700);
+  await s.tap(50);                                              // 2. set yüzülüyor: Düzenle kapalı, etiket yazılabilir
+  await p.click('#wheel .w-item.is-active .w-card'); await p.waitForSelector('#detail:not([hidden])');
+  await p.click('#detail [data-dact="etiket"]'); await s.waitModal('etiket');
+  await p.fill('#etk-in', 'Aerobik Taban -1 (hızlı)'); await s.modalClick('Kaydet');
+  await s.adv(50); await s.press();                             // 2. set biter (son set → idman biter)
+  await s.waitScreen('rpe'); await p.click('#rpe-grid button[data-v="7"]');
+  await s.waitScreen('msi'); await p.click('#msi-none'); await s.waitScreen('ozet');
+  assert.deepStrictEqual(await p.$$eval('.oz-etiket', (e) => e.map((x) => x.textContent)), ['🏷 Isınma kolay', '🏷 Aerobik Taban -1 (hızlı)']);
+  await p.click('#oz-save'); await s.waitScreen('done');
+  const E = s.env.sheets.eski.data;
+  const ci = E[0].indexOf('Etiket');
+  assert.deepStrictEqual(E.slice(1, 3).map((x) => x[ci]), ['Isınma kolay', 'Aerobik Taban -1 (hızlı)']);
+  assert.doesNotMatch(E[1][col('Not')], /Plan:/, 'yalnız etiket değişince not yok');
 });
 
 sc('13.7 Mesafe düzelt: yüzerken ayrıntı panelinden, bitince sete dokunarak, özette; tempo ve toplam yeni mesafeyle; tabloya Mesafe + plan farkı notu', async ({ launch }) => {

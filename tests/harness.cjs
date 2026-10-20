@@ -94,7 +94,7 @@ async function launch(opts = {}) {
   // 13.2: iki betik — idman.gs (yüzme + salon girişleri: havuzPlan/havuzVeri/havuzSeans, salonVeri/salonPlan) ve
   // idmanRef.gs (bölgeler, CSS, … + salonHar/salonHKEtki/bilgi BW). Test kurguları eski sayfa adlarıyla yazılır (fakegas ALIAS).
   const salonSheets = opts.salonSheets || (opts.salon ? sampleSalon() : null);
-  const giris = { Plan: new Sheet('Plan', PLAN_H, opts.rows || samplePlan()), eski: new Sheet('eski', ESKI_H), seans: new Sheet('seans', SEANS_H) };
+  const giris = { Plan: new Sheet('Plan', opts.planH || PLAN_H, opts.rows || samplePlan()), eski: new Sheet('eski', opts.eskiH || ESKI_H), seans: new Sheet('seans', SEANS_H) }; // 13.8: planH / eskiH (ör. Etiket sütunu)
   const refSheets = { ...(opts.refSheets || sampleRef()) };
   if (salonSheets) {
     giris.idman = salonSheets.idman;
@@ -261,4 +261,4 @@ async function runScenarios(title, scenarios, port) {
   if (failed) process.exit(1);
 }
 
-module.exports = { launch, runScenarios, prow, samplePlan, sampleRef, sampleSalon, API, REF_API, SALON_API, KUT_API, D };
+module.exports = { PLAN_H, ESKI_H, launch, runScenarios, prow, samplePlan, sampleRef, sampleSalon, API, REF_API, SALON_API, KUT_API, D };

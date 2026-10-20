@@ -196,4 +196,26 @@ test('13.2.1: havuzSeans sayfası yoksa setler havuzVeri\'ye yazılır, plan sil
   assert.strictEqual(e.call(fin('2026-09-29', [])).error, 'DUPLICATE');
 });
 
+test('13.8 Etiket: plandan okunur (sütun yoksa alan yok), değişmeyen sette plandan kopyalanır, idmanda değişen/eklenen sette yazılır', () => {
+  const HE = [...H, 'Etiket'];
+  const rowE = (t, s, b, tk, m, et) => [...row(t, s, b, tk, m), et];
+  const e = makeEnv({
+    Plan: new Sheet('Plan', HE, [rowE('2026-10-13', 1, 'MS', 5, 200, 'Aerobik Taban -1'), rowE('2026-10-13', 2, 'MS', 1, 200, 'Aerobik Taban -2'), rowE('2026-10-13', 3, 'CD', 1, 200, '')]),
+    eski: new Sheet('eski', [...ESKI_H, 'Etiket']),
+    seans: new Sheet('seans', SEANS_H),
+  });
+  const g = e.call({ action: 'getPlan', tarih: '2026-10-13' }).data.setler;
+  assert.deepStrictEqual(g.map((x) => x.etiket), ['Aerobik Taban -1', 'Aerobik Taban -2', '']);
+  assert.ok(!('etiket' in env([row('2026-10-13', 1, 'WU', 1, 100)]).call({ action: 'getPlan', tarih: '2026-10-13' }).data.setler[0]), 'eski tablo: alan yok');
+  const r = e.call(fin('2026-10-13', [
+    { sira: 1, tamamlandi: true, gercek: '04:28.0' },
+    { sira: 2, tamamlandi: true, gercek: '04:17.0', plan: { etiket: 'Eşik' } },
+    { sira: null, eklendi: true, tamamlandi: true, gercek: '01:00.0', plan: { blok: 'AS', tekrar: 1, mesafe: 50, stil: 'FR', tur: 'Swim', aciklama: '', hedef: '01:00', dinlen: '', alet: '', etiket: 'Bonus' } },
+  ]));
+  assert.ok(r.ok, JSON.stringify(r));
+  const E = e.sheets.eski.data;
+  const ci = E[0].indexOf('Etiket');
+  assert.deepStrictEqual(E.slice(1, 4).map((x) => x[ci]), ['Aerobik Taban -1', 'Eşik', 'Bonus']);
+});
+
 console.log(`idman.gs uç durum testleri: TAMAM (${n} senaryo)`);

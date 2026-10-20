@@ -697,6 +697,7 @@ Sürüm 8 görünümü korunuyor; v10/v11 önerileri beğenilmedi, görsel yenil
 
 ## Tamamlanan
 
+- [x] Sürüm 13.8.0 (20.10): Etiket sütunu — plandan okunur, idmanda değiştirilebilir (Düzenle / Etiket yaz), yuzmeVeri'ye yazılır. idman.gs dağıtımı gerekir.
 - [x] Sürüm 13.7.0 (16.10): yüzme setinin mesafesini set anında / sonunda / özette düzeltme (kullanıcı: 1500 yerine 1600 yüzdüm).
 - [x] Sürüm 13.4.0 (dağıtım: idman.gs yeni sürüm + idmanKutuphane.gs yeni betik):
   - idman sayfa adları yuzme… / kara… (eski adlar yedek); karaSeans (Tarih, Süre, RPE, MSI, Yer, Açıklama) yazımı,

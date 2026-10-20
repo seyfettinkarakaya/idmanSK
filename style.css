@@ -1161,7 +1161,7 @@ button {
 .es-chips { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 8px; }
 .es-chips button { min-height: 44px; padding: 8px 14px; border-radius: 999px; border: 1.5px solid var(--n5); background: transparent; color: var(--m3); font-size: 16px; font-weight: 800; }
 .es-chips button.is-on { border-color: var(--c, var(--accent)); color: var(--c, var(--accent)); background: rgba(255, 255, 255, 0.06); }
-.es-blk textarea { width: 100%; margin-top: 8px; padding: 12px; border-radius: 14px; border: 1px solid var(--n5); background: var(--n2); color: var(--text); font: inherit; font-size: 18px; resize: vertical; }
+.es-blk textarea, .es-blk input[type="text"] { width: 100%; margin-top: 8px; padding: 12px; border-radius: 14px; border: 1px solid var(--n5); background: var(--n2); color: var(--text); font: inherit; font-size: 18px; resize: vertical; }
 .es-warn { margin-top: 14px; padding: 10px 12px; border-radius: 14px; background: rgba(255, 176, 32, 0.12); color: #FFB020; font-size: 16px; font-weight: 700; }
 .es-foot { display: grid; grid-template-columns: 1fr 1.6fr; gap: 10px; padding: 10px 16px calc(var(--safe-b) + 14px); }
 .es-foot .btn { min-height: 64px; font-size: 19px; font-weight: 800; }
@@ -1896,3 +1896,7 @@ b.tur, .tur { color: #F97316; }
 .mz-r b small { font-size: 16px; color: var(--muted); }
 .dt-mz { width: 100%; margin-top: 8px; flex-direction: row; justify-content: center; gap: 8px; }
 .oz-mz { display: block; margin: -4px 0 10px; padding: 6px 10px; border-radius: 10px; border: 1px solid var(--n4); background: var(--n2); color: var(--s1); font-size: 13px; font-weight: 700; }
+
+/* 13.8: set etiketi */
+.dt-etiket, .oz-etiket { margin: 4px 0 0; font-size: 14px; font-weight: 700; color: var(--accent-tx); }
+.es-l small { margin-left: 6px; font-weight: 600; color: var(--muted); letter-spacing: 0; }
