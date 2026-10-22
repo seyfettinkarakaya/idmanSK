@@ -272,6 +272,13 @@ function prunePlans(keepDates) {
 }
 
 /** Kaydedilen (veya kuyruğa alınan) bir günü yerel listelerden çıkarır. */
+/** 13.9: yalnızca günün program önbelleği (kalan setler sunucudan yeniden alınır; gün listede kalır). */
+export function forgetPlan(tarih) {
+  const plans = loadPlans();
+  delete plans[tarih];
+  store(KEYS.plans, plans);
+}
+
 export function forgetDate(tarih) {
   const dates = getCachedDates();
   if (dates) store(KEYS.dates, { dates: dates.filter((d) => d && d.tarih !== tarih), savedAt: Date.now() });
@@ -374,6 +381,17 @@ export function enqueue(payload, error, tur = 'yuzme') {
     lastError: error ? { code: error.code, message: error.message } : null,
   });
   store(KEYS.queue, queue);
+}
+
+/** 13.9: kuyruktaki kaydı aynı günün ikinci idmanı olarak işaretler (SAME_DAY onayı). */
+export function markQueueIkinci(id) {
+  const queue = getQueue();
+  const q = queue.find((x) => x.id === id);
+  if (!q) return false;
+  q.payload = { ...q.payload, ikinci: true };
+  q.lastError = null;
+  store(KEYS.queue, queue);
+  return true;
 }
 
 export function removeFromQueue(id) {
@@ -511,7 +529,7 @@ export function saveSalonProgram(tarih, hareketler) {
   return call('savePlan', { tarih, hareketler }, 'salon');
 }
 
-/** Salon programı: o günün salonPlan satırlarını siler (13.8.0; saveSalon da siler). */
+/** Salon programı: o günün salonPlan satırlarını siler (13.9.0; saveSalon da siler). */
 export function salonProgramYapildi(tarih) {
   return call('planYapildi', { tarih }, 'salon');
 }

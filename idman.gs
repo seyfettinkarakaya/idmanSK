@@ -277,6 +277,10 @@ function getPlan_(req) {
 //       5) ancak hepsi başarılıysa günün yuzmePlan satırlarını sil (arşiv yok).
 // 2–4 arasında bir hata olursa bu çağrının eklediği satırlar geri alınır,
 // yuzmePlan'a dokunulmaz. Böylece ya hepsi kalıcı olur ya hiçbiri.
+// 13.9: ikinci: true → aynı günün ikinci idmanı (kullanıcı onayıyla); yinelenme
+//       yuzmeSeans'ta aynı başlangıç saatiyle aranır. baslangic (ms) → yuzmeSeans
+//       Tarih hücresi saatli yazılır. birak: [Sıra] → bu satırlar planda kalır
+//       (yarıda kesilen idmanın kalan setleri).
 // ---------------------------------------------------------------------------
 
 function finishSession_(req) {
@@ -294,11 +298,23 @@ function finishSession_(req) {
   var eskiTarihCol = col_(eski, COL.tarih, true);
   var seansTarihCol = seans ? col_(seans, SEANS_COL.tarih, true) : -1;
 
+  var baslangic = seansStart_(req.baslangic, tarih, tz);
+  var eskiOnce = rowsForDate_(eski, eskiTarihCol, tarih, tz).length;
+  var seansOnce = seans ? rowsForDate_(seans, seansTarihCol, tarih, tz).length : 0;
+
   // 1) Yinelenme kontrolü. seans sayfası da kontrol edilir: hiç set
   //    tamamlanmadan kapatılan bir seans eski'ye satır yazmaz, ikinci
-  //    gönderimi yakalamanın tek yolu budur.
-  if (rowsForDate_(eski, eskiTarihCol, tarih, tz).length ||
-      (seans && rowsForDate_(seans, seansTarihCol, tarih, tz).length)) {
+  //    gönderimi yakalamanın tek yolu budur. İkinci idmanda yalnızca aynı
+  //    başlangıç saatli seans satırı yinelenme sayılır (kuyruktan yeniden gönderim).
+  //    Başlangıç saati gelirse: aynı saatli seans satırı = bu idman (DUPLICATE); günün başka
+  //    kaydı varsa SAME_DAY (uygulama sorar, onaylanınca ikinci: true ile yeniden gönderir).
+  var ayniIdman = Boolean(seans && baslangic && seans.values.some(function (row) {
+    var v = row[seansTarihCol];
+    return v instanceof Date && Math.floor(v.getTime() / 60000) === Math.floor(baslangic.getTime() / 60000);
+  }));
+  if (ayniIdman) throw appError_('DUPLICATE', tarih + ' tarihli bu idman zaten kaydedilmiş.');
+  if (req.ikinci !== true && (eskiOnce || seansOnce)) {
+    if (baslangic) throw appError_('SAME_DAY', tarih + ' için tabloda başka bir idman kayıtlı.');
     throw appError_('DUPLICATE', tarih + ' tarihli seans zaten kaydedilmiş.');
   }
 
@@ -359,16 +375,16 @@ function finishSession_(req) {
     // 3) Doğrula.
     SpreadsheetApp.flush();
     var yazilan = countDateInColumn_(eski.sheet, eskiTarihCol, tarih, tz);
-    if (yazilan !== done.length) {
+    if (yazilan !== eskiOnce + done.length) {
       throw appError_('WRITE_MISMATCH',
-        adOf_(SHEET_ESKI) + ' sayfasına ' + done.length + ' satır beklenirken ' + yazilan + ' satır bulundu.');
+        adOf_(SHEET_ESKI) + ' sayfasına ' + done.length + ' satır beklenirken ' + (yazilan - eskiOnce) + ' satır bulundu.');
     }
 
     // 4) seans sayfasına tek satır (sayfa varsa).
     if (seans) {
-      seansWritten = writeRows_(seans, [buildSeansRow_(seans, tarih, seansIn, tz)], true); // en yeni üstte
+      seansWritten = writeRows_(seans, [buildSeansRow_(seans, tarih, seansIn, tz, baslangic)], true); // en yeni üstte
       SpreadsheetApp.flush();
-      if (countDateInColumn_(seans.sheet, seansTarihCol, tarih, tz) !== 1) {
+      if (countDateInColumn_(seans.sheet, seansTarihCol, tarih, tz) !== seansOnce + 1) {
         throw appError_('WRITE_MISMATCH', adOf_(SHEET_SEANS) + ' satırı doğrulanamadı.');
       }
     }
@@ -380,17 +396,23 @@ function finishSession_(req) {
   }
 
   // 5) Günün plan satırlarını sil (arşiv yok: yapılan setler yuzmeVeri'de). Satır numaraları, arada tablo
-  //    elle düzenlenmiş olabileceği için taze okumayla yeniden hesaplanır.
+  //    elle düzenlenmiş olabileceği için taze okumayla yeniden hesaplanır. birak'taki Sıralar planda kalır.
+  var birak = null;
+  if (Array.isArray(req.birak) && req.birak.length) {
+    birak = {};
+    req.birak.forEach(function (x) { birak[siraKey_(x)] = true; });
+  }
   var silinen = 0;
   var uyari = '';
   try {
-    silinen = deleteDateRows_(plan.sheet, planTarihCol, tarih, tz);
+    silinen = deleteDateRows_(plan.sheet, planTarihCol, tarih, tz, birak ? { col: planSiraCol, keep: birak } : null);
   } catch (err) {
     console.error('plan sil: ' + ((err && err.stack) || err));
     uyari = 'Seans kaydedildi ancak plan satırları silinemedi.';
   }
 
   var data = { yazilanSet: done.length, silinenSet: silinen };
+  if (birak) data.kalanSet = planRows.length - silinen;
   if (uyari) data.uyari = uyari;
   return data;
 }
@@ -441,9 +463,28 @@ function buildEskiRow_(plan, eski, planRow, sonuc, tarih, tz) {
   return { values: values, formats: formats };
 }
 
-function buildSeansRow_(seans, tarih, s, tz) {
+/**
+ * Seansın başlangıç anı (ms) → Date; yalnızca aynı güne düşüyorsa (yoksa null: Tarih saatsiz yazılır).
+ */
+function seansStart_(ms, tarih, tz) {
+  var n = Number(ms);
+  if (!isFinite(n) || n <= 0) return null;
+  var d = new Date(n);
+  return dateKey_(d, tz) === tarih ? d : null;
+}
+
+var SEANS_SAAT_FMT = 'dd.mm.yyyy hh:mm'; // 13.9: seans Tarih'i başlangıç saatiyle
+
+/** Seans sayfasının Tarih hücresi: başlangıç saati varsa saatli, yoksa yalnız gün. */
+function seansTarihCell_(tarih, tz, baslangic) {
+  return baslangic
+    ? { value: baslangic, format: SEANS_SAAT_FMT }
+    : { value: Utilities.parseDate(tarih, tz, 'yyyy-MM-dd'), format: null };
+}
+
+function buildSeansRow_(seans, tarih, s, tz, baslangic) {
   var fields = {};
-  fields[normalize_(SEANS_COL.tarih)] = { value: Utilities.parseDate(tarih, tz, 'yyyy-MM-dd'), format: null };
+  fields[normalize_(SEANS_COL.tarih)] = seansTarihCell_(tarih, tz, baslangic);
   fields[normalize_(SEANS_COL.sure)] = convertValue_(s.sure, 'olcum');
   fields[normalize_(SEANS_COL.mesafe)] = convertValue_(s.mesafe, 'number');
   fields[normalize_(SEANS_COL.havuz)] = convertValue_(s.havuz == null || s.havuz === '' ? 25 : s.havuz, 'number');
@@ -664,13 +705,21 @@ function rollback_(written, tarihCol, tarih, tz) {
   }
 }
 
-/** Plan'da bu tarihe ait tüm satırları taze okumayla bulup alttan yukarı siler. */
-function deleteDateRows_(sheet, tarihCol, tarih, tz) {
+/**
+ * Plan'da bu tarihe ait tüm satırları taze okumayla bulup alttan yukarı siler.
+ * birak { col, keep }: o sütundaki Sıra'sı keep'te olan satırlar kalır (13.9).
+ */
+function deleteDateRows_(sheet, tarihCol, tarih, tz, birak) {
   var lastRow = sheet.getLastRow();
   if (lastRow < 2) return 0;
   var vals = sheet.getRange(2, tarihCol + 1, lastRow - 1, 1).getValues();
+  var siralar = birak ? sheet.getRange(2, birak.col + 1, lastRow - 1, 1).getValues() : null;
   var rows = [];
-  vals.forEach(function (r, i) { if (dateKey_(r[0], tz) === tarih) rows.push(i + 2); });
+  vals.forEach(function (r, i) {
+    if (dateKey_(r[0], tz) !== tarih) return;
+    if (siralar && birak.keep[siraKey_(siralar[i][0])]) return;
+    rows.push(i + 2);
+  });
 
   // Ardışık satırları tek deleteRows çağrısında sil, en alttan başla.
   var deleted = 0;
@@ -1001,7 +1050,7 @@ function saveSalon_(req) {
     var ksTarih = col_(ks, KARA_SEANS_COL.tarih, true);
     var ksWritten = null;
     try {
-      ksWritten = writeRows_(ks, [buildKaraSeansRow_(ks, day, req.seans)], true); // en yeni üstte
+      ksWritten = writeRows_(ks, [buildKaraSeansRow_(ks, day, req.seans, seansStart_(req.seans.baslangic, tarih, tz))], true); // en yeni üstte
       SpreadsheetApp.flush();
       if (countDateInColumn_(ks.sheet, ksTarih, tarih, tz) !== 1) {
         throw appError_('WRITE_MISMATCH', adOf_(SHEET_KARA_SEANS) + ' satırı doğrulanamadı.');
@@ -1026,10 +1075,10 @@ function saveSalon_(req) {
 
 var KARA_SEANS_COL = { tarih: 'Tarih', sure: 'Süre', rpe: 'RPE', msi: 'MSI', yer: 'Yer', aciklama: 'Açıklama' };
 
-/** karaSeans satırı: { sure: 'h:mm:ss', rpe, msi, yer, aciklama } — başlık sırası tablodan. */
-function buildKaraSeansRow_(ks, day, s) {
+/** karaSeans satırı: { sure: 'h:mm:ss', rpe, msi, yer, aciklama, baslangic (ms, 13.9: Tarih saatli) } — başlık sırası tablodan. */
+function buildKaraSeansRow_(ks, day, s, baslangic) {
   var fields = {};
-  fields[normalize_(KARA_SEANS_COL.tarih)] = { value: day, format: null };
+  fields[normalize_(KARA_SEANS_COL.tarih)] = baslangic ? { value: baslangic, format: SEANS_SAAT_FMT } : { value: day, format: null };
   fields[normalize_(KARA_SEANS_COL.sure)] = convertValue_(s.sure, 'duration');
   fields[normalize_(KARA_SEANS_COL.rpe)] = convertValue_(s.rpe, 'number');
   fields[normalize_(KARA_SEANS_COL.msi)] = convertValue_(s.msi, 'number');

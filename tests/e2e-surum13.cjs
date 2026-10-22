@@ -433,5 +433,73 @@ sc('13.6 Görünüm: Ayarlar → tema (koyu / açık / sistem) ve yazı boyutu; 
   assert.equal((await s.ls('ysk.prefs')).tema, null);
 });
 
+sc('13.9 Tekrarı iptal: yüzerken sol düğme İptal; onayla tekrar silinir (ilk tekrarda idman saati de), vazgeçince sürer; odak düzeni', async ({ launch }) => {
+  const s = await launch(); const p = s.page;
+  await s.openToday();
+  assert.ok(!(await p.$eval('#wheel', (e) => e.classList.contains('is-focus'))), 'başlamadan odak yok');
+  await s.press(); await s.adv(10);
+  assert.ok(await p.$eval('#wheel', (e) => e.classList.contains('is-focus')), 'yüzerken odak');
+  assert.strictEqual(await s.text('#btn-undo'), 'İptal');
+  await p.click('#btn-undo'); await s.waitModal('1. tekrarı iptal et?');
+  assert.ok((await s.text('.modal')).includes('idman saati de sıfırlanır'));
+  await s.modalClick('Vazgeç, yüzüyorum');
+  assert.deepStrictEqual(await s.events(), ['basla', 'cik0'], 'vazgeç: sürer');
+  await p.click('#btn-undo'); await s.waitModal('1. tekrarı iptal et?'); await s.modalClick('Evet, iptal et');
+  await p.waitForTimeout(300);
+  assert.deepStrictEqual(await s.events(), [], 'ilk tekrar: idman da başlamamış sayılır');
+  assert.strictEqual(await s.label(), 'YÜZ');
+  assert.ok(await p.$eval('#prog-clock', (e) => e.classList.contains('is-idle')), 'idman saati sıfır');
+  assert.ok(!(await p.$eval('#wheel', (e) => e.classList.contains('is-focus'))));
+  await s.press(); await s.adv(30); await s.press(); // 1. set (1 tekrar) bitti
+  await s.adv(15); await s.press(); await s.adv(40);    // 2. setin 1. tekrarı yanlışlıkla
+  await p.click('#btn-undo'); await s.waitModal('1. tekrarı iptal et?');
+  assert.ok((await s.text('.modal')).includes('dinlenme saati kaldığı yerden sürer'));
+  await s.modalClick('Evet, iptal et'); await p.waitForTimeout(300);
+  assert.deepStrictEqual(await s.events(), ['basla', 'cik0', 'geldim']);
+  assert.strictEqual(await s.label(), 'YÜZ');
+  assert.strictEqual(await s.text('#btn-undo'), 'Mola', 'dinlenmeye döndü');
+});
+
+sc('13.9 Yarıda kesilen idman: kalanlar planda kalır; aynı gün ikinci idman uyarı + onayla kaydedilir; yuzmeSeans Tarih saatli', async ({ launch }) => {
+  const s = await launch(); const p = s.page;
+  await s.openToday();
+  await s.tap(60); await s.tap(5); // 1. set (1 × 200) bitti
+  await s.finishToOzet();
+  assert.ok(!(await p.$eval('#oz-kalan', (e) => e.hidden)));
+  assert.match(await s.text('#oz-kalan'), /Yapılmayan 4 set planda kalsın/);
+  await p.click('#oz-kalan');
+  assert.ok(await p.$eval('#oz-kalan .cb', (e) => e.classList.contains('on')));
+  await p.click('#oz-save'); await s.waitScreen('done');
+  assert.match(await s.text('#done-text'), /4 set planda kaldı/);
+  const bugun = () => s.env.sheets.Plan.data.slice(1).filter((r) => r[0] && r[0].toISOString && r[0].toISOString().slice(0, 10) === '2026-09-23').length;
+  assert.strictEqual(bugun(), 4, 'kalan 4 set planda');
+  const S = s.env.sheets.seans;
+  assert.strictEqual(S.data.length - 1, 1);
+  assert.ok(S.data[1][0].getUTCHours() || S.data[1][0].getUTCMinutes(), 'Seans Tarih saatli');
+  assert.strictEqual(S.fmt[1][0], 'dd.mm.yyyy hh:mm');
+  assert.strictEqual(s.env.sheets.eski.data[1][0].getUTCHours(), 0, 'yuzmeVeri Tarih saatsiz');
+  // ikinci parça: kalan setlerden biri yapılır
+  await s.adv(5); await s.waitScreen('days');
+  await p.waitForFunction(() => (JSON.parse(localStorage.getItem('ysk.dates')) || { dates: [] }).dates.some((d) => d.tarih === '2026-09-23'));
+  await p.waitForTimeout(300);
+  await p.click('#days-today-btn'); await s.waitScreen('program'); await p.waitForSelector('.w-item.is-active');
+  assert.strictEqual(await s.title(), '4 × 50', 'plan kalan setlerle açılır');
+  await s.adv(600);
+  for (let i = 0; i < 4; i++) { await s.tap(65); await s.tap(15); }
+  await s.finishToOzet();
+  await p.click('#oz-save');
+  await s.waitModal('Bugüne ait idman kaydı var');
+  await s.modalClick('Özete dön');
+  assert.strictEqual(await s.screen(), 'ozet');
+  assert.strictEqual(S.data.length - 1, 1, 'onaysız yazılmaz');
+  await p.click('#oz-save');
+  await s.waitModal('Bugüne ait idman kaydı var');
+  await s.modalClick('Evet, ikinci idman olarak kaydet');
+  await s.waitScreen('done');
+  assert.strictEqual(S.data.length - 1, 2, 'iki seans satırı');
+  assert.strictEqual(s.env.sheets.eski.data.length - 1, 2, 'iki parça toplam 2 set');
+  assert.strictEqual(bugun(), 0, 'işaretsiz: kalanlar plandan silinir');
+});
+
 const only = process.argv[2];
 if (require.main === module) runScenarios('Sürüm 13 senaryoları', only ? S.filter(([n]) => n.toLowerCase().includes(only.toLowerCase())) : S, 8160);

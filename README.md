@@ -332,6 +332,8 @@ gönderim kuyruğunu etkiler.
 ## Arka uç davranışı (`finishSession`)
 
 1. `eski` (veya `seans`) sayfasında o tarih varsa **DUPLICATE** döner, hiçbir şey yazılmaz.
+   13.9: `baslangic` gelirse aynı başlangıç saatli seans satırı **DUPLICATE**, günün başka kaydı **SAME_DAY**
+   (uygulama sorar; `ikinci: true` ile yazılır). `birak` verilirse o Sıralar planda kalır.
 2. Tamamlanan setler, Plan'daki satırları kaynak alınarak **orijinal Sıra değerine göre**
    `eski`'ye eklenir; Gerçek/Kulaç/Nabız/RPE/MSI/Not uygulamadan gelen değerlerle dolar.
    Satırlar başlığın hemen altına (2. satırdan itibaren) eklenir, böylece en yeni seans
@@ -347,7 +349,7 @@ dokunulmaz. Arşivleme başarısız olursa seans yine kaydedilmiş sayılır ama
 silinmez (cevapta `uyari`). Tüm yazma işlemleri `LockService` kilidi altında yapılır (30 sn bekler,
 alamazsa **LOCKED**).
 
-Hata kodları: `AUTH`, `LOCKED`, `DUPLICATE`, `NOT_FOUND`, `PLAN_MISMATCH`,
+Hata kodları: `AUTH`, `LOCKED`, `DUPLICATE`, `SAME_DAY`, `NOT_FOUND`, `PLAN_MISMATCH`,
 `WRITE_MISMATCH`, `MISSING_COLUMN`, `NO_SHEET`, `BAD_REQUEST`, `SERVER`.
 
 ### Sürüm 13.2'ye geçiş (iki dosya, iki betik)
@@ -369,6 +371,27 @@ Hata kodları: `AUTH`, `LOCKED`, `DUPLICATE`, `NOT_FOUND`, `PLAN_MISMATCH`,
    `frame-src https://www.youtube-nocookie.com` eklendi. İnternet yokken fotoğraf ve adımlar gösterilir.
 3. Telefonda yeni yerel anahtarlar: `ysk.hazir` (hazır olma kontrolleri, 60 gün), `ysk.hareketNot` (harekete sabit not);
    ayarlar: `yer` (Salon/Ev/Otel), `bildirim`. Ayarlar → Yedek indir: anahtarlar hariç JSON.
+
+## Sürüm 13.9'da neler var (dağıtım: idman.gs yeni sürüm — tablo yapısı değişmez)
+
+- **Yarıda kesilen idman:** Özette "Yapılmayan N set planda kalsın" kutusu (yalnız yapılmayan set varsa). İşaretlenirse
+  yapılan setler yuzmeVeri'ye yazılır, yapılmayanların yuzmePlan satırları silinmez; gün listede kalır, sonra kalan
+  setlerle yeniden açılır. İşaretsizse eskisi gibi günün tüm plan satırları silinir.
+- **Aynı gün ikinci idman:** O gün tabloda başka bir idman varsa "Bugüne ait idman kaydı var" sorulur; onaylanırsa
+  ikinci idman olarak yazılır (öncekine dokunulmaz). Kuyrukta bekleyen böyle bir kayıt Bekleyen kayıtlar → dokun →
+  "İkinci idman olarak gönder". Aynı başlangıç saatli kayıt gerçekten aynı idmandır: "zaten kayıtlı".
+- **Kayıt korunur:** Gönderilemeyen idman kuyrukta ve geçmişte kalır; "Tekrar dene" artık gerçekten yeniden dener;
+  devam eden seansı silme onayı yapılan tekrar sayısını yazar; program önbellekten düşse de seans açılır.
+- **Seans saati:** yuzmeSeans ve karaSeans'ın **Tarih** hücresi idmanın başladığı saatle yazılır (`dd.mm.yyyy hh:mm`).
+  yuzmeVeri / karaVeri yalnız tarih kalır.
+- **Tekrarı iptal:** Yüzerken sol alttaki düğme **✕ İptal** olur (ilk 5 sn Geri al). Onaylanınca başlayan tekrar hiç
+  başlamamış sayılır: süresi silinir, dinlenme kaldığı yerden sürer, YÜZ yeniden başlatır (idmanın ilk tekrarıysa
+  idman saati de sıfırlanır).
+- **Büyük kronometre:** idman sürerken kart tam genişlik, önceki/sonraki set birer satır, açıklama gizli (karta dokununca
+  ayrıntıda); rakamlar kutuya sığan en büyük boy (1:05 ≈ 175 px, 15:23 de sığar). YÜZ/DUR düğmesi 150 px, ayrıntı
+  panelinin yazıları büyüdü.
+- `finishSession` yeni alanlar: `baslangic` (ms), `ikinci` (true), `birak` ([Sıra]); yeni hata kodu `SAME_DAY`;
+  cevapta `kalanSet`. `saveSalon`: `seans.baslangic`.
 
 ## Sürüm 13.8'de neler var (dağıtım: idman.gs yeni sürüm)
 

@@ -152,6 +152,7 @@ export function payload(session, st) {
   const sure = `${Math.floor(sn / 3600)}:${String(Math.floor((sn % 3600) / 60)).padStart(2, '0')}:${String(sn % 60).padStart(2, '0')}`;
   // 13.4: karaSeans satırı — gerçek idman süresi (mola düşülür) ve idmanın geneli için RPE / MSI / yer / not
   const seans = { sure, rpe: ks.rpe == null ? '' : ks.rpe, msi: ks.msi == null ? '' : ks.msi, yer: ks.yer || '', aciklama: String(ks.not || '').trim() };
+  if (st.basla != null) seans.baslangic = st.basla; // 13.9: karaSeans Tarih saatli
   return { tarih: session.tarih, hareketler: out, seans };
 }
 

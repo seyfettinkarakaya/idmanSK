@@ -159,7 +159,10 @@ sc('Geçici hata (LOCKED): otomatik kuyruk, bağlantıda gönderilir, geçmiş "
 sc('Zaten kayıtlı (DUPLICATE): seansı kapat → geçmişte "Zaten kayıtlıydı"', async ({ launch }) => {
   const s = await launch(); const p = s.page;
   await toOzet(s, 1);
-  const sh = s.env.sheets.seans; sh._row(1); sh.data[1] = [new s.env.CDate(Date.UTC(2026, 8, 23)), '', 0, 25, '', '', ''];
+  // 13.9 (bilerek değişti): yalnızca AYNI başlangıç saatli seans satırı "zaten kayıtlı" sayılır
+  // (kuyruktan yeniden gönderim); günün başka saatli kaydı SAME_DAY → ikinci idman sorusu (e2e-surum13).
+  const bas = (await s.session()).events[0].ts;
+  const sh = s.env.sheets.seans; sh._row(1); sh.data[1] = [new s.env.CDate(bas), '', 0, 25, '', '', ''];
   await p.click('#oz-save');
   await s.waitModal('Bu seans zaten kayıtlı');
   await s.modalClick('Seansı kapat');

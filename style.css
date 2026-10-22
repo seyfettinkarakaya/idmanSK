@@ -1900,3 +1900,42 @@ b.tur, .tur { color: #F97316; }
 /* 13.8: set etiketi */
 .dt-etiket, .oz-etiket { margin: 4px 0 0; font-size: 14px; font-weight: 700; color: var(--accent-tx); }
 .es-l small { margin-left: 6px; font-weight: 600; color: var(--muted); letter-spacing: 0; }
+
+/* --- 13.9: idman sürerken odak düzeni (kart tam genişlik, büyük kronometre), büyük düğmeler, okunur ayrıntı ---- */
+#wheel.is-focus .w-card { left: 0; }
+#wheel.is-focus .w-ctm, #wheel.is-focus .w-platform, #wheel.is-focus .w-line { display: none; }
+#wheel.is-focus .w-dot { --s: 12px; left: 4px; top: 12px; border-width: 3px; box-shadow: none; }
+#wheel.is-focus .w-item.is-active .w-dot { display: none; }
+#wheel.is-focus .w-row { grid-template-columns: 0 minmax(0, 1fr); gap: 24px; }
+#wheel.is-focus .w-tm { visibility: hidden; }
+#wheel.is-focus .w-nm { font-size: 18px; }
+#wheel.is-focus .w-item.m-live .w-idesc { display: none; } /* açıklama: karta dokununca ayrıntıda */
+#wheel.is-focus .w-item.m-live .w-timer { container-type: size; padding: 4px 4px 8px; }
+#wheel.is-focus .w-item.m-live .w-tmode { font-size: 16px; }
+#wheel.is-focus .w-item.m-live .w-tsub { margin-top: 6px; font-size: 26px; }
+/* Rakamlar kutuya sığan en büyük boy: genişlik (karakter sayısına göre) ya da yükseklik hangisi önce dolarsa. */
+#wheel.is-focus .w-item.m-live .w-tbig { font-size: min(54cqw, calc((100cqh - 64px) * 1.15)); letter-spacing: -0.03em; }
+#wheel.is-focus .w-item.m-live .w-tbig.l5 { font-size: min(43cqw, calc((100cqh - 64px) * 1.15)); }
+#wheel.is-focus .w-item.m-live .w-tbig.l6 { font-size: min(36cqw, calc((100cqh - 64px) * 1.15)); }
+#wheel.is-focus .w-item.m-live .w-tbig.l7 { font-size: min(31cqw, calc((100cqh - 64px) * 1.15)); }
+
+#screen-program .dock-side, #screen-program .dock-main { height: 150px; }
+#screen-program .dock-main b { font-size: 56px; }
+#screen-program .dock-main small { font-size: 16px; }
+@media (max-height: 700px) {
+  #screen-program .dock-side, #screen-program .dock-main { height: 124px; }
+  #screen-program .dock-main b { font-size: 46px; }
+}
+#btn-undo.is-iptal { opacity: 1; pointer-events: auto; color: #F97316; box-shadow: inset 0 0 0 1px rgba(249, 115, 22, 0.6); }
+
+.dt-tag { font-size: 16px; }
+.dt-title { font-size: 88px; }
+.dt-sub { font-size: 44px; }
+.dt-desc { font-size: 32px; line-height: 1.3; }
+.dt-tiles small { font-size: 14px; }
+.dt-tiles b { font-size: 68px; }
+.dt-row { font-size: 27px; }
+.dt-row b { font-size: 31px; }
+.dt-hint { font-size: 18px; }
+.oz-kalan { margin-top: 12px; padding: 12px; border: 1px solid rgba(255, 176, 32, 0.6); border-radius: 14px; font-size: 18px; font-weight: 700; color: var(--text); }
+.oz-kalan small { display: block; font-size: 14px; font-weight: 500; color: var(--muted); }

@@ -667,6 +667,8 @@ Sürüm 8 görünümü korunuyor; v10/v11 önerileri beğenilmedi, görsel yenil
 - [x] Ayarlar'da yazı boyutu seçimi. → YAPILDI 13.6.0
 
 ## İzlenecek
+- 22.10 (13.9.0): test-e2e.cjs tam akışı 13.8'de de 5'te 2 "tekrar 2: DUR !== YÜZ" ile kalıyor (sahte saat); 13.9'da bir kez "0 !== 1" (set sonu geçişi). Tek tek tekrarında geçiyor. Aynı kök neden (sahte saat + çift dokunma koruması) adayı.
+- 13.9 ilk gerçek idmanda kontrol: yarıda kesip "kalsın" → plan satırları; aynı gün ikinci idman → yuzmeSeans iki satır, Tarih saatli.
 - 14.10 (13.6.0): "13.2.0 yüzme … biten setin tekrar süresi idmanda düzeltilir" sürüm 13 dosyası tam koşuda 3'te 1 "Bu seti sıfırla?" modalını bekleyip zaman aşımına düşüyor (13.5'te de bir kez); tek başına hep geçiyor. Kök neden araştırılacak (sahte saat + çift dokunma koruması?).
 - 14.10 (13.5.0): tam takımda yüzme senaryoları ara sıra zaman aşımıyla kalıyor ("Mola", "Tam idman", "Eski Code.gs"); tek başına hep geçiyor. Ağır yükte sahte saat zamanlaması; ayrı bir düzeltme işi olabilir.
 - 13.4 ilk kara idmanında kontrol: karaVeri hareket satırları, karaSeans tek satır, günün karaPlan satırları silindi mi (14.10: bağlantılar, ana sayfa ve katalog tamam).
@@ -697,6 +699,7 @@ Sürüm 8 görünümü korunuyor; v10/v11 önerileri beğenilmedi, görsel yenil
 
 ## Tamamlanan
 
+- [x] Sürüm 13.9.0 (22.10): yarıda kesilen idmanda kalan setler planda kalabilir; aynı gün ikinci idman uyarı + onayla kaydedilir; kayıt hiçbir hata yolunda silinmez ("Tekrar dene" kilidi düzeltildi); yuzmeSeans / karaSeans Tarih başlangıç saatli; yüzerken "✕ İptal" (yanlışlıkla başlayan tekrar); büyük kronometre (odak düzeni), büyük YÜZ/DUR, büyük ayrıntı yazıları. idman.gs dağıtımı gerekir.
 - [x] Sürüm 13.8.0 (20.10): Etiket sütunu — plandan okunur, idmanda değiştirilebilir (Düzenle / Etiket yaz), yuzmeVeri'ye yazılır. idman.gs dağıtımı gerekir.
 - [x] Sürüm 13.7.0 (16.10): yüzme setinin mesafesini set anında / sonunda / özette düzeltme (kullanıcı: 1500 yerine 1600 yüzdüm).
 - [x] Sürüm 13.4.0 (dağıtım: idman.gs yeni sürüm + idmanKutuphane.gs yeni betik):

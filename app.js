@@ -1,25 +1,25 @@
 // idmanSK — arayüz. Veriye yalnızca data.js üzerinden erişir.
 
-import * as data from './data.js?v=13.8.0';
-import { Wheel } from './wheel.js?v=13.8.0';
-import * as zaman from './zaman.js?v=13.8.0';
-import * as ref from './ref.js?v=13.8.0';
-import * as duzen from './duzen.js?v=13.8.0';
-import * as salon from './salon.js?v=13.8.0';
-import * as grup from './grup.js?v=13.8.0';
-import * as kisit from './kisit.js?v=13.8.0';
-import * as yuk from './yuk.js?v=13.8.0';
-import * as harita from './harita.js?v=13.8.0';
-import * as bilgi from './bilgi.js?v=13.8.0';
-import * as analiz from './analiz.js?v=13.8.0';
-import * as video from './video.js?v=13.8.0';
-import * as hazir from './hazir.js?v=13.8.0';
-import { VIDEOLAR } from './videolar.js?v=13.8.0';
-import * as model from './model.js?v=13.8.0';
-import * as gosterge from './gosterge.js?v=13.8.0';
+import * as data from './data.js?v=13.9.0';
+import { Wheel } from './wheel.js?v=13.9.0';
+import * as zaman from './zaman.js?v=13.9.0';
+import * as ref from './ref.js?v=13.9.0';
+import * as duzen from './duzen.js?v=13.9.0';
+import * as salon from './salon.js?v=13.9.0';
+import * as grup from './grup.js?v=13.9.0';
+import * as kisit from './kisit.js?v=13.9.0';
+import * as yuk from './yuk.js?v=13.9.0';
+import * as harita from './harita.js?v=13.9.0';
+import * as bilgi from './bilgi.js?v=13.9.0';
+import * as analiz from './analiz.js?v=13.9.0';
+import * as video from './video.js?v=13.9.0';
+import * as hazir from './hazir.js?v=13.9.0';
+import { VIDEOLAR } from './videolar.js?v=13.9.0';
+import * as model from './model.js?v=13.9.0';
+import * as gosterge from './gosterge.js?v=13.9.0';
 
 // Telefonun güncel kodu çalıştırıp çalıştırmadığını görmek için ekranda gösterilir.
-export const APP_VERSION = '13.8.0';
+export const APP_VERSION = '13.9.0';
 
 const $ = (id) => document.getElementById(id);
 
@@ -393,8 +393,17 @@ function hasProgress(s) {
 
 const sessionStarted = (s) => Boolean(s && s.events && s.events.some((e) => e.t === 'basla'));
 
-/** Seansı cihazdan kaldırır. Hata fırlatmaz: kullanıcıyı hiçbir ekranda kilitlememeli. */
-function endSessionLocally() {
+/** 13.9: silme onayında yapılmış tekrar sayısı (kaydetmeden silmeye karşı açık uyarı). */
+function yapilanUyari(s) {
+  const n = s && Array.isArray(s.events) ? s.events.filter((e) => e.t === 'geldim').length : 0;
+  return n ? `<p class="msg err">⚠ Bu seansta ${n} tekrar yapıldı. Kaydetmek için önce “Devam et” → idmanı bitir → Kaydet.</p>` : '';
+}
+
+/**
+ * Seansı cihazdan kaldırır. Hata fırlatmaz: kullanıcıyı hiçbir ekranda kilitlememeli.
+ * kalan: günün planında set kaldı (13.9) — gün listede ve seçili kalır, programı sunucudan tazelenir.
+ */
+function endSessionLocally(kalan = false) {
   const tarih = state.session && state.session.tarih;
   state.session = null;
   state.plan = null;
@@ -404,7 +413,11 @@ function endSessionLocally() {
   state.selKeep = false;
   data.clearSession();
   try {
-    if (tarih) data.forgetDate(tarih);
+    if (tarih && kalan) {
+      data.forgetPlan(tarih);
+      state.selDate = tarih;
+      state.selKeep = true;
+    } else if (tarih) data.forgetDate(tarih);
   } catch (err) {
     console.error(err);
   }
@@ -939,7 +952,7 @@ async function onDaysClick(e) {
     case 'discard': {
       const ok = await modal({
         title: 'Seans silinsin mi?',
-        body: '<p>Bu seansın işaretleri ve süresi silinecek, hiçbir yere kaydedilmeyecek.</p>',
+        body: `<p>Bu seansın işaretleri ve süresi silinecek, hiçbir yere kaydedilmeyecek.</p>${yapilanUyari(state.session)}`,
         actions: [{ label: 'Evet, sil', value: true, cls: 'btn-danger' }, { label: 'Vazgeç', value: false }],
       });
       if (ok) {
@@ -964,10 +977,21 @@ async function manageQueue() {
   body.innerHTML = queue.map((q) => `
     <button class="pick" data-value="${esc(q.id)}">
       <strong>${esc(fmtDateTR(q.payload.tarih))}</strong>
-      <small>${q.lastError ? esc(q.lastError.message || q.lastError.code) : 'Henüz denenmedi'} · Silmek için dokun</small>
+      <small>${q.lastError ? esc(q.lastError.message || q.lastError.code) : 'Henüz denenmedi'} · ${q.lastError && q.lastError.code === 'SAME_DAY' ? 'Göndermek ya da silmek için dokun' : 'Silmek için dokun'}</small>
     </button>`).join('');
   const id = await modal({ title: 'Bekleyen kayıtlar', body, actions: [{ label: 'Kapat', value: '' }] });
   if (!id) return;
+  const item = queue.find((q) => q.id === id);
+  if (item && item.lastError && item.lastError.code === 'SAME_DAY') {
+    // 13.9: aynı gün başka idman kayıtlı — kullanıcı onaylarsa ikinci idman olarak gönderilir.
+    const c = await modal({
+      title: 'Bugüne ait idman kaydı var',
+      body: `<p>${esc(fmtDateTR(item.payload.tarih))} için tabloda başka bir idman kayıtlı. Bu kayıt ikinci idman olarak gönderilsin mi?</p>`,
+      actions: [{ label: 'İkinci idman olarak gönder', value: 'ikinci', cls: 'btn-primary' }, { label: 'Kaydı sil', value: 'sil', cls: 'btn-danger' }, { label: 'Vazgeç', value: '' }],
+    });
+    if (c === 'ikinci') { data.markQueueIkinci(id); return flushQueue(true); }
+    if (c !== 'sil') return;
+  }
   const ok = await modal({
     title: 'Kayıt silinsin mi?',
     body: '<p>Bu seans hiçbir zaman tabloya gönderilmeyecek.</p>',
@@ -1766,7 +1790,7 @@ async function openDate(tarih) {
   if (state.session && hasProgress(state.session)) {
     const ok = await modal({
       title: 'Devam eden seans var',
-      body: `<p>${esc(fmtDateTR(state.session.tarih))} seansı kaydedilmedi. Yeni güne geçersen silinecek.</p>`,
+      body: `<p>${esc(fmtDateTR(state.session.tarih))} seansı kaydedilmedi. Yeni güne geçersen silinecek.</p>${yapilanUyari(state.session)}`,
       actions: [{ label: 'Sil ve geç', value: true, cls: 'btn-danger' }, { label: 'Vazgeç', value: false }],
     });
     if (!ok) return;
@@ -1811,6 +1835,7 @@ async function openDate(tarih) {
 function startSession(tarih, plan) {
   state.plan = { ...plan, tarih };
   state.session = newSession(tarih);
+  state.session.yedek = plan.setler; // 13.9: program önbellekten düşse de seans açılabilsin
   persist();
   openProgram();
   const cu = cssUyarisi(tarih); // geçerli CSS yoksa bölge verilmez: bir kez söyle
@@ -1859,7 +1884,9 @@ async function prefetchPlans() {
 
 function resumeSession() {
   const s = state.session || data.loadSession();
-  const plan = s && data.getCachedPlan(s.tarih);
+  // 13.9: önbellekte program yoksa seansın kendi kopyası; başlamış seans hiçbir zaman sessizce silinmez.
+  const yedek = s && [s.setler, s.yedek].find((x) => Array.isArray(x) && x.length);
+  const plan = s && (data.getCachedPlan(s.tarih) || (yedek ? { tarih: s.tarih, setler: yedek } : null));
   if (!s || !plan) {
     data.clearSession();
     state.session = null;
@@ -2301,7 +2328,7 @@ function fitMainLabel() {
   if (!el) return;
   delete el.dataset.fit;
   if (!el.clientWidth) return; // ekran gizli: görününce yeniden denenir
-  const max = innerWidth <= 380 ? 34 : 40;
+  const max = innerWidth <= 380 ? 46 : 56; // 13.9: büyük düğme
   el.classList.remove('is-wrap');
   fitText(el, max, 30);
   // Tek satırda büyük kalamıyorsa iki satıra bölünür (İDMANA / BAŞLA).
@@ -2363,6 +2390,10 @@ function updateProgram() {
   $('prog-end').textContent = totalTime ? ` /${fmtDur(totalTime)}` : '';
   if (state.wheel) state.wheel.locked = zst().phase === 'swim';
   $('prog-back').classList.toggle('is-off', zst().phase === 'swim');
+  // 13.9 odak: yüzerken/dinlenirken kart tam genişlik, komşu setler birer satır, kronometre büyük.
+  const odak = ['swim', 'rest'].includes(zst().phase);
+  $('wheel').classList.toggle('is-focus', odak);
+  if (state.wheel) state.wheel.setSide(odak ? 1 : 2);
   updateBar();
   updateControls();
   tick();
@@ -2441,10 +2472,10 @@ function tick() {
   }
   clock.classList.toggle('is-idle', st.basla == null);
 
-  // Sol düğme: son basıştan sonra 5 sn "Geri al"; sonra dinlenirken "Mola".
+  // Sol düğme: son basıştan sonra 5 sn "Geri al"; sonra dinlenirken "Mola", yüzerken "İptal" (13.9).
   const last = st.last;
   const undoable = Boolean(last && ACTIONS.includes(last.t) && st.phase !== 'done' && st.mola == null && now - last.ts < UNDO_MS);
-  setLeftSlot(undoable ? 'undo' : (st.phase === 'rest' && st.mola == null ? 'mola' : ''));
+  setLeftSlot(undoable ? 'undo' : (st.phase === 'rest' && st.mola == null ? 'mola' : st.phase === 'swim' ? 'iptal' : ''));
   updateMola(st, now);
 
   if (!state.wheel) return;
@@ -2699,23 +2730,56 @@ function onUndo() {
 
 const ACTIONS = ['basla', 'cik', 'geldim'];
 const ICON_UNDO = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg>';
+const ICON_IPTAL = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>';
 const ICON_MOLA = '<svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1.2"/><rect x="14" y="5" width="4" height="14" rx="1.2"/></svg>';
 
-/** Sol alt düğme: 'undo' (Geri al, 5 sn), 'mola' (dinlenirken) ya da '' (sönük). */
+/** Sol alt düğme: 'undo' (Geri al, 5 sn), 'mola' (dinlenirken), 'iptal' (yüzerken: tekrarı iptal) ya da '' (sönük). */
 function setLeftSlot(act) {
   const b = $('btn-undo');
   if (b.dataset.act === act) return;
   b.dataset.act = act;
-  b.innerHTML = act === 'mola' ? `${ICON_MOLA}<span>Mola</span>` : `${ICON_UNDO}<span>Geri al</span>`;
-  b.setAttribute('aria-label', act === 'mola' ? 'Mola ver' : 'Son dokunuşu geri al');
+  b.innerHTML = act === 'mola' ? `${ICON_MOLA}<span>Mola</span>` : act === 'iptal' ? `${ICON_IPTAL}<span>İptal</span>` : `${ICON_UNDO}<span>Geri al</span>`;
+  b.setAttribute('aria-label', act === 'mola' ? 'Mola ver' : act === 'iptal' ? 'Başlayan tekrarı iptal et' : 'Son dokunuşu geri al');
   b.classList.toggle('is-on', act === 'undo');
   b.classList.toggle('is-mola', act === 'mola');
+  b.classList.toggle('is-iptal', act === 'iptal');
 }
 
 function onLeftSlot() {
   const act = $('btn-undo').dataset.act;
   if (act === 'undo') onUndo();
   else if (act === 'mola') startMola();
+  else if (act === 'iptal') tekrarIptal();
+}
+
+/**
+ * 13.9: yanlışlıkla başlatılan tekrarı iptal: başlangıcı (cik) silinir, tekrar hiç başlamamış
+ * sayılır; dinlenme kaldığı yerden sürer, YÜZ yeniden başlatır. İdmanın ilk tekrarıysa idman
+ * saati de sıfırlanır (basla da silinir). Onay sorulur.
+ */
+async function tekrarIptal() {
+  const st = zst();
+  const e = ev();
+  const last = e[e.length - 1];
+  if (st.phase !== 'swim' || !last || last.t !== 'cik') return;
+  const rep = st.per[st.cur].reps.length;
+  const sure = fmtDur(Math.floor((Date.now() - last.ts) / 1000));
+  const ilk = e.length === 2 && e[0].t === 'basla' && e[0].ts === last.ts; // idmanın ilk tekrarı
+  const ok = await modal({
+    title: `${rep}. tekrarı iptal et?`,
+    body: `<p>Bu tekrar <b>${sure}</b>'dir sayıyor. İptal edersen hiç başlamamış sayılır:</p>
+      <p class="muted">• ${sure} silinir, tekrar boş kalır<br>• ${ilk ? 'idman saati de sıfırlanır' : 'dinlenme saati kaldığı yerden sürer'}<br>• hazır olunca YÜZ'e yeniden bas</p>`,
+    actions: [{ label: 'Evet, iptal et', value: true, cls: 'btn-primary' }, { label: 'Vazgeç, yüzüyorum', value: false }],
+  });
+  // Onay beklerken DUR'a basıldıysa (olay değiştiyse) hiçbir şey yapılmaz.
+  if (!ok || ev()[ev().length - 1] !== last) return;
+  e.pop();
+  const prev = e[e.length - 1];
+  if (prev && prev.t === 'basla' && prev.ts === last.ts) e.pop();
+  state.zst = null;
+  persist();
+  afterEvent();
+  toast('Tekrar iptal edildi · YÜZ ile yeniden başlat', 2500);
 }
 
 /** Mola: yalnızca dinlenirken. İdman saati, dinlenme sayacı ve bipler durur. */
@@ -3503,11 +3567,17 @@ function renderOzet() {
   const mola = zs.molaN ? [`Mola ${zs.molaN > 1 ? `${zs.molaN}× · ` : ''}${fmtShort(zaman.molaMs(zs, zs.bitir || Date.now()))}`] : [];
   $('oz-chips').innerHTML = [...HAZIR_IFADE, ...mola].map((c) => `<button class="oz-chip${f.chips.includes(c) ? ' on' : ''}" data-chip="${esc(c)}">${esc(c)}</button>`).join('');
   if (document.activeElement !== $('oz-aciklama')) $('oz-aciklama').value = f.aciklama;
+  // 13.9: yarıda kalan idman — yapılmayan setler planda kalabilir (sonra devam).
+  const kalan = kalanSetler();
+  const kb = $('oz-kalan');
+  kb.hidden = !kalan.length;
+  kb.innerHTML = `<i class="cb${f.kalanPlanda ? ' on' : ''}">${f.kalanPlanda ? '✓' : ''}</i><span>Yapılmayan ${kalan.length} set planda kalsın <small>(sonra devam edersin; işaretsizse plandan silinir)</small></span>`;
   $('oz-msg').hidden = true;
 }
 
 function onOzetClick(e) {
   const f = state.session.form;
+  if (e.target.closest('#oz-kalan')) { f.kalanPlanda = !f.kalanPlanda; persist(); return renderOzet(); }
   const hv = e.target.closest('#oz-havuz button[data-v]');
   if (hv) { f.havuz = Number(hv.dataset.v); persist(); return renderOzet(); }
   const chip = e.target.closest('button[data-chip]');
@@ -3597,8 +3667,12 @@ function buildPayload() {
   const st = zst();
   const legacyRes = (s.legacy && s.legacy.results) || {};
   const aciklama = [...f.chips, String(f.aciklama || '').trim()].filter(Boolean).join('. ');
+  const kalan = kalanSetler();
   return {
     tarih: s.tarih,
+    ...(st.basla ? { baslangic: st.basla } : {}), // 13.9: yuzmeSeans Tarih saatli
+    ...(f.ikinci ? { ikinci: true } : {}),         // 13.9: aynı günün ikinci idmanı (onaylı)
+    ...(f.kalanPlanda && kalan.length ? { birak: kalan.map((i) => state.plan.setler[i].sira) } : {}),
     seans: {
       sure: fmtHMS(zaman.idmanMs(st, Date.now())),
       mesafe: sessionDistance(),
@@ -3626,6 +3700,14 @@ function buildPayload() {
       return { ...base, tamamlandi: false };
     }),
   };
+}
+
+/** 13.9: hiç yapılmamış özgün setler (indeks) — istenirse planda kalır. */
+function kalanSetler() {
+  const st = zst();
+  return state.plan.setler.map((set, i) => i)
+    .filter((i) => !state.plan.setler[i]._yeni && state.plan.setler[i].sira != null
+      && !(st.per[i].reps.length && zaman.doneReps(st, i) > 0) && !legacyDone(i));
 }
 
 /** Biten seansın telefonda saklanan kopyası (Yapılmış idmanlar). */
@@ -3671,22 +3753,37 @@ async function saveSessionForm() {
   btn.disabled = true;
   btn.textContent = 'Kaydediliyor…';
   let result;
+  let again = false;
   try {
     result = await data.finishSession(payload);
   } catch (err) {
-    await handleSaveError(err, payload);
-    return;
+    again = await handleSaveError(err, payload);
   } finally {
     state.saving = false;
     btn.disabled = false;
     btn.textContent = 'Kaydet';
   }
+  // Tekrar dene / ikinci idman: kilit (state.saving) açıldıktan sonra yeniden gönderilir.
+  if (again) return saveSessionForm();
+  if (!result) return;
   keepInHistory(payload, 'sent');
-  endSessionLocally();
+  endSessionLocally(Boolean(result && result.kalanSet));
   showDone({ ok: true, result });
 }
 
 async function handleSaveError(err, payload) {
+  if (err.code === 'SAME_DAY') {
+    // 13.9: aynı gün başka idman kayıtlı — onaylanırsa ikinci idman olarak yazılır.
+    const ikinci = await modal({
+      title: 'Bugüne ait idman kaydı var',
+      body: `<p>${esc(fmtDateTR(payload.tarih))} için tabloda başka bir idman kayıtlı. Bu idman aynı günün ikinci idmanı olarak ayrıca kaydedilsin mi?</p><p class="muted">Önceki kayda dokunulmaz.</p>`,
+      actions: [{ label: 'Evet, ikinci idman olarak kaydet', value: true, cls: 'btn-primary' }, { label: 'Özete dön', value: false }],
+    });
+    if (!ikinci) return false;
+    state.session.form.ikinci = true;
+    persist();
+    return true;
+  }
   if (err.code === 'DUPLICATE') {
     const close = await modal({
       title: 'Bu seans zaten kayıtlı',
@@ -3715,8 +3812,9 @@ async function handleSaveError(err, payload) {
       { label: 'Özete dön', value: '' },
     ],
   });
-  if (choice === 'retry') saveSessionForm();
-  else if (choice === 'queue') queueAndClose(payload, err);
+  if (choice === 'retry') return true;
+  if (choice === 'queue') queueAndClose(payload, err);
+  return false;
 }
 
 function queueAndClose(payload, err) {
@@ -3737,6 +3835,7 @@ function showDone({ ok, result }) {
   let text;
   if (ok) {
     text = `${result.yazilanSet} set yuzmeVeri sayfasına yazıldı, ${result.silinenSet} satır yuzmePlan'dan silindi.`;
+    if (result.kalanSet) text += ` ${result.kalanSet} set planda kaldı.`;
     if (result.uyari) text += ` ${result.uyari}`;
     text += ' Seans bu telefonda da saklandı.';
   } else {
@@ -4440,8 +4539,8 @@ function slPlusSet() {
 
 let hdb = null; // hareketdb.js (yalnızca kart açılınca yüklenir)
 let adb = null; // adimlar.js (Türkçe adımlar, yalnızca kart açılınca)
-const adimYukle = () => adb || (adb = import('./adimlar.js?v=13.8.0').then((m) => m.ADIMLAR).catch(() => ({})));
-const hdbYukle = () => hdb || (hdb = import('./hareketdb.js?v=13.8.0'));
+const adimYukle = () => adb || (adb = import('./adimlar.js?v=13.9.0').then((m) => m.ADIMLAR).catch(() => ({})));
+const hdbYukle = () => hdb || (hdb = import('./hareketdb.js?v=13.9.0'));
 let bilgiTimer = null;
 
 /** Hareketin videosu (H · Video önce, sonra uygulamadaki liste) ya da null. */

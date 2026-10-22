@@ -218,4 +218,42 @@ test('13.8 Etiket: plandan okunur (sütun yoksa alan yok), değişmeyen sette pl
   assert.deepStrictEqual(E.slice(1, 4).map((x) => x[ci]), ['Aerobik Taban -1', 'Eşik', 'Bonus']);
 });
 
+test('13.9 ikinci idman: onaysız SAME_DAY, ikinci:true ile yazılır; aynı başlangıç saati yinelenme; Seans Tarih saatli', () => {
+  const e = env([row('2026-10-20', 1, 'WU', 1, 200), row('2026-10-20', 2, 'MS', 4, 100), row('2026-10-20', 3, 'CD', 1, 200)]);
+  const t1 = Date.UTC(2026, 9, 20, 7, 42, 13);
+  // ilk parça: 1 yapıldı, 2 ve 3 planda kalsın
+  let r = e.call({ ...fin('2026-10-20', [{ sira: 1, tamamlandi: true, gercek: '04:00.0' }, { sira: 2, tamamlandi: false }, { sira: 3, tamamlandi: false }]), baslangic: t1, birak: [2, 3] });
+  assert.ok(r.ok, JSON.stringify(r));
+  assert.strictEqual(r.data.silinenSet, 1); assert.strictEqual(r.data.kalanSet, 2);
+  assert.deepStrictEqual(e.sheets.Plan.data.slice(1).map((x) => x[1]), [2, 3], 'kalan setler planda');
+  const S = e.sheets.seans;
+  assert.strictEqual(S.data[1][0].getTime(), t1, 'Seans Tarih = başlangıç anı');
+  assert.strictEqual(S.fmt[1][0], 'dd.mm.yyyy hh:mm');
+  assert.ok(!(e.sheets.eski.data[1][0].getUTCHours()), 'yuzmeVeri Tarih saatsiz kalır');
+  // ikinci parça: onaysız reddedilir, hiçbir şey silinmez
+  const t2 = Date.UTC(2026, 9, 20, 17, 5, 0);
+  const p2 = { ...fin('2026-10-20', [{ sira: 2, tamamlandi: true, gercek: '01:30.0' }, { sira: 3, tamamlandi: true, gercek: '04:00.0' }]), baslangic: t2 };
+  assert.strictEqual(e.call(p2).error, 'SAME_DAY', 'başka saatli kayıt var: uygulama sorar');
+  assert.strictEqual(e.call({ ...p2, baslangic: t1 }).error, 'DUPLICATE', 'aynı başlangıç = aynı idman');
+  assert.strictEqual(e.call({ ...p2, baslangic: undefined }).error, 'DUPLICATE', 'saatsiz eski istemci: eski davranış');
+  assert.strictEqual(e.sheets.Plan.getLastRow(), 3);
+  r = e.call({ ...p2, ikinci: true });
+  assert.ok(r.ok, JSON.stringify(r));
+  assert.strictEqual(r.data.yazilanSet, 2); assert.strictEqual(r.data.silinenSet, 2);
+  assert.strictEqual(e.sheets.eski.getLastRow(), 4, 'iki parça toplam 3 set');
+  assert.strictEqual(S.getLastRow(), 3, 'iki seans satırı');
+  assert.strictEqual(S.data[1][0].getTime(), t2, 'en yeni üstte');
+  // kuyruktan yeniden gönderim: aynı başlangıç → DUPLICATE (plan artık boş olsa da önce yinelenme)
+  assert.strictEqual(e.call({ ...p2, ikinci: true }).error, 'DUPLICATE');
+});
+
+test('13.9 başlangıç başka güne düşüyor ya da bozuk: Tarih saatsiz; birak boşsa tüm gün silinir (eski davranış)', () => {
+  const e = env([row('2026-10-21', 1, 'WU', 1, 200), row('2026-10-21', 2, 'MS', 1, 200)]);
+  const r = e.call({ ...fin('2026-10-21', [{ sira: 1, tamamlandi: true, gercek: '04:00.0' }]), baslangic: Date.UTC(2026, 9, 19, 9), birak: [] });
+  assert.ok(r.ok, JSON.stringify(r));
+  assert.strictEqual(r.data.silinenSet, 2); assert.ok(!('kalanSet' in r.data));
+  assert.strictEqual(e.sheets.seans.data[1][0].getTime(), Date.UTC(2026, 9, 21));
+  assert.strictEqual(e.call({ ...fin('2026-10-21', []), ikinci: true, baslangic: 'abc' }).error, 'NOT_FOUND', 'plan boş');
+});
+
 console.log(`idman.gs uç durum testleri: TAMAM (${n} senaryo)`);

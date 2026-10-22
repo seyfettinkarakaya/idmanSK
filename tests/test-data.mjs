@@ -275,6 +275,21 @@ await test('flush: kalıcı hata (PLAN_MISMATCH) atlanır, sonraki denenir; çif
   assert.equal(calls.filter((c) => c === 'finishSession').length, 2);
 });
 
+await test('13.9 flush: SAME_DAY kuyrukta kalır; ikinci idman işaretlenince ikinci: true ile gönderilir', async () => {
+  cfg();
+  data.enqueue(payload('2026-09-26'));
+  const bodies = [];
+  handler = (b) => { bodies.push(b); return b.ikinci ? { json: { ok: true, data: { yazilanSet: 1 } } } : { json: { ok: false, error: 'SAME_DAY', message: 'başka idman' } }; };
+  let r = await data.flushQueue();
+  assert.equal(r.remaining, 1); assert.equal(data.getQueue()[0].lastError.code, 'SAME_DAY');
+  assert.ok(data.markQueueIkinci(data.getQueue()[0].id));
+  assert.equal(data.getQueue()[0].lastError, null);
+  r = await data.flushQueue();
+  assert.deepEqual(r.sent.map((x) => x.tarih), ['2026-09-26']);
+  assert.equal(bodies[1].ikinci, true); assert.equal(r.remaining, 0);
+  assert.equal(data.markQueueIkinci('yok'), false);
+});
+
 await test('flush: yapılandırma yoksa göndermez', async () => {
   data.enqueue(payload('2026-09-26'));
   const r = await data.flushQueue();

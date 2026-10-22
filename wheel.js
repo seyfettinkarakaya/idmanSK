@@ -34,6 +34,7 @@ export class Wheel {
     this.wheelAcc = 0;
     this.cardH = 400;
     this.locked = false; // true iken kaydırma ve dokunarak geçiş kapalı (yüzerken)
+    this.side = SIDE;    // 13.9: idman sürerken 1 (kart büyür)
 
     // Peron: aktif durağın oturduğu sabit halka.
     this.platform = document.createElement('div');
@@ -63,14 +64,21 @@ export class Wheel {
     this.layout();
   }
 
+  /** Peronun üstünde/altında görünen durak sayısı (13.9: idman sürerken 1, kart büyür). */
+  setSide(n) {
+    if (this.side === n) return;
+    this.side = n;
+    this.layout();
+  }
+
   /** Kart boyu tekerleğin yüksekliğinden hesaplanır: 2+2 durak satırı sığar, gerisi kartındır. */
   layout() {
     const h = this.el.clientHeight;
-    this.cardH = Math.max(MIN_CARD, h - 2 * SIDE * ROW_H - 2 * CARD_GAP);
+    this.cardH = Math.max(MIN_CARD, h - 2 * this.side * ROW_H - 2 * CARD_GAP);
     this.el.style.setProperty('--card-h', `${this.cardH}px`);
     this.el.style.setProperty('--row-h', `${ROW_H}px`);
     this.el.style.setProperty('--card-gap', `${CARD_GAP}px`);
-    this.platform.style.top = `${SIDE * ROW_H + CARD_GAP}px`;
+    this.platform.style.top = `${this.side * ROW_H + CARD_GAP}px`;
     this.render();
     this.onLayout(this.cardH);
   }
@@ -111,7 +119,7 @@ export class Wheel {
     const fl = Math.min(n - 1, Math.floor(pc));
     let pointer = tops[fl] + (pc - fl) * hs[fl];
     pointer += (this.pos - pc) * ROW_H; // uçlarda lastik etkisi
-    const offset = SIDE * ROW_H - pointer;
+    const offset = this.side * ROW_H - pointer;
 
     for (let i = 0; i < n; i++) {
       const node = this.items[i];
