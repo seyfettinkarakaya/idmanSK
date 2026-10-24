@@ -174,19 +174,28 @@ function helpers(page) {
     async tap(sec = 0) { await h.press(); if (sec) await h.adv(sec); },
     // Playwright'ın sahte saati fastForward'u ara sıra uygulamıyor (sayfa saati ilerlemiyor):
     // sayfanın gördüğü zaman istenen kadar ilerleyene dek tekrar edilir.
+    // 24.10: kök neden — fastForward'dan hemen sonra gelen runFor(250) ara sıra sayfa saatini geri alıyordu
+    // (adv sonrası ölçüm yalnız ~250 ms ilerlemiş; çift dokunma koruması sonraki basışı yutuyor: tam idman
+    // 'DUR !== YÜZ'). Bu yüzden runFor'dan SONRA da ölçülür; saat geri kaldıysa yeniden ilerletilir.
     async adv(sec) {
       const want = sec * 1000;
       const t0 = await page.evaluate(() => Date.now());
-      for (let k = 0; k < 5; k++) {
-        let done = (await page.evaluate(() => Date.now())) - t0;
+      const gecen = async () => (await page.evaluate(() => Date.now())) - t0;
+      for (let k = 0; k < 8; k++) {
+        let done = await gecen();
         if (done < want - 20 && k > 0) { // önceki ileri alma geç uygulanmış olabilir: biraz bekle, yeniden ölç
           await page.waitForTimeout(40);
-          done = (await page.evaluate(() => Date.now())) - t0;
+          done = await gecen();
         }
-        if (done >= want - 20) break;
-        await page.clock.fastForward(want - done);
+        if (done >= want - 20) {
+          await page.clock.runFor(250); // zamanlayıcılar (arayüz tikleri) işlensin
+          if ((await gecen()) >= want - 20) return;
+          continue;
+        }
+        if (k >= 2) await page.clock.runFor(want - done); // fastForward uygulanmıyorsa kesin ama yavaş yol
+        else await page.clock.fastForward(want - done);
       }
-      await page.clock.runFor(250);
+      throw new Error(`adv(${sec}): sahte saat ilerlemedi`);
     },
     label: () => page.textContent('#btn-main-label'),
     sub: () => page.textContent('#btn-main-sub'),

@@ -699,6 +699,9 @@ Sürüm 8 görünümü korunuyor; v10/v11 önerileri beğenilmedi, görsel yenil
 
 ## Tamamlanan
 
+- [x] Sürüm 13.10.0 (24.10): yüzerken/dinlenirken kronometre rakamları dikey uzatıldı (boy ~2x), uzun süre (12:34) de büyük; tekrar kutuları ve hedef satırı odak düzeninde gizli. Dağıtım gerekmez.
+- [x] Kararsız e2e testleri (24.10): kök neden bulundu — harness `adv`: fastForward'dan hemen sonraki runFor(250) ara sıra sayfa saatini geri alıyordu (çift dokunma koruması sonraki basışı yutuyor; 'Tam idman DUR !== YÜZ'). `adv` runFor'dan sonra yeniden ölçüp ilerletir; 'Tam idman' 20 koşuda 0 hata (önceden ~4'te 1), tam takım temiz. Diğer eski 'zaman aşımı' notları aynı nedenden olabilir; görülürse yeniden bakılır.
+
 - [x] Sürüm 13.9.0 (22.10): yarıda kesilen idmanda kalan setler planda kalabilir; aynı gün ikinci idman uyarı + onayla kaydedilir; kayıt hiçbir hata yolunda silinmez ("Tekrar dene" kilidi düzeltildi); yuzmeSeans / karaSeans Tarih başlangıç saatli; yüzerken "✕ İptal" (yanlışlıkla başlayan tekrar); büyük kronometre (odak düzeni), büyük YÜZ/DUR, büyük ayrıntı yazıları. idman.gs dağıtımı gerekir.
 - [x] Sürüm 13.8.0 (20.10): Etiket sütunu — plandan okunur, idmanda değiştirilebilir (Düzenle / Etiket yaz), yuzmeVeri'ye yazılır. idman.gs dağıtımı gerekir.
 - [x] Sürüm 13.7.0 (16.10): yüzme setinin mesafesini set anında / sonunda / özette düzeltme (kullanıcı: 1500 yerine 1600 yüzdüm).

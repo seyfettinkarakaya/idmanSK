@@ -1,4 +1,4 @@
-# idmanSK — Teknik şartname (sürüm 13.9.0, 22.10.2026)
+# idmanSK — Teknik şartname (sürüm 13.10.0, 22.10.2026)
 
 Bu belge uygulamanın mimarisini, veri modelini, arka uç sözleşmesini ve ekran akışlarını anlatır. Yeni bir
 Claude Code oturumu buradan kaldığı yerden devam edebilmelidir. Kurallar ve günlük komutlar: `CLAUDE.md`.
@@ -137,6 +137,8 @@ Seans bir **olay listesidir**; süre hiçbir yerde biriktirilmez, her şey `repl
 - **İdman** (`program`): üst bilgi (SÜRE/MESAFE, set şeridi), `wheel` (metro tekerleği; aktif set kartı, komşular
   satır), dock (sol: Geri al/Mola/İptal · büyük YÜZ/DUR · Ses).
   - Kart modları: ready, live (yüzerken/dinlenirken), next (set sonu dinlenmesi; sıradaki set öne), sum (biten).
+  - 13.10: odak düzeninde `.w-tbig` dikey uzatılır (`--sy` 2.2, `scaleY`; kutu yüksekliği 0.85·boy·sy, `pointer-events:none`);
+    `.w-reps` ve `.w-info` gizli, başlık 40 px.
   - 13.9 odak düzeni: phase swim|rest iken `#wheel.is-focus`, `wheel.setSide(1)`; kart tam genişlik, açıklama gizli,
     kronometre `container-type:size` ile kutuya sığan en büyük boy. Dock 150 px.
   - Karta dokun → ayrıntı paneli (büyük yazı; Mesafe / Etiket düzelt). Uzun bas / SET TAMAM'a dokun → seti sıfırla,

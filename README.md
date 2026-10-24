@@ -372,6 +372,13 @@ Hata kodları: `AUTH`, `LOCKED`, `DUPLICATE`, `SAME_DAY`, `NOT_FOUND`, `PLAN_MIS
 3. Telefonda yeni yerel anahtarlar: `ysk.hazir` (hazır olma kontrolleri, 60 gün), `ysk.hareketNot` (harekete sabit not);
    ayarlar: `yer` (Salon/Ev/Otel), `bildirim`. Ayarlar → Yedek indir: anahtarlar hariç JSON.
 
+## Sürüm 13.10'da neler var (dağıtım: yalnız uygulama; .gs değişmedi)
+
+- **Büyük kronometre:** Yüzerken ve dinlenirken saat rakamları dikey uzatıldı (boy yaklaşık 100 → 210 px+); 10 dakikayı
+  geçen süre (12:34) de aynı boyda. Kulvara dokunup dönerken tek bakışta okunur. Set başlığı küçüldü, tekrar kutuları
+  ve "Hedef · Dinlen" satırı gizlendi (tekrar sayısı "YÜZÜYOR · 3/4" yazısında, hedef saatin altında). Önceki/sonraki
+  set satırları ve karta dokununca ayrıntı paneli aynen çalışır.
+
 ## Sürüm 13.9'da neler var (dağıtım: idman.gs yeni sürüm — tablo yapısı değişmez)
 
 - **Yarıda kesilen idman:** Özette "Yapılmayan N set planda kalsın" kutusu (yalnız yapılmayan set varsa). İşaretlenirse

@@ -1910,14 +1910,20 @@ b.tur, .tur { color: #F97316; }
 #wheel.is-focus .w-tm { visibility: hidden; }
 #wheel.is-focus .w-nm { font-size: 18px; }
 #wheel.is-focus .w-item.m-live .w-idesc { display: none; } /* açıklama: karta dokununca ayrıntıda */
-#wheel.is-focus .w-item.m-live .w-timer { container-type: size; padding: 4px 4px 8px; }
+#wheel.is-focus .w-item.m-live .w-timer { container-type: size; padding: 4px 4px 8px; margin-top: 6px; }
 #wheel.is-focus .w-item.m-live .w-tmode { font-size: 16px; }
-#wheel.is-focus .w-item.m-live .w-tsub { margin-top: 6px; font-size: 26px; }
-/* Rakamlar kutuya sığan en büyük boy: genişlik (karakter sayısına göre) ya da yükseklik hangisi önce dolarsa. */
-#wheel.is-focus .w-item.m-live .w-tbig { font-size: min(54cqw, calc((100cqh - 64px) * 1.15)); letter-spacing: -0.03em; }
-#wheel.is-focus .w-item.m-live .w-tbig.l5 { font-size: min(43cqw, calc((100cqh - 64px) * 1.15)); }
-#wheel.is-focus .w-item.m-live .w-tbig.l6 { font-size: min(36cqw, calc((100cqh - 64px) * 1.15)); }
-#wheel.is-focus .w-item.m-live .w-tbig.l7 { font-size: min(31cqw, calc((100cqh - 64px) * 1.15)); }
+#wheel.is-focus .w-item.m-live .w-tsub { margin-top: 4px; font-size: 26px; }
+/* 13.10: kulvara dokunup dönerken tek bakışta okunsun — set başlığı küçülür, tekrar kutuları gizlenir
+   (tekrar sayısı "YÜZÜYOR · 3/4" yazısında), rakamlar dikey uzatılır (yatayda yer yok). */
+#wheel.is-focus .w-item.m-live .w-title { font-size: 40px; }
+#wheel.is-focus .w-item.m-live .w-reps { display: none; }
+#wheel.is-focus .w-item.m-live .w-info { display: none; } /* hedef zaten saatin altında */
+/* Rakam boyu: genişlik (karakter sayısına göre) ya da uzatılmış boyun yüksekliği hangisi önce dolarsa.
+   --sy dikey uzatma; kutu yüksekliği 0.85 × boy × --sy (satır yüksekliği 0.85), uzatma ortadan yapılır. */
+#wheel.is-focus .w-item.m-live .w-tbig { --sy: 2.2; --fs: min(54cqw, calc((100cqh - 54px) / 1.87)); font-size: var(--fs); height: calc(var(--fs) * 0.85 * var(--sy)); display: flex; align-items: center; justify-content: center; letter-spacing: -0.03em; transform: scaleY(var(--sy)); transform-origin: center; pointer-events: none; /* uzatılan kutu düğmelerin üstüne taşar */ }
+#wheel.is-focus .w-item.m-live .w-tbig.l5 { --fs: min(43cqw, calc((100cqh - 54px) / 1.87)); }
+#wheel.is-focus .w-item.m-live .w-tbig.l6 { --fs: min(36cqw, calc((100cqh - 54px) / 1.87)); }
+#wheel.is-focus .w-item.m-live .w-tbig.l7 { --fs: min(31cqw, calc((100cqh - 54px) / 1.87)); }
 
 #screen-program .dock-side, #screen-program .dock-main { height: 150px; }
 #screen-program .dock-main b { font-size: 56px; }

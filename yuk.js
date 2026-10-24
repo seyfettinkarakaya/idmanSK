@@ -1,7 +1,7 @@
 // Antrenman yükü ve toparlanma: saf işlevler (DOM yok).
 // Seans yükü = RPE × dakika (Foster sRPE). Yüzme ve salon aynı ölçekte.
 // Kaynaklar: telefondaki geçmiş (ysk.history: yüzme + salon kayıtları) ve SalonTakip "idman" geçmişi.
-import { grupKey, haritaGruplari } from './grup.js?v=13.9.0';
+import { grupKey, haritaGruplari } from './grup.js?v=13.10.0';
 
 /** "01:18:20", "18:20", "4:10" → saniye; geçersizse 0. */
 export function sureSn(s) {
