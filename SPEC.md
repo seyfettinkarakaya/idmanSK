@@ -1,4 +1,4 @@
-# idmanSK — Teknik şartname (sürüm 13.10.1, 22.10.2026)
+# idmanSK — Teknik şartname (sürüm 13.11.0, 22.10.2026)
 
 Bu belge uygulamanın mimarisini, veri modelini, arka uç sözleşmesini ve ekran akışlarını anlatır. Yeni bir
 Claude Code oturumu buradan kaldığı yerden devam edebilmelidir. Kurallar ve günlük komutlar: `CLAUDE.md`.
@@ -131,6 +131,11 @@ Seans bir **olay listesidir**; süre hiçbir yerde biriktirilmez, her şey `repl
 
 `show(name)` ekranları değiştirir; `state` tek global durum (session, plan, zst, wheel, screen, dates…).
 
+- **Renk sistemi (13.11):** rol başına tek renk — sarı `--accent` (birincil eylem), yeşil `--done` (durum), amber `--warn`, kırmızı `#FF6B6B`/`#EF4444`,
+  dinlenme/mola nötr (`var(--text)`). Blok renkleri `BLOKLAR` (WU krem, PS gül, AS somon, CD açık mavi); ana set `blokOf(s)` ile bölgeden:
+  `ZONE_FILL` (n: 1 REC … 7 SP3). Bölge metin/çubuk rengi `.z1–.z7` (`--zc` metin, `--zf` dolgu, `--zi` hap yazısı). Kimlik: `--t-teal` yüzme
+  (#3FC1D9), `--t-amber` kara (#A78BFA; adı eski). Kart: `.w-card` çapraz renk akışı + `inset 4px` sol vurgu; metin tonu
+  `color-mix(var(--c) var(--cp), var(--cmix))` (koyu: beyaza, açık: siyaha karışır). Yazı boyutu seçenekleri 0.9/1/1.12/1.25/1.4.
 - **Ana sayfa** (`home`): Yüzme kartı (bugünün programı), Kara kartı (karaPlan'dan; metro şeridi), haftalık şerit,
   Form ve denge, hazır olma (B7), uyarılar (B18). Ayarlar: 3 bağlantı, görünüm, ses, bildirim, CSS, yedek.
 - **Gün seçimi** (`days`): hafta takvimi; banner'lar (devam eden seans, bekleyen kayıtlar → Yönet). "… idmanını aç".

@@ -667,6 +667,7 @@ Sürüm 8 görünümü korunuyor; v10/v11 önerileri beğenilmedi, görsel yenil
 - [x] Ayarlar'da yazı boyutu seçimi. → YAPILDI 13.6.0
 
 ## İzlenecek
+- 24.10 (13.11.0): "Düzen: 320, 375 ve 430 px …" senaryosu tam takımda bir kez 1444. satırda (yüzerken DUR sonrası etiket değişimi) zaman aşımına düştü; tek başına 3/3 ve tekrar tam koşuda geçti. harness `adv` düzeltmesinden sonraki tek görülen; basış yutulması (2 sn koruma) ya da yük adayı.
 - 22.10 (13.9.0): test-e2e.cjs tam akışı 13.8'de de 5'te 2 "tekrar 2: DUR !== YÜZ" ile kalıyor (sahte saat); 13.9'da bir kez "0 !== 1" (set sonu geçişi). Tek tek tekrarında geçiyor. Aynı kök neden (sahte saat + çift dokunma koruması) adayı.
 - 13.9 ilk gerçek idmanda kontrol: yarıda kesip "kalsın" → plan satırları; aynı gün ikinci idman → yuzmeSeans iki satır, Tarih saatli.
 - 14.10 (13.6.0): "13.2.0 yüzme … biten setin tekrar süresi idmanda düzeltilir" sürüm 13 dosyası tam koşuda 3'te 1 "Bu seti sıfırla?" modalını bekleyip zaman aşımına düşüyor (13.5'te de bir kez); tek başına hep geçiyor. Kök neden araştırılacak (sahte saat + çift dokunma koruması?).
@@ -698,6 +699,8 @@ Sürüm 8 görünümü korunuyor; v10/v11 önerileri beğenilmedi, görsel yenil
   video "YouTube'da aç" bağlantısına düşer — beğenmediğini H · Video sütununa başka adresle yaz).
 
 ## Tamamlanan
+
+- [x] Sürüm 13.11.0 (24.10): renk sistemi (rol başına tek renk; ana sette bölge ısı rampası; blok renkleri soğuk→sıcak→soğuk), yeni set kartı stili (yüzme + kara), ana sayfa kimlik renkleri, okunurluk (14 px taban, açık gri metin, En büyük yazı boyutu). Dağıtım gerekmez.
 
 - [x] test-e2e.cjs kendi `adv`'ına da aynı düzeltme (runFor sonrası ölçüm); 8 koşuda 0 hata, tam takım temiz (24.10).
 - [x] Sürüm 13.10.1 (24.10): set sonu dinlenmesinde büyük saat; biten set özet şeridi ve "kapanacak" uyarısı sıradaki kartı ezmiyor. Dağıtım gerekmez.

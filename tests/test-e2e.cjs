@@ -210,7 +210,8 @@ const server = http.createServer((req, res) => {
   assert.ok(desc.sh <= desc.ch + 1, 'açıklama kırpılmamalı');
   // 100 m tempo: hedef 1:30 / 200 m → 0:45, CSS 1:57'ye göre SP3 (ekipmansız Swim)
   assert.strictEqual((await page.textContent('.w-item.is-active .w-pace')).replace(/\s+/g, ' ').trim(), 'Tempo 0:45/100 · SP3');
-  assert.strictEqual(await page.$eval('.w-item.is-active .w-pace b', e => getComputedStyle(e).color), 'rgb(232, 121, 249)');
+  // 13.11 (bilerek değişti): tek bölge ısı rampası; SP3 metin rengi #F58BB0 (eski eflatun #E879F9)
+  assert.strictEqual(await page.$eval('.w-item.is-active .w-pace b', e => getComputedStyle(e).color), 'rgb(245, 139, 176)');
   await goTo(0);
 
   assert.strictEqual(await label(), 'YÜZ');
@@ -377,7 +378,7 @@ const server = http.createServer((req, res) => {
   assert.strictEqual(await page.evaluate(() => localStorage.getItem('ysk.session')), null);
   await page.click('#days-back');
   await page.waitForSelector('#screen-home:not([hidden])');
-  assert.strictEqual(await page.textContent('#app-version'), 'Sürüm 13.10.1');
+  assert.strictEqual(await page.textContent('#app-version'), 'Sürüm 13.11.0');
   assert.match(await page.textContent('#home-history-meta'), /^3 kayıt$/);
 
   // Toplu silme: yalnızca telefondaki kopyalar gider

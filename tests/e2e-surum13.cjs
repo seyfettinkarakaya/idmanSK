@@ -502,4 +502,29 @@ sc('13.9 Yarıda kesilen idman: kalanlar planda kalır; aynı gün ikinci idman 
 });
 
 const only = process.argv[2];
+sc('13.11 Renk: ana sette bölge hapı + 7 kademeli ısı ölçeği; diğer blokta soluk bölge kodu; tekerlekte blok kodu; birincil düğme sarı; yazı boyutu En büyük', async ({ launch }) => {
+  const s = await launch({ ref: true }); const p = s.page;
+  await s.openToday();
+  // WU (200 m, hedef 4:00): ölçek yok, soluk bölge kodu
+  const wu = await p.$eval('.w-item.is-active', (n) => ({ pill: n.querySelector('.w-ztag') && n.querySelector('.w-ztag').className, meter: !!n.querySelector('.w-meter'), bk: n.querySelector('.w-bk').textContent }));
+  assert.ok(wu.pill && /is-plain/.test(wu.pill) && !wu.meter && wu.bk === 'WU', JSON.stringify(wu));
+  await s.goTo(2);
+  const ms = await p.$eval('.w-item.is-active', (n) => ({ pill: n.querySelector('.w-ztag').textContent, cls: n.querySelector('.w-ztag').className, on: [...n.querySelectorAll('.w-meter i')].filter((i) => i.classList.contains('on')).length, all: n.querySelectorAll('.w-meter i').length, bk: n.querySelector('.w-bk').textContent }));
+  assert.equal(ms.all, 7, JSON.stringify(ms)); assert.equal(ms.on, 1, JSON.stringify(ms));
+  assert.match(ms.cls, /\bz\d\b/, JSON.stringify(ms)); assert.equal(ms.bk, 'MS');
+  assert.equal(ms.pill, await p.$eval('.w-item.is-active .w-meter i.on', (i) => ['REC', 'EN1', 'EN2', 'EN3', 'SP1', 'SP2', 'SP3'][Number(i.className.match(/z(\d)/)[1]) - 1]));
+  // ana set kartının rengi bölgeden: tekerlek çizgisi/nokta rengi kartın --c değeri
+  const c = await p.$eval('.w-item.is-active', (n) => n.style.getPropertyValue('--c'));
+  assert.match(c, /^#[0-9A-F]{6}$/i);
+  // birincil eylem sarı
+  await s.goTo(0); await p.click('#prog-back'); await s.waitScreen('days');
+  assert.equal(await p.$eval('#days-today-btn', (b) => getComputedStyle(b).backgroundColor), 'rgb(255, 210, 63)');
+  // yazı boyutu: En büyük (1.4) seçilir, kalıcı
+  await p.click('#days-back'); await s.waitScreen('home'); await p.click('#home-settings'); await s.waitScreen('setup');
+  await p.click('#pref-yazi [data-v="1.4"]');
+  assert.equal(await p.evaluate(() => document.documentElement.style.zoom), '1.4');
+  assert.equal((await s.ls('ysk.prefs')).yazi, 1.4);
+  await p.click('#pref-yazi [data-v="1"]');
+});
+
 if (require.main === module) runScenarios('Sürüm 13 senaryoları', only ? S.filter(([n]) => n.toLowerCase().includes(only.toLowerCase())) : S, 8160);

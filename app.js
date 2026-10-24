@@ -1,25 +1,25 @@
 // idmanSK — arayüz. Veriye yalnızca data.js üzerinden erişir.
 
-import * as data from './data.js?v=13.10.1';
-import { Wheel } from './wheel.js?v=13.10.1';
-import * as zaman from './zaman.js?v=13.10.1';
-import * as ref from './ref.js?v=13.10.1';
-import * as duzen from './duzen.js?v=13.10.1';
-import * as salon from './salon.js?v=13.10.1';
-import * as grup from './grup.js?v=13.10.1';
-import * as kisit from './kisit.js?v=13.10.1';
-import * as yuk from './yuk.js?v=13.10.1';
-import * as harita from './harita.js?v=13.10.1';
-import * as bilgi from './bilgi.js?v=13.10.1';
-import * as analiz from './analiz.js?v=13.10.1';
-import * as video from './video.js?v=13.10.1';
-import * as hazir from './hazir.js?v=13.10.1';
-import { VIDEOLAR } from './videolar.js?v=13.10.1';
-import * as model from './model.js?v=13.10.1';
-import * as gosterge from './gosterge.js?v=13.10.1';
+import * as data from './data.js?v=13.11.0';
+import { Wheel } from './wheel.js?v=13.11.0';
+import * as zaman from './zaman.js?v=13.11.0';
+import * as ref from './ref.js?v=13.11.0';
+import * as duzen from './duzen.js?v=13.11.0';
+import * as salon from './salon.js?v=13.11.0';
+import * as grup from './grup.js?v=13.11.0';
+import * as kisit from './kisit.js?v=13.11.0';
+import * as yuk from './yuk.js?v=13.11.0';
+import * as harita from './harita.js?v=13.11.0';
+import * as bilgi from './bilgi.js?v=13.11.0';
+import * as analiz from './analiz.js?v=13.11.0';
+import * as video from './video.js?v=13.11.0';
+import * as hazir from './hazir.js?v=13.11.0';
+import { VIDEOLAR } from './videolar.js?v=13.11.0';
+import * as model from './model.js?v=13.11.0';
+import * as gosterge from './gosterge.js?v=13.11.0';
 
 // Telefonun güncel kodu çalıştırıp çalıştırmadığını görmek için ekranda gösterilir.
-export const APP_VERSION = '13.10.1';
+export const APP_VERSION = '13.11.0';
 
 const $ = (id) => document.getElementById(id);
 
@@ -132,16 +132,26 @@ function paint(root) {
 
 const setDist = (s) => (Number(s.tekrar) || 1) * (Number(s.mesafe) || 0);
 
-// Blok renkleri (Gece Havuzu). ink: rozet/şerit üzerindeki yazı rengi.
+// Blok renkleri (13.11): soğuk → sıcak → soğuk akış — ısınma krem, hazırlık gül, yardımcı set somon, soğuma açık mavi.
+// Ana set (MS) tek renk taşımaz: hedef temposunun bölgesine göre ısı rampasını alır (ZONE_FILL, n: 1 REC … 7 SP3).
+// ink: dolgu üzerindeki yazı rengi.
 const BLOKLAR = {
-  WU: { ad: 'Isınma', renk: '#2563EB', ink: '#ffffff' },
-  PS: { ad: 'Hazırlık', renk: '#7C3AED', ink: '#ffffff' },
-  MS: { ad: 'Ana set', renk: '#F97316', ink: '#1c0a00' },
-  AS: { ad: 'Ek set', renk: '#FACC15', ink: '#1f1800' },
-  CD: { ad: 'Soğuma', renk: '#14B8A6', ink: '#03201c' },
+  WU: { ad: 'Isınma', renk: '#E8D9B5', ink: '#1F1A0C' },
+  PS: { ad: 'Hazırlık', renk: '#EBB4B4', ink: '#2A1010' },
+  MS: { ad: 'Ana set', renk: '#E4572E', ink: '#0B0F14' },
+  AS: { ad: 'Yardımcı set', renk: '#E59A84', ink: '#2B120A' },
+  CD: { ad: 'Soğuma', renk: '#A9C4E3', ink: '#0C1A2B' },
 };
-const BLOK_DIGER = { ad: '', renk: '#475569', ink: '#ffffff' };
-const blokOf = (s) => BLOKLAR[String(s.blok || '').trim().toUpperCase()] || BLOK_DIGER;
+const BLOK_DIGER = { ad: '', renk: '#7B8794', ink: '#0B0F14' };
+const ZONE_FILL = { 1: '#A9BDD0', 2: '#F4B860', 3: '#EE8434', 4: '#E4572E', 5: '#C1272D', 6: '#8E1B2A', 7: '#5E0F1C' };
+const blokOf = (s) => {
+  const key = String(s.blok || '').trim().toUpperCase();
+  const b = BLOKLAR[key] || BLOK_DIGER;
+  if (key !== 'MS' || !s.hedef || !s.mesafe) return b;
+  const sec = parseSec(s.hedef);
+  const z = sec ? zoneOf(pacePer100(sec, s.mesafe), s) : null;
+  return z && ZONE_FILL[z.n] ? { ...b, renk: ZONE_FILL[z.n], zone: z } : b;
+};
 
 /** "01:30", "1:02:03", "00:22.7" → saniye; boş/geçersiz → 0. */
 function parseSec(v) {
@@ -691,7 +701,7 @@ function hedefSureOf(d) {
   return sets ? sets.reduce((a, s) => a + (s.sure || 0), 0) : 0;
 }
 
-const blokRenk = (b) => blokOf({ blok: b }).renk;
+const blokRenk = (b) => blokOf(typeof b === 'object' ? b : { blok: b }).renk;
 
 /** Günün programı küçük bir metro hattı olarak (blok renginde, mesafeye oranlı). */
 function metroSvg(sets) {
@@ -702,7 +712,7 @@ function metroSvg(sets) {
   const dots = [];
   for (const s of sets) {
     const w = (W * Math.max(1, s.mesafe || 0)) / tot;
-    const c = blokRenk(s.blok);
+    const c = blokRenk(s);
     segs.push(`<line x1="${(x + 2).toFixed(1)}" y1="14" x2="${(x + w - 2).toFixed(1)}" y2="14" stroke="${c}" stroke-width="6" stroke-linecap="round"/>`);
     dots.push(`<circle cx="${(x + w / 2).toFixed(1)}" cy="14" r="6.5" fill="#141B23" stroke="${c}" stroke-width="3.5"/>`);
     x += w;
@@ -713,11 +723,11 @@ function metroSvg(sets) {
 // Seçili olmayan günler renksiz: blok başına gri tonu (ana set en açık,
 // ısınma/soğuma en koyu) ki yapı renk olmadan da okunsun.
 const BLOK_GRI = { MS: '#C9D2DB', AS: '#9BA7B3', PS: '#76828F', WU: '#4F5B67', CD: '#4F5B67' };
-const blokGri = (b) => BLOK_GRI[String(b || '').trim().toUpperCase()] || '#65717D';
+const blokGri = (b) => BLOK_GRI[String((b && b.blok) || b || '').trim().toUpperCase()] || '#65717D';
 
 function miniBar(sets, gray = false) {
   const color = gray ? blokGri : blokRenk;
-  return `<div class="mini-bar">${sets.map((s) => `<i data-grow="${Math.max(1, s.mesafe || 0)}" data-bg="${color(s.blok)}"></i>`).join('')}</div>`;
+  return `<div class="mini-bar">${sets.map((s) => `<i data-grow="${Math.max(1, s.mesafe || 0)}" data-bg="${color(s)}"></i>`).join('')}</div>`;
 }
 
 function renderBanners() {
@@ -1346,7 +1356,7 @@ function renderForm() {
       <div class="fm-yb"><i data-w="${bar}" class="${DURUM_CLS[G.hd.durum]}"></i><s data-l="${nrm}"></s></div>
       <p class="fm-acik">Yük = süre (dk) × zorluk (RPE). Normal hafta = ${ayriGun(G.K) ? 'yüzme ' : ''}${G.K.gunHafta} seans × ${G.K.seansDk} dk × RPE ${G.K.seansRpe}${ayriGun(G.K) ? ` + kara ${G.K.gunHaftaSalon} × ${G.K.salonDk} dk × RPE ${G.K.salonRpe}` : ''}.</p>
     </div>
-    <p class="sp-lb">SON 8 HAFTA <small>(mavi yüzme · turuncu kara)</small></p>
+    <p class="sp-lb">SON 8 HAFTA <small>(turkuaz yüzme · mor kara)</small></p>
     ${haftaGrafik(G.H, G.normal)}
     ${G.od.durum === 'donus' || O.top.oran == null ? `<p class="fm-sonuc ${gid[0]}">${esc(gid[1])}</p>` : ''}
     ${dinOn.oner ? `<p class="fm-sonuc warn">⚠ Dinlenme haftası öner: ${esc(dinOn.nedenler.join(', '))}.</p>` : ''}
@@ -1721,7 +1731,7 @@ function historyDetail(r) {
   ].filter(Boolean).join(' · ');
   const sets = r.setler.map((x) => `
     <div class="hd-set${x.tamamlandi ? '' : ' is-skip'}">
-      <i data-bg="${blokRenk(x.blok)}"></i>
+      <i data-bg="${blokRenk(x)}"></i>
       <span><b>${x.tamamlandi ? '✓ ' : ''}${esc([setTitle(x), x.tur].filter(Boolean).join(' '))}</b>
       ${x.gercek ? `<small>Gerçek ${esc(x.gercek)}${x.hedef ? ` · Hedef ${esc(x.hedef)}` : ''}</small>` : ''}
       ${x.not ? `<small>${esc(x.not)}</small>` : ''}</span>
@@ -2048,7 +2058,7 @@ function renderItem(node, s, i, cum) {
 
   // Hazır kartta başlık büyük: stil · tür Sürüm 9'daki gibi kendi satırında. Küçük başlıklı
   // kartlarda (yüzerken, dinlenirken, özet) başlığın yanında durur.
-  // 13.10.1: sıradaki set kartında (set sonu dinlenmesi) başlık ve stil·tür tek satırda: alan saate kalır.
+  // 13.11.0: sıradaki set kartında (set sonu dinlenmesi) başlık ve stil·tür tek satırda: alan saate kalır.
   const title = mode === 'ready'
     ? `<div class="w-title">${esc(`${T} × ${s.mesafe}`)}</div>${styleTur ? `<div class="w-sub">${esc(styleTur)}</div>` : ''}`
     : `<div class="w-title">${esc(`${T} × ${s.mesafe}`)}${styleTur ? `<small>${esc(styleTur)}</small>` : ''}</div>`;
@@ -2063,7 +2073,7 @@ function renderItem(node, s, i, cum) {
     body = `${title}${setInfo(s)}${T > 4 ? repStrip(i) : repBoxes(i, true)}${plus}${timer}`;
   } else if (mode === 'next') {
     // Set sonu dinlenmesi: sıradaki setin içeriği öne alınır, kalan alanı büyük sayaç doldurur.
-    // 13.10.1: biten setin özeti ("✓ … bitti · ort.") sıradaki kartın üstüne binmez; kendi kartında kalır.
+    // 13.11.0: biten setin özeti ("✓ … bitti · ort.") sıradaki kartın üstüne binmez; kendi kartında kalır.
     body = `${title}
       ${s.aciklama ? `<div class="w-desc">${esc(s.aciklama)}</div>` : ''}
       ${tiles ? `<div class="w-tiles">${tiles}</div>` : ''}
@@ -2083,6 +2093,16 @@ function renderItem(node, s, i, cum) {
       ${foot}`;
   }
 
+  // 13.11: kartta hem blok hem bölge. Ana sette bölge dolgulu hap + 7 kademeli ısı ölçeği; diğer bloklarda soluk bölge kodu.
+  let ztag = ''; let meter = '';
+  const sn = s.hedef && s.mesafe ? pacePer100(parseSec(s.hedef), s.mesafe) : 0;
+  const zz = b.zone || (sn ? zoneOf(sn, s) : null);
+  if (b.zone) {
+    ztag = `<b class="w-ztag z${b.zone.n}">${esc(b.zone.zone)}</b>`;
+    meter = `<div class="w-meter">${[1, 2, 3, 4, 5, 6, 7].map((n) => `<i class="z${n}${n === b.zone.n ? ' on' : ''}"></i>`).join('')}</div>`;
+  } else if (zz || (sn && ref.isDrill(s))) {
+    ztag = `<b class="w-ztag is-plain">${esc(zz ? zz.zone : 'TEC')}</b>`;
+  }
   node.classList.toggle('is-done', isDone);
   for (const m of ['live', 'next', 'sum', 'ready']) node.classList.toggle(`m-${m}`, m === mode);
   node.classList.add('w-item');
@@ -2096,10 +2116,10 @@ function renderItem(node, s, i, cum) {
     <div class="w-dot"></div>
     <div class="w-row">
       <span class="w-tm">${c.time ? fmtDur(c.time) : ''}</span>
-      <span class="w-nm">${esc(rowName)}${status === 'eksik' ? ` · ${d}/${T}` : ''}</span>
+      <span class="w-nm"><i class="w-bk">${esc(blok)}</i>${esc(rowName)}${status === 'eksik' ? ` · ${d}/${T}` : ''}</span>
     </div>
     <div class="w-ctm">${c.time ? fmtDur(c.time) : ''}${setTime(s) ? `<small>+${fmtDur(setTime(s))}</small>` : ''}</div>
-    <div class="w-card">${(() => { const dr = (mode === 'ready' || mode === 'next') && drillOf(s); return dr ? `<a class="sl-vid" href="${esc(dr.video)}" target="_blank" rel="noopener noreferrer" aria-label="${esc(dr.ad)} videosu">▶ Drill</a>` : ''; })()}<div class="w-tag">${tag}</div>${body}</div>`;
+    <div class="w-card">${(() => { const dr = (mode === 'ready' || mode === 'next') && drillOf(s); return dr ? `<a class="sl-vid" href="${esc(dr.video)}" target="_blank" rel="noopener noreferrer" aria-label="${esc(dr.ad)} videosu">▶ Drill</a>` : ''; })()}<div class="w-tag"><span>${tag}</span>${ztag}</div>${meter}${body}</div>`;
 }
 
 // --- Sürüm 12 (yüzme): set sonu ara şeridi — omuz rahatlatma, kulaç, nabız; drill videosu --------
@@ -4535,8 +4555,8 @@ function slPlusSet() {
 
 let hdb = null; // hareketdb.js (yalnızca kart açılınca yüklenir)
 let adb = null; // adimlar.js (Türkçe adımlar, yalnızca kart açılınca)
-const adimYukle = () => adb || (adb = import('./adimlar.js?v=13.10.1').then((m) => m.ADIMLAR).catch(() => ({})));
-const hdbYukle = () => hdb || (hdb = import('./hareketdb.js?v=13.10.1'));
+const adimYukle = () => adb || (adb = import('./adimlar.js?v=13.11.0').then((m) => m.ADIMLAR).catch(() => ({})));
+const hdbYukle = () => hdb || (hdb = import('./hareketdb.js?v=13.11.0'));
 let bilgiTimer = null;
 
 /** Hareketin videosu (H · Video önce, sonra uygulamadaki liste) ya da null. */

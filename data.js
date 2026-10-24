@@ -124,7 +124,7 @@ export function getPrefs() {
     if (typeof p.blokBas === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(p.blokBas)) out.blokBas = p.blokBas; // yalnızca ayarlandıysa
     if (p.karaYorgunluk === true) out.karaYorgunluk = true; // 13.5 (B17): kara yükü yalnız yorgunluğa
     if (p.tema === 'acik' || p.tema === 'sistem') out.tema = p.tema; // 13.6: varsayılan koyu
-    if ([0.9, 1.12, 1.25].includes(p.yazi)) out.yazi = p.yazi; // 13.6: yazı boyutu (varsayılan 1)
+    if ([0.9, 1.12, 1.25, 1.4].includes(p.yazi)) out.yazi = p.yazi; // 13.6: yazı boyutu (varsayılan 1)
   }
   return out;
 }
@@ -529,7 +529,7 @@ export function saveSalonProgram(tarih, hareketler) {
   return call('savePlan', { tarih, hareketler }, 'salon');
 }
 
-/** Salon programı: o günün salonPlan satırlarını siler (13.10.1; saveSalon da siler). */
+/** Salon programı: o günün salonPlan satırlarını siler (13.11.0; saveSalon da siler). */
 export function salonProgramYapildi(tarih) {
   return call('planYapildi', { tarih }, 'salon');
 }

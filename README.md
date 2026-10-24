@@ -372,6 +372,20 @@ Hata kodları: `AUTH`, `LOCKED`, `DUPLICATE`, `SAME_DAY`, `NOT_FOUND`, `PLAN_MIS
 3. Telefonda yeni yerel anahtarlar: `ysk.hazir` (hazır olma kontrolleri, 60 gün), `ysk.hareketNot` (harekete sabit not);
    ayarlar: `yer` (Salon/Ev/Otel), `bildirim`. Ayarlar → Yedek indir: anahtarlar hariç JSON.
 
+## Sürüm 13.11.0'da neler var (dağıtım: yalnız uygulama; .gs değişmedi)
+
+- **Tek renk mantığı (rol başına tek renk):** sarı = birincil eylem/seçili (YÜZ, BAŞLA, Kaydet, İdmanı aç…); yeşil = yalnız durum (tamam,
+  hedefte, ağrı yok); amber = uyarı; kırmızı = kötü/gecikme/sil (6 ayrı kırmızı tek renge indi); dinlenme ve mola nötr (mavi kalktı).
+- **Blok renkleri soğuk → sıcak → soğuk:** WU krem, PS gül, AS somon, CD açık mavi. **Ana set** blok rengi yerine hedef temposunun
+  bölgesine göre ısı rampasını alır: REC gri-mavi → EN1 kehribar → EN2 turuncu → EN3 mercan → SP1 kırmızı → SP2 bordo → SP3 koyu bordo.
+  Aynı rampa tempo sayılarında, özet "Bölgelerde süre" çubuğunda ve form grafiklerinde de kullanılır (eski 7 renkli ölçek kalktı).
+- **Set kartı: yeni "ısı" stili (yüzme + kara):** çapraz yumuşak renk akışı, sol kenarda ince vurgu, blok/grup adı ve "3/7" başlıkta;
+  ana sette bölge hapı (EN3) ve 7 kademeli ısı ölçeği (bulunduğun bölge parlak). Diğer bloklarda soluk bölge kodu. Tekerlek solunda blok kodu.
+  Kara idmanı kartları kas grubu rengini aynı stille alır (Kalça fuşya, Ön kol açık pembe: ana sayfa moruyla karışmasın).
+- **Ana sayfa kimlik renkleri:** Yüzme su mavisi (#3FC1D9), Kara mor (#A78BFA); grafik serileri de aynı. Düğmeler hep sarı.
+- **Okunurluk:** yazı tabanı 14 px (harf aralıklı küçük başlıklar 13 px), soluk gri metinler açıldı (kontrast ≥ 7:1), yazı boyutuna
+  **En büyük (1.4)** eklendi. Açık temada DUR/BİTTİ yazısı görünmüyordu: düzeltildi.
+
 ## Sürüm 13.10.1'de neler var (dağıtım: yalnız uygulama)
 
 - **Set sonu dinlenmesi:** Geri sayım artık ince şerit değil; kartta kalan alanı dolduran büyük saat (rakam boyu ~28 → ~100 px).

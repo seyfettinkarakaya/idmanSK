@@ -8,10 +8,10 @@ export const GRUPLAR = [
   { key: 'Göğüs', renk: '#3D6FE8', kas: 'Büyük ve küçük göğüs' },
   { key: 'Biseps', renk: '#E5423A', kas: 'Kolun ön yüzü' },
   { key: 'Triseps', renk: '#33B5F0', kas: 'Kolun arka yüzü' },
-  { key: 'Ön kol', renk: '#F06BAE', kas: 'Bilek ve kavrama kasları' },
+  { key: 'Ön kol', renk: '#FF8FB1', kas: 'Bilek ve kavrama kasları' },
   { key: 'Sırt', renk: '#3DB24B', kas: 'Kanat, trapez, romboid, bel' },
   { key: 'Karın', renk: '#1EC6B8', kas: 'Core: düz ve yan karın' },
-  { key: 'Kalça', renk: '#9A4FE6', kas: 'Gluteus (kalça kasları)' },
+  { key: 'Kalça', renk: '#D946EF', kas: 'Gluteus (kalça kasları)' },
   { key: 'Kalça yanı', renk: '#A8D838', kas: 'Kalça fleksörü ve abdüktör' },
   { key: 'Bacak', renk: '#F5862A', kas: 'Ön/arka uyluk, baldır' },
 ];

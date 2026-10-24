@@ -756,9 +756,10 @@ sc('Ana sayfa: Yüzme kartında ilk planlı idman; İdmanı aç doğrudan girer,
   assert.ok(await p.$('#home-swim-metro svg.metro'), 'blok renkli hat');
   assert.strictEqual(await p.textContent('#home-open-text'), 'İdmanı aç');
   assert.strictEqual(await p.$$eval('.home-card .hc-hd .hc-name', (e) => e.map((x) => x.textContent).join(',')), 'Yüzme,Kara');
-  // Bölüm renkleri: Yüzme turkuaz, Salon amber
+  // Bölüm renkleri: Yüzme su mavisi, Kara mor
+  // 13.11 (bilerek değişti): kimlik renkleri yüzme #3FC1D9 (su mavisi), kara #A78BFA (mor); sarı yalnız birincil eylem rengi
   const colors = await p.$$eval('.home-card', (e) => e.map((x) => getComputedStyle(x, '::before').backgroundColor));
-  assert.deepStrictEqual(colors, ['rgb(45, 212, 191)', 'rgb(245, 165, 36)']);
+  assert.deepStrictEqual(colors, ['rgb(63, 193, 217)', 'rgb(167, 139, 250)']);
   await p.click('#home-open'); await s.waitScreen('program');
   assert.match(await s.title(), /×/);
   await p.click('#prog-back'); await s.waitScreen('days'); await p.click('#days-back'); await s.waitScreen('home');
@@ -999,7 +1000,8 @@ sc('Metin boyu alana uyar: kısa açıklama büyür, uzun açıklama küçülür
     const a = await m();
     await s.goTo(1);
     const b = await m();
-    assert.ok(a.fs >= 24, `${w}px kısa metin büyür (eski sabit boy 22–25): ${a.fs}`);
+    // 13.11 (bilerek değişti): kartın sol vurgusu ve bölge hapı 390 px altında açıklama alanını biraz daraltır (en az 22 px kalır)
+    assert.ok(a.fs >= (w < 390 ? 22 : 24), `${w}px kısa metin büyür (eski sabit boy 22–25): ${a.fs}`);
     assert.ok(b.fs >= 13 && b.fs < a.fs, `${w}px uzun metin küçülür: ${b.fs}`);
     for (const x of [a, b]) {
       assert.ok(!x.over && x.inside && !x.dOver, `${w}px taşma yok ${JSON.stringify(x)}`);
@@ -1175,7 +1177,8 @@ sc('Salon planlama: dağılım, öncelik, puanlı liste (⚠ ağrı), sıra, pla
   assert.deepStrictEqual(ev.map((e) => e.t), ['set', 'bitti']);
   assert.strictEqual(ev[1].ts - ev[0].ts, 30000, 'bitiş = başlangıç + 30 sn');
   // Başlanan hareket silinemez / değiştirilemez
-  await p.click('#sl-wheel .w-item.is-active .w-card');
+  // 13.11 (bilerek değişti): kart ortası artık bir kontrolün üstüne düşebiliyor (içerik yerleşimi değişti); başlık satırına dokunulur
+  await p.click('#sl-wheel .w-item.is-active .w-card', { position: { x: 40, y: 14 } });
   assert.ok(await p.isDisabled('#sl-detail [data-sact="del"]'));
   assert.ok(await p.isDisabled('#sl-detail [data-sact="swap"]'));
 });
