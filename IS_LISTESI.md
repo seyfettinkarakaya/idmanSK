@@ -699,6 +699,9 @@ Sürüm 8 görünümü korunuyor; v10/v11 önerileri beğenilmedi, görsel yenil
 
 ## Tamamlanan
 
+- [x] test-e2e.cjs kendi `adv`'ına da aynı düzeltme (runFor sonrası ölçüm); 8 koşuda 0 hata, tam takım temiz (24.10).
+- [x] Sürüm 13.10.1 (24.10): set sonu dinlenmesinde büyük saat; biten set özet şeridi ve "kapanacak" uyarısı sıradaki kartı ezmiyor. Dağıtım gerekmez.
+
 - [x] Sürüm 13.10.0 (24.10): yüzerken/dinlenirken kronometre rakamları dikey uzatıldı (boy ~2x), uzun süre (12:34) de büyük; tekrar kutuları ve hedef satırı odak düzeninde gizli. Dağıtım gerekmez.
 - [x] Kararsız e2e testleri (24.10): kök neden bulundu — harness `adv`: fastForward'dan hemen sonraki runFor(250) ara sıra sayfa saatini geri alıyordu (çift dokunma koruması sonraki basışı yutuyor; 'Tam idman DUR !== YÜZ'). `adv` runFor'dan sonra yeniden ölçüp ilerletir; 'Tam idman' 20 koşuda 0 hata (önceden ~4'te 1), tam takım temiz. Diğer eski 'zaman aşımı' notları aynı nedenden olabilir; görülürse yeniden bakılır.
 

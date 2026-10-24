@@ -532,7 +532,9 @@ sc('Seti erken bitirme: dinlenirken kaydır → uyarı → YÜZ n/N; geri kaydı
   await p.waitForTimeout(700);
   await s.tap(65); await s.tap(15); await s.tap(65); await s.tap(10); // 4×50: 2 tekrar
   await s.goTo(2);
-  assert.match(await s.text('.w-item.is-active .w-banner'), /4 × 50 FR 2\/4'te kapanacak · 2 tekrar yapılmadı/);
+  // 13.10.1 (bilerek değişti): "2/4'te kapanacak" uyarı şeridi sıradaki kartın açıklamasını eziyordu; kalktı
+  // (biten setin durumu kendi kartında: ERKEN BİTTİ etiketi).
+  assert.strictEqual(await p.$$eval('.w-item.is-active .w-banner', (e) => e.length), 0);
   assert.strictEqual(await s.sub(), '4 × 100 FR Swim · 1. tekrar');
   await s.goTo(1);
   assert.strictEqual(await s.sub(), '3. tekrar başlar');
@@ -927,7 +929,7 @@ sc('Çok tekrar (12×100): şerit, Tekrar 7/12, son 3 süre; set bilgisi görün
   }
 });
 
-sc('Set sonu dinlenmesi: sıradaki setin içeriği öne, sayaç küçük şerit; kart taşmaz', async ({ launch }) => {
+sc('Set sonu dinlenmesi: sıradaki setin içeriği öne, sayaç kalan alanda büyük (13.10.1); özet şeridi yok; kart taşmaz', async ({ launch }) => {
   const rows = [prow(T23, 1, 'WU', 1, 200, 'Swim', '04:00', '01:00'), prow(T23, 2, 'AS', 6, 50, 'Kick', '01:20', '00:15', 'Finn'), prow(T23, 3, 'CD', 1, 200, 'Swim', '04:00', '')];
   rows[1][7] = 'Sağ/Sol rotasyon, omuz-çene hattı. Son 2 tekrar hızlı.';
   for (const vp of [{ width: 375, height: 667 }, { width: 430, height: 932 }]) {
@@ -937,21 +939,23 @@ sc('Set sonu dinlenmesi: sıradaki setin içeriği öne, sayaç küçük şerit;
     await p.waitForTimeout(800);
     assert.strictEqual(await s.activeIdx(), 1);
     const m = await p.$eval('.w-item.is-active', (it) => ({
-      mode: it.dataset.mode, sub: it.querySelector('.w-sub').textContent, desc: it.querySelector('.w-desc').textContent,
+      mode: it.dataset.mode, sub: it.querySelector('.w-title small').textContent, // 13.10.1 (bilerek değişti): stil·tür başlıkla aynı satırda (alan saate kalır)
+      desc: it.querySelector('.w-desc').textContent,
       tiles: it.querySelectorAll('.w-tile').length, alet: it.querySelector('.w-foot').textContent.includes('Finn'),
-      mini: !!it.querySelector('.w-timer.is-mini'), big: it.querySelector('.w-timer.is-mini .w-tbig').textContent,
-      banner: it.querySelector('.w-banner').textContent,
+      boxH: it.querySelector('.w-timer').getBoundingClientRect().height, digitH: it.querySelector('.w-timer .w-tbig').getBoundingClientRect().height,
+      big: it.querySelector('.w-timer .w-tbig').textContent, banner: it.querySelectorAll('.w-banner').length,
     }));
     const tag = `${vp.width}px ${JSON.stringify(m)}`;
     assert.strictEqual(m.mode, 'next', tag);
     assert.strictEqual(m.sub, 'FR · Kick', tag);
     assert.match(m.desc, /^Sağ\/Sol rotasyon/, tag);
-    assert.ok(m.mini, tag);
+    // 13.10.1 (bilerek değişti): sayaç artık ince şerit değil, kartta kalan alanı dolduran büyük saat
+    assert.ok(m.boxH >= 84 && m.digitH >= 60, tag);
     const vis = await p.$eval('.w-item.is-active', (it) => (it.querySelector('.w-tiles').offsetParent ? it.querySelector('.w-foot').textContent : it.querySelector('.w-ninfo').textContent).replace(/\s+/g, ' '));
     assert.match(vis, /Finn/, `alet görünmeli: ${tag} ${vis}`);
     if (vp.width === 430) assert.strictEqual(m.tiles, 2);
     assert.match(m.big, /^0:4\d$/, tag);
-    assert.match(m.banner, /1 × 200 FR bitti/, tag);
+    assert.strictEqual(m.banner, 0, `biten set özeti sıradaki kartı ezmemeli: ${tag}`);
     assert.ok((await fitsCard(p)) <= 1, `kart taşmamalı: ${tag} ${await fitsCard(p)}`);
     assert.strictEqual(await s.label(), 'YÜZ');
     assert.strictEqual(await s.sub(), '6 × 50 FR Kick · 1. tekrar');

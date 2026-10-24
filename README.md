@@ -372,6 +372,13 @@ Hata kodları: `AUTH`, `LOCKED`, `DUPLICATE`, `SAME_DAY`, `NOT_FOUND`, `PLAN_MIS
 3. Telefonda yeni yerel anahtarlar: `ysk.hazir` (hazır olma kontrolleri, 60 gün), `ysk.hareketNot` (harekete sabit not);
    ayarlar: `yer` (Salon/Ev/Otel), `bildirim`. Ayarlar → Yedek indir: anahtarlar hariç JSON.
 
+## Sürüm 13.10.1'de neler var (dağıtım: yalnız uygulama)
+
+- **Set sonu dinlenmesi:** Geri sayım artık ince şerit değil; kartta kalan alanı dolduran büyük saat (rakam boyu ~28 → ~100 px).
+  Başlık ve stil · tür tek satıra indi. Biten setin yeşil özet şeridi ("✓ … bitti · ort.") ve sarı "…'te kapanacak"
+  uyarısı sıradaki setin kartından kalktı; biten setin gerçekleşme bilgisi kendi kartında (ortalama, tekrar süreleri,
+  ERKEN BİTTİ etiketi) durur. Sıradaki setin açıklaması, Hedef/Dinlen ve tempo bilgisi eksiksiz okunur.
+
 ## Sürüm 13.10'da neler var (dağıtım: yalnız uygulama; .gs değişmedi)
 
 - **Büyük kronometre:** Yüzerken ve dinlenirken saat rakamları dikey uzatıldı (boy yaklaşık 100 → 210 px+); 10 dakikayı

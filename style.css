@@ -941,9 +941,6 @@ button {
   .w-item.m-live .w-title, .w-item.m-next .w-title, .w-item.m-sum .w-title { font-size: 48px; }
 }
 
-.w-banner { margin-top: 10px; padding: 10px 12px; border-radius: 14px; font-family: var(--num); font-size: 20px; font-weight: 700; }
-.w-banner.ok { background: rgba(61, 220, 132, 0.10); color: var(--done); }
-.w-banner.warn { background: rgba(255, 176, 32, 0.14); border: 1px solid rgba(255, 176, 32, 0.6); color: var(--warn); font-family: 'Archivo', sans-serif; font-size: 17px; }
 .w-summary { margin-top: 10px; font-size: 22px; font-weight: 700; color: var(--s3); }
 .w-summary b { color: var(--done); }
 
@@ -1079,11 +1076,9 @@ button {
   .w-item.m-live .w-tbig.l6, .w-item.m-live .w-tbig.l7 { font-size: 72px; }
 }
 
-/* Set sonu dinlenmesi: sayaç kartın altında ince şerit */
-.w-timer.is-mini { flex: none; margin-top: auto; flex-direction: row; justify-content: space-between; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 16px; background: rgba(56, 189, 248, 0.10); border: 1px solid rgba(56, 189, 248, 0.4); }
-.w-timer.is-mini .w-tmode { font-size: 11px; letter-spacing: 1.5px; max-width: 40%; }
-.w-timer.is-mini .w-tbig, .w-timer.is-mini .w-tbig.l5, .w-timer.is-mini .w-tbig.l6, .w-timer.is-mini .w-tbig.l7 { order: 3; font-size: 40px; letter-spacing: 0; line-height: 1; }
-.w-timer.is-mini .w-tsub { display: none; }
+/* Set sonu dinlenmesi (13.10.1): sayaç kartta kalan alanı doldurur; ayrıntılar odak düzeni bölümünde */
+.w-item.m-next .w-timer { flex: 3 1 0; min-height: 84px; margin-top: 8px; }
+.w-item.m-next .w-tsub { display: none; }
 .w-item.m-next .w-desc { font-size: 19px; margin-top: 6px; }
 .w-item.m-next .w-tiles { margin-top: 8px; padding-top: 0; }
 .w-item.m-next .w-tile b { font-size: 40px; }
@@ -1118,25 +1113,18 @@ button {
 .dt-row b { color: var(--text); font-size: 26px; }
 .dt-hint { margin-top: 20px; text-align: center; font-size: 16px; font-weight: 700; color: var(--muted); }
 
-.w-item.m-next.fit-1 .w-banner { padding: 6px 10px; font-size: 17px; }
-.w-item.m-next.fit-1 .w-timer.is-mini { padding: 5px 10px; }
-.w-item.m-next.fit-1 .w-timer.is-mini .w-tbig { font-size: 32px; }
-.w-item.m-next.fit-2 .w-banner { margin-top: 4px; font-size: 15px; }
-.w-item.m-next.fit-3 .w-foot { flex-direction: row; flex-wrap: wrap; gap: 0 10px; }
+.w-item.m-next.fit-1 .w-item.m-next.fit-2 .w-item.m-next.fit-3 .w-foot { flex-direction: row; flex-wrap: wrap; gap: 0 10px; }
 /* Kısa ekranda sıradaki set kartı: kutular ve alt satır yerine tek bilgi paragrafı */
 .w-ninfo { display: none; margin-top: 8px; font-size: 19px; font-weight: 700; line-height: 1.35; color: var(--s2); }
 .w-ninfo b { color: var(--text); }
 .w-item.m-next.fit-2 .w-tiles, .w-item.m-next.fit-2 .w-foot { display: none; }
 .w-item.m-next.fit-2 .w-ninfo { display: block; }
 .w-item.m-next.fit-3 .w-ninfo { font-size: 16px; margin-top: 4px; }
-.w-item.m-next.fit-3 .w-banner { padding: 4px 8px; }
-.w-item.m-next.fit-3 .w-timer.is-mini { padding: 3px 10px; }
-.w-item.m-next.fit-3 .w-timer.is-mini .w-tbig { font-size: 28px; }
-.w-item.m-next.fit-3 .w-title { font-size: 44px; }
+.w-item.m-next.fit-3 .w-item.m-next.fit-3 .w-title { font-size: 44px; }
 .w-item.m-next.fit-3 .w-sub { font-size: 22px; }
 /* Küçük başlıklı kartlarda stil · tür sığmazsa alt satıra boşluksuz geçer */
-.w-item.m-live .w-title, .w-item.m-sum .w-title { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 8px; }
-.w-item.m-live .w-title small, .w-item.m-sum .w-title small { margin-left: 0; line-height: 1.05; }
+.w-item.m-live .w-title, .w-item.m-next .w-title, .w-item.m-sum .w-title { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 8px; }
+.w-item.m-live .w-title small, .w-item.m-next .w-title small, .w-item.m-sum .w-title small { margin-left: 0; line-height: 1.05; }
 
 /* --- sürüm 11: idman anında düzenleme (duzen.js) ---------------------------- */
 .dt-acts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 18px; }
@@ -1910,14 +1898,19 @@ b.tur, .tur { color: #F97316; }
 #wheel.is-focus .w-tm { visibility: hidden; }
 #wheel.is-focus .w-nm { font-size: 18px; }
 #wheel.is-focus .w-item.m-live .w-idesc { display: none; } /* açıklama: karta dokununca ayrıntıda */
-#wheel.is-focus .w-item.m-live .w-timer { container-type: size; padding: 4px 4px 8px; margin-top: 6px; }
-#wheel.is-focus .w-item.m-live .w-tmode { font-size: 16px; }
+#wheel.is-focus .w-item.m-live .w-timer, #wheel.is-focus .w-item.m-next .w-timer { container-type: size; padding: 4px 4px 8px; margin-top: 6px; }
+#wheel.is-focus .w-item.m-live .w-tmode, #wheel.is-focus .w-item.m-next .w-tmode { font-size: 16px; }
 #wheel.is-focus .w-item.m-live .w-tsub { margin-top: 4px; font-size: 26px; }
 /* 13.10: kulvara dokunup dönerken tek bakışta okunsun — set başlığı küçülür, tekrar kutuları gizlenir
    (tekrar sayısı "YÜZÜYOR · 3/4" yazısında), rakamlar dikey uzatılır (yatayda yer yok). */
 #wheel.is-focus .w-item.m-live .w-title { font-size: 40px; }
 #wheel.is-focus .w-item.m-live .w-reps { display: none; }
 #wheel.is-focus .w-item.m-live .w-info { display: none; } /* hedef zaten saatin altında */
+/* Set sonu dinlenmesi (13.10.1): alt yazı yok, rakam kutunun tamamını kullanır. */
+#wheel.is-focus .w-item.m-next .w-tbig { --sy: 2.2; --fs: min(54cqw, calc((100cqh - 34px) / 1.87)); font-size: var(--fs); height: calc(var(--fs) * 0.85 * var(--sy)); display: flex; align-items: center; justify-content: center; letter-spacing: -0.03em; transform: scaleY(var(--sy)); transform-origin: center; pointer-events: none; }
+#wheel.is-focus .w-item.m-next .w-tbig.l5 { --fs: min(43cqw, calc((100cqh - 34px) / 1.87)); }
+#wheel.is-focus .w-item.m-next .w-tbig.l6 { --fs: min(36cqw, calc((100cqh - 34px) / 1.87)); }
+#wheel.is-focus .w-item.m-next .w-tbig.l7 { --fs: min(31cqw, calc((100cqh - 34px) / 1.87)); }
 /* Rakam boyu: genişlik (karakter sayısına göre) ya da uzatılmış boyun yüksekliği hangisi önce dolarsa.
    --sy dikey uzatma; kutu yüksekliği 0.85 × boy × --sy (satır yüksekliği 0.85), uzatma ortadan yapılır. */
 #wheel.is-focus .w-item.m-live .w-tbig { --sy: 2.2; --fs: min(54cqw, calc((100cqh - 54px) / 1.87)); font-size: var(--fs); height: calc(var(--fs) * 0.85 * var(--sy)); display: flex; align-items: center; justify-content: center; letter-spacing: -0.03em; transform: scaleY(var(--sy)); transform-origin: center; pointer-events: none; /* uzatılan kutu düğmelerin üstüne taşar */ }

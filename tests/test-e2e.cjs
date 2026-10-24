@@ -171,15 +171,22 @@ const server = http.createServer((req, res) => {
   };
   // Tek zamanlayıcı: büyük düğme YÜZ → DUR → YÜZ (ilk YÜZ idmanı da başlatır); süreler dokunuş zamanlarından
   const label = () => page.textContent('#btn-main-label');
-  const adv = async (sec) => { // sahte saat fastForward'u ara sıra uygulamıyor: ilerleyene dek tekrar
+  // 24.10: fastForward'dan hemen sonraki runFor(250) ara sıra sayfa saatini geri alıyordu (harness.cjs adv ile aynı
+  // kök neden): runFor'dan sonra da ölçülür, saat geri kaldıysa yeniden ilerletilir.
+  const adv = async (sec) => {
     const want = sec * 1000; const t0 = await page.evaluate(() => Date.now());
-    for (let k = 0; k < 5; k++) {
-      let done = (await page.evaluate(() => Date.now())) - t0;
-      if (done < want - 20 && k > 0) { await page.waitForTimeout(40); done = (await page.evaluate(() => Date.now())) - t0; }
-      if (done >= want - 20) break;
-      await page.clock.fastForward(want - done);
+    const gecen = async () => (await page.evaluate(() => Date.now())) - t0;
+    for (let k = 0; k < 8; k++) {
+      let done = await gecen();
+      if (done < want - 20 && k > 0) { await page.waitForTimeout(40); done = await gecen(); }
+      if (done >= want - 20) {
+        await page.clock.runFor(250);
+        if ((await gecen()) >= want - 20) return;
+        continue;
+      }
+      if (k >= 2) await page.clock.runFor(want - done); else await page.clock.fastForward(want - done);
     }
-    await page.clock.runFor(250);
+    throw new Error(`adv(${sec}): sahte saat ilerlemedi`);
   };
   // Yük altında basış geç işlenebilir: düğme yazısı değişene dek (en çok 1,5 sn) beklenir.
   const tap = async (sec) => {
@@ -370,7 +377,7 @@ const server = http.createServer((req, res) => {
   assert.strictEqual(await page.evaluate(() => localStorage.getItem('ysk.session')), null);
   await page.click('#days-back');
   await page.waitForSelector('#screen-home:not([hidden])');
-  assert.strictEqual(await page.textContent('#app-version'), 'Sürüm 13.10.0');
+  assert.strictEqual(await page.textContent('#app-version'), 'Sürüm 13.10.1');
   assert.match(await page.textContent('#home-history-meta'), /^3 kayıt$/);
 
   // Toplu silme: yalnızca telefondaki kopyalar gider

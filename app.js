@@ -1,25 +1,25 @@
 // idmanSK — arayüz. Veriye yalnızca data.js üzerinden erişir.
 
-import * as data from './data.js?v=13.10.0';
-import { Wheel } from './wheel.js?v=13.10.0';
-import * as zaman from './zaman.js?v=13.10.0';
-import * as ref from './ref.js?v=13.10.0';
-import * as duzen from './duzen.js?v=13.10.0';
-import * as salon from './salon.js?v=13.10.0';
-import * as grup from './grup.js?v=13.10.0';
-import * as kisit from './kisit.js?v=13.10.0';
-import * as yuk from './yuk.js?v=13.10.0';
-import * as harita from './harita.js?v=13.10.0';
-import * as bilgi from './bilgi.js?v=13.10.0';
-import * as analiz from './analiz.js?v=13.10.0';
-import * as video from './video.js?v=13.10.0';
-import * as hazir from './hazir.js?v=13.10.0';
-import { VIDEOLAR } from './videolar.js?v=13.10.0';
-import * as model from './model.js?v=13.10.0';
-import * as gosterge from './gosterge.js?v=13.10.0';
+import * as data from './data.js?v=13.10.1';
+import { Wheel } from './wheel.js?v=13.10.1';
+import * as zaman from './zaman.js?v=13.10.1';
+import * as ref from './ref.js?v=13.10.1';
+import * as duzen from './duzen.js?v=13.10.1';
+import * as salon from './salon.js?v=13.10.1';
+import * as grup from './grup.js?v=13.10.1';
+import * as kisit from './kisit.js?v=13.10.1';
+import * as yuk from './yuk.js?v=13.10.1';
+import * as harita from './harita.js?v=13.10.1';
+import * as bilgi from './bilgi.js?v=13.10.1';
+import * as analiz from './analiz.js?v=13.10.1';
+import * as video from './video.js?v=13.10.1';
+import * as hazir from './hazir.js?v=13.10.1';
+import { VIDEOLAR } from './videolar.js?v=13.10.1';
+import * as model from './model.js?v=13.10.1';
+import * as gosterge from './gosterge.js?v=13.10.1';
 
 // Telefonun güncel kodu çalıştırıp çalıştırmadığını görmek için ekranda gösterilir.
-export const APP_VERSION = '13.10.0';
+export const APP_VERSION = '13.10.1';
 
 const $ = (id) => document.getElementById(id);
 
@@ -2048,7 +2048,8 @@ function renderItem(node, s, i, cum) {
 
   // Hazır kartta başlık büyük: stil · tür Sürüm 9'daki gibi kendi satırında. Küçük başlıklı
   // kartlarda (yüzerken, dinlenirken, özet) başlığın yanında durur.
-  const title = mode === 'ready' || mode === 'next'
+  // 13.10.1: sıradaki set kartında (set sonu dinlenmesi) başlık ve stil·tür tek satırda: alan saate kalır.
+  const title = mode === 'ready'
     ? `<div class="w-title">${esc(`${T} × ${s.mesafe}`)}</div>${styleTur ? `<div class="w-sub">${esc(styleTur)}</div>` : ''}`
     : `<div class="w-title">${esc(`${T} × ${s.mesafe}`)}${styleTur ? `<small>${esc(styleTur)}</small>` : ''}</div>`;
   const timer = '<div class="w-timer"><span class="w-tmode"></span><b class="w-tbig n"></b><span class="w-tsub n"></span></div>';
@@ -2061,19 +2062,14 @@ function renderItem(node, s, i, cum) {
     const plus = st.phase === 'rest' && st.cur === i ? '<button class="w-plus" data-plus>＋1 tekrar</button>' : '';
     body = `${title}${setInfo(s)}${T > 4 ? repStrip(i) : repBoxes(i, true)}${plus}${timer}`;
   } else if (mode === 'next') {
-    const cs = state.plan.setler[st.cur];
-    const cd = zaman.doneReps(st, st.cur);
-    const ct = tekrarOf(cs);
-    const banner = cd >= ct || legacyDone(st.cur)
-      ? `<div class="w-banner ok">✓ ${esc(setTitle(cs))} bitti · ort. ${fmtAvg(zaman.effectiveTimes(zaman.repTimes(st, st.cur)).avgMs)} · ${cd}/${ct}</div>`
-      : `<div class="w-banner warn">⚠ ${esc(setTitle(cs))} ${cd}/${ct}'te kapanacak · ${ct - cd} tekrar yapılmadı</div>`;
-    // Set sonu dinlenmesi: sıradaki setin içeriği öne alınır, sayaç küçülüp alta iner.
-    body = `${title}${banner}
+    // Set sonu dinlenmesi: sıradaki setin içeriği öne alınır, kalan alanı büyük sayaç doldurur.
+    // 13.10.1: biten setin özeti ("✓ … bitti · ort.") sıradaki kartın üstüne binmez; kendi kartında kalır.
+    body = `${title}
       ${s.aciklama ? `<div class="w-desc">${esc(s.aciklama)}</div>` : ''}
       ${tiles ? `<div class="w-tiles">${tiles}</div>` : ''}
       ${foot}
       <div class="w-ninfo">${setInfo({ ...s, aciklama: '' }).replace(/<\/?div[^>]*>/g, '')}${s.hedef && pacePer100(parseSec(s.hedef), s.mesafe) ? ` · Tempo ${paceHtml(parseSec(s.hedef), s)}` : ''}</div>
-      ${timer.replace('class="w-timer"', 'class="w-timer is-mini"')}`;
+      ${timer}`;
   } else if (mode === 'sum') {
     const times = zaman.repTimes(st, i);
     const avg = times.length ? fmtAvg(zaman.effectiveTimes(times).avgMs) : '';
@@ -4539,8 +4535,8 @@ function slPlusSet() {
 
 let hdb = null; // hareketdb.js (yalnızca kart açılınca yüklenir)
 let adb = null; // adimlar.js (Türkçe adımlar, yalnızca kart açılınca)
-const adimYukle = () => adb || (adb = import('./adimlar.js?v=13.10.0').then((m) => m.ADIMLAR).catch(() => ({})));
-const hdbYukle = () => hdb || (hdb = import('./hareketdb.js?v=13.10.0'));
+const adimYukle = () => adb || (adb = import('./adimlar.js?v=13.10.1').then((m) => m.ADIMLAR).catch(() => ({})));
+const hdbYukle = () => hdb || (hdb = import('./hareketdb.js?v=13.10.1'));
 let bilgiTimer = null;
 
 /** Hareketin videosu (H · Video önce, sonra uygulamadaki liste) ya da null. */
