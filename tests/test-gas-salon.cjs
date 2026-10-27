@@ -282,7 +282,8 @@ test('13.9 karaSeans Tarih başlangıç saatiyle (karaVeri saatsiz); başlangı�
   const r = e.call({ action: 'saveSalon', tarih: '2026-10-14', hareketler: [{ hareket: 'Dead Bug', set: 3, tekrar: 10, sure: '04:00' }], seans: { sure: '0:40:00', rpe: 6, baslangic: t } });
   assert.ok(r.ok, JSON.stringify(r));
   assert.strictEqual(e.sheets.karaSeans.data[1][0].getTime(), t);
-  assert.strictEqual(e.sheets.karaSeans.fmt[1][0], 'dd.mm.yyyy hh:mm');
+  // 13.12 (bilerek değişti): timestamp saniyeli ve açık 24 saat (HH) biçiminde yazılır
+  assert.strictEqual(e.sheets.karaSeans.fmt[1][0], 'dd.mm.yyyy HH:mm:ss');
   assert.strictEqual(e.sheets.karaVeri.data[1][0].getUTCHours(), 0, 'karaVeri saatsiz');
   assert.deepStrictEqual(e.call({ action: 'getSalon' }).data.seans.map((x) => x.tarih), ['2026-10-14'], 'okurken gün');
 });

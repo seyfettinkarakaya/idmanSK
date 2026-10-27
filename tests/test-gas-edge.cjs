@@ -218,6 +218,17 @@ test('13.8 Etiket: plandan okunur (sütun yoksa alan yok), değişmeyen sette pl
   assert.deepStrictEqual(E.slice(1, 4).map((x) => x[ci]), ['Aerobik Taban -1', 'Eşik', 'Bonus']);
 });
 
+test('13.12 Seans Tarih öğleden sonra: 27.10.2026 14:24:08 gerçek timestamp (saniyeli), 24 saat biçimli; 12 saate bölünmez', () => {
+  const e = env([row('2026-10-27', 1, 'WU', 1, 200)]);
+  const t = Date.UTC(2026, 9, 27, 14, 24, 8);
+  const r = e.call({ ...fin('2026-10-27', [{ sira: 1, tamamlandi: true, gercek: '04:00.0' }]), baslangic: t });
+  assert.ok(r.ok, JSON.stringify(r));
+  const c = e.sheets.seans.data[1][0];
+  assert.strictEqual(typeof c.getTime, 'function', 'metin değil, tarih-saat değeri');
+  assert.deepStrictEqual([c.getUTCHours(), c.getUTCMinutes(), c.getUTCSeconds()], [14, 24, 8]);
+  assert.strictEqual(e.sheets.seans.fmt[1][0], 'dd.mm.yyyy HH:mm:ss');
+});
+
 test('13.9 ikinci idman: onaysız SAME_DAY, ikinci:true ile yazılır; aynı başlangıç saati yinelenme; Seans Tarih saatli', () => {
   const e = env([row('2026-10-20', 1, 'WU', 1, 200), row('2026-10-20', 2, 'MS', 4, 100), row('2026-10-20', 3, 'CD', 1, 200)]);
   const t1 = Date.UTC(2026, 9, 20, 7, 42, 13);
@@ -228,7 +239,8 @@ test('13.9 ikinci idman: onaysız SAME_DAY, ikinci:true ile yazılır; aynı ba�
   assert.deepStrictEqual(e.sheets.Plan.data.slice(1).map((x) => x[1]), [2, 3], 'kalan setler planda');
   const S = e.sheets.seans;
   assert.strictEqual(S.data[1][0].getTime(), t1, 'Seans Tarih = başlangıç anı');
-  assert.strictEqual(S.fmt[1][0], 'dd.mm.yyyy hh:mm');
+  // 13.12 (bilerek değişti): timestamp saniyeli ve açık 24 saat (HH) biçiminde yazılır
+  assert.strictEqual(S.fmt[1][0], 'dd.mm.yyyy HH:mm:ss');
   assert.ok(!(e.sheets.eski.data[1][0].getUTCHours()), 'yuzmeVeri Tarih saatsiz kalır');
   // ikinci parça: onaysız reddedilir, hiçbir şey silinmez
   const t2 = Date.UTC(2026, 9, 20, 17, 5, 0);

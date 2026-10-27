@@ -913,24 +913,31 @@ sc('Çok tekrar (12×100): şerit, Tekrar 7/12, son 3 süre; set bilgisi görün
     const m = await p.$eval('.w-item.is-active', (it) => ({
       n: it.querySelectorAll('.w-strip i').length, ok: it.querySelectorAll('.w-strip i.ok').length, now: it.querySelectorAll('.w-strip i.now').length,
       boxes: it.querySelectorAll('.w-reps').length, rep: it.querySelector('.w-rep b').textContent, last: it.querySelector('.w-last3').textContent,
-      info: it.querySelector('.w-info').textContent, desc: it.querySelector('.w-idesc').textContent,
+      hd: it.querySelector('.w-hn b').textContent, zb: !!it.querySelector('.w-zb'),
     }));
     const tag = `${vp.width}px ${JSON.stringify(m)}`;
     assert.deepStrictEqual([m.n, m.ok, m.now, m.boxes], [12, 6, 1, 0], tag);
     assert.strictEqual(m.rep, 'Tekrar 7/12', tag);
     assert.strictEqual(m.last, 'Son: 1:31 · 1:32 · 1:33', tag);
-    assert.strictEqual(m.info, 'Hedef 1:30 · Dinlen 0:20 · Alet Paletsiz', tag);
-    assert.strictEqual(m.desc, 'Son 25 hızlı, dönüşte 5 dolfin', tag);
+    // 13.12 (bilerek değişti): yüzerken kartta yalnız başlık satırı, ince tekrar çubuğu ve dev saat; Hedef/Dinlen/Alet ve açıklama
+    // dinlenme ekranında (aşağıda) ve ayrıntı panelinde
+    assert.strictEqual(m.hd, 'ANA SET', tag);
     assert.ok((await fitsCard(p)) <= 1, `yüzerken kart taşmamalı: ${tag} ${await fitsCard(p)}`);
     await s.press(); await s.adv(5); // dinlenme
-    assert.strictEqual(await s.text('.w-item.is-active .w-rep b'), '7/12 bitti');
-    assert.strictEqual(await p.$$eval('.w-item.is-active .w-strip i.rs', (e) => e.length), 1);
-    assert.ok((await fitsCard(p)) <= 1, `dinlenirken kart taşmamalı: ${vp.width}px`);
+    // 13.12 (bilerek değişti): dinlenmede 12 tekrar kutusu (dokun → düzelt), orta saat, son tekrar/ortalama/tempo, sıradaki tekrar, açıklama
+    const rs = await p.$eval('.w-item.is-active', (it) => ({
+      boxes: it.querySelectorAll('.w-reps > div').length, done: it.querySelectorAll('.w-reps > div[data-rep]').length, rest: it.querySelectorAll('.w-reps > div.rest').length,
+      ri: it.querySelector('.w-ri').textContent.replace(/\s+/g, ' '), next: it.querySelector('.w-next2').textContent.replace(/\s+/g, ' ').trim(),
+    }));
+    assert.deepStrictEqual([rs.boxes, rs.done, rs.rest], [12, 7, 1], JSON.stringify(rs));
+    assert.match(rs.ri, /SON TEKRAR0:30.*ORTALAMA.*TEMPO/, JSON.stringify(rs)); // 7. tekrar 30 sn yüzüldü
+    assert.strictEqual(rs.next, 'Sıradaki: 8. tekrar · hedef 1:30', JSON.stringify(rs));
+    assert.ok((await fitsCard(p)) <= 1, `dinlenirken kart taşmamalı: ${vp.width}px ${await fitsCard(p)}`);
     await s.close();
   }
 });
 
-sc('Set sonu dinlenmesi: sıradaki setin içeriği öne, sayaç kalan alanda büyük (13.10.1); özet şeridi yok; kart taşmaz', async ({ launch }) => {
+sc('Set sonu dinlenmesi: sıradaki setin içeriği öne, sayaç orta boy şerit (13.12); biten set tek satır; özet şeridi yok; kart taşmaz', async ({ launch }) => {
   const rows = [prow(T23, 1, 'WU', 1, 200, 'Swim', '04:00', '01:00'), prow(T23, 2, 'AS', 6, 50, 'Kick', '01:20', '00:15', 'Finn'), prow(T23, 3, 'CD', 1, 200, 'Swim', '04:00', '')];
   rows[1][7] = 'Sağ/Sol rotasyon, omuz-çene hattı. Son 2 tekrar hızlı.';
   for (const vp of [{ width: 375, height: 667 }, { width: 430, height: 932 }]) {
@@ -950,8 +957,8 @@ sc('Set sonu dinlenmesi: sıradaki setin içeriği öne, sayaç kalan alanda bü
     assert.strictEqual(m.mode, 'next', tag);
     assert.strictEqual(m.sub, 'FR · Kick', tag);
     assert.match(m.desc, /^Sağ\/Sol rotasyon/, tag);
-    // 13.10.1 (bilerek değişti): sayaç artık ince şerit değil, kartta kalan alanı dolduran büyük saat
-    assert.ok(m.boxH >= 84 && m.digitH >= 60, tag);
+    // 13.12 (bilerek değişti): dinlenmede saat orta boy (kullanıcı: bilgi daha önemli); 13.10.1'deki "kalan alanı dolduran büyük saat" geri alındı
+    assert.ok(m.boxH >= 52 && m.digitH >= 52, tag);
     const vis = await p.$eval('.w-item.is-active', (it) => (it.querySelector('.w-tiles').offsetParent ? it.querySelector('.w-foot').textContent : it.querySelector('.w-ninfo').textContent).replace(/\s+/g, ' '));
     assert.match(vis, /Finn/, `alet görünmeli: ${tag} ${vis}`);
     if (vp.width === 430) assert.strictEqual(m.tiles, 2);
@@ -1000,8 +1007,8 @@ sc('Metin boyu alana uyar: kısa açıklama büyür, uzun açıklama küçülür
     const a = await m();
     await s.goTo(1);
     const b = await m();
-    // 13.11 (bilerek değişti): kartın sol vurgusu ve bölge hapı 390 px altında açıklama alanını biraz daraltır (en az 22 px kalır)
-    assert.ok(a.fs >= (w < 390 ? 22 : 24), `${w}px kısa metin büyür (eski sabit boy 22–25): ${a.fs}`);
+    // 13.11 (bilerek değişti): kartın sol vurgusu ve bölge hapı 390 px altında açıklama alanını biraz daraltır (375: 20 px, 320: 18 px)
+    assert.ok(a.fs >= (w <= 340 ? 18 : w < 390 ? 20 : 24), `${w}px kısa metin büyür (eski sabit boy 22–25): ${a.fs}`);
     assert.ok(b.fs >= 13 && b.fs < a.fs, `${w}px uzun metin küçülür: ${b.fs}`);
     for (const x of [a, b]) {
       assert.ok(!x.over && x.inside && !x.dOver, `${w}px taşma yok ${JSON.stringify(x)}`);

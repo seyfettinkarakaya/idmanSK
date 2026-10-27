@@ -128,13 +128,14 @@ const server = http.createServer((req, res) => {
     const a = document.querySelector('.w-item.is-active');
     const r = a.getBoundingClientRect(); const w = document.getElementById('wheel').getBoundingClientRect();
     const btns = [...document.querySelectorAll('#screen-program button')].filter(b => b.offsetParent).map(b => { const q = b.getBoundingClientRect(); return [b.id || b.textContent, Math.round(q.width), Math.round(q.height)]; });
-    return { title: a.querySelector('.w-title').textContent, font: parseFloat(getComputedStyle(a.querySelector('.w-title')).fontSize), top: r.top, bottom: r.bottom, wTop: w.top, wBottom: w.bottom, btns, count: document.querySelectorAll('.w-item.is-done').length, tag: a.querySelector('.w-tag').textContent, dist: document.getElementById('prog-dist').textContent, docW: document.documentElement.scrollWidth };
+    return { title: a.querySelector('.w-title').textContent, font: parseFloat(getComputedStyle(a.querySelector('.w-title')).fontSize), top: r.top, bottom: r.bottom, wTop: w.top, wBottom: w.bottom, btns, count: document.querySelectorAll('.w-item.is-done').length, tag: a.querySelector('.w-blk').textContent + ' · ' + a.querySelector('.w-hn b').textContent + ' · ' + a.querySelector('.w-hn small').textContent, dist: document.getElementById('prog-dist').textContent, docW: document.documentElement.scrollWidth };
   });
   console.log('Program:', JSON.stringify(info));
   assert.match(info.title, /^1 × 200/); assert.ok(info.font >= 40);
   assert.ok(info.top >= info.wTop && info.bottom <= info.wBottom, 'aktif kart tekerleğe sığmalı');
   for (const [n, w, h] of info.btns) assert.ok(w >= 60 && h >= 60, `dokunma hedefi küçük: ${n} ${w}x${h}`);
-  assert.strictEqual(info.count, 0); assert.match(info.tag, /WU · ISINMA · 1\/8/); assert.ok(info.docW <= 440);
+  assert.strictEqual(info.count, 0); // 13.12 (bilerek değişti): başlık = blok karesi (WU) + ISINMA + "set 1/8"; eski tek satır etiketin parçaları
+  assert.match(info.tag, /WU · ISINMA · set 1\/8/); assert.ok(info.docW <= 440);
   // Üstte toplam hedef süre; kartta 4. satır set/yığımlı; blok renkli şerit
   const top = await page.evaluate(() => {
     const a = document.querySelector('.w-item.is-active');

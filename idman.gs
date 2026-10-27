@@ -473,7 +473,9 @@ function seansStart_(ms, tarih, tz) {
   return dateKey_(d, tz) === tarih ? d : null;
 }
 
-var SEANS_SAAT_FMT = 'dd.mm.yyyy hh:mm'; // 13.9: seans Tarih'i başlangıç saatiyle
+// 13.9: seans Tarih'i başlangıç saatiyle. 13.12: gerçek tarih-saat (timestamp), saniyeli ve açık 24 saat (HH): küçük hh bazı
+// gösterimlerde 12 saat verdiği için öğleden sonraki idman gece görünüyordu (27.10: 14:24 → 02:24).
+var SEANS_SAAT_FMT = 'dd.mm.yyyy HH:mm:ss';
 
 /** Seans sayfasının Tarih hücresi: başlangıç saati varsa saatli, yoksa yalnız gün. */
 function seansTarihCell_(tarih, tz, baslangic) {

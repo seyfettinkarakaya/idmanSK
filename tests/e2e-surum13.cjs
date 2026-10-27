@@ -476,7 +476,8 @@ sc('13.9 Yarıda kesilen idman: kalanlar planda kalır; aynı gün ikinci idman 
   const S = s.env.sheets.seans;
   assert.strictEqual(S.data.length - 1, 1);
   assert.ok(S.data[1][0].getUTCHours() || S.data[1][0].getUTCMinutes(), 'Seans Tarih saatli');
-  assert.strictEqual(S.fmt[1][0], 'dd.mm.yyyy hh:mm');
+  // 13.12 (bilerek değişti): timestamp saniyeli ve açık 24 saat (HH) biçiminde yazılır
+  assert.strictEqual(S.fmt[1][0], 'dd.mm.yyyy HH:mm:ss');
   assert.strictEqual(s.env.sheets.eski.data[1][0].getUTCHours(), 0, 'yuzmeVeri Tarih saatsiz');
   // ikinci parça: kalan setlerden biri yapılır
   await s.adv(5); await s.waitScreen('days');
@@ -506,12 +507,13 @@ sc('13.11 Renk: ana sette bölge hapı + 7 kademeli ısı ölçeği; diğer blok
   const s = await launch({ ref: true }); const p = s.page;
   await s.openToday();
   // WU (200 m, hedef 4:00): ölçek yok, soluk bölge kodu
-  const wu = await p.$eval('.w-item.is-active', (n) => ({ pill: n.querySelector('.w-ztag') && n.querySelector('.w-ztag').className, meter: !!n.querySelector('.w-meter'), bk: n.querySelector('.w-bk').textContent }));
+  // 13.12 (bilerek değişti): başlık = blok karesi + blok adı + bölge rozeti (.w-zb); eski .w-ztag hapı kalktı
+  const wu = await p.$eval('.w-item.is-active', (n) => ({ pill: n.querySelector('.w-zb') && n.querySelector('.w-zb').className, meter: !!n.querySelector('.w-meter'), bk: n.querySelector('.w-blk').textContent }));
   assert.ok(wu.pill && /is-plain/.test(wu.pill) && !wu.meter && wu.bk === 'WU', JSON.stringify(wu));
   await s.goTo(2);
-  const ms = await p.$eval('.w-item.is-active', (n) => ({ pill: n.querySelector('.w-ztag').textContent, cls: n.querySelector('.w-ztag').className, on: [...n.querySelectorAll('.w-meter i')].filter((i) => i.classList.contains('on')).length, all: n.querySelectorAll('.w-meter i').length, bk: n.querySelector('.w-bk').textContent }));
+  const ms = await p.$eval('.w-item.is-active', (n) => ({ pill: n.querySelector('.w-zb b').textContent, cls: n.querySelector('.w-zb').className, on: [...n.querySelectorAll('.w-meter i')].filter((i) => i.classList.contains('on')).length, all: n.querySelectorAll('.w-meter i').length, bk: n.querySelector('.w-blk').textContent, name: n.querySelector('.w-hn b').textContent }));
   assert.equal(ms.all, 7, JSON.stringify(ms)); assert.equal(ms.on, 1, JSON.stringify(ms));
-  assert.match(ms.cls, /\bz\d\b/, JSON.stringify(ms)); assert.equal(ms.bk, 'MS');
+  assert.match(ms.cls, /\bz\d\b/, JSON.stringify(ms)); assert.equal(ms.bk, 'MS'); assert.equal(ms.name, 'ANA SET');
   assert.equal(ms.pill, await p.$eval('.w-item.is-active .w-meter i.on', (i) => ['REC', 'EN1', 'EN2', 'EN3', 'SP1', 'SP2', 'SP3'][Number(i.className.match(/z(\d)/)[1]) - 1]));
   // ana set kartının rengi bölgeden: tekerlek çizgisi/nokta rengi kartın --c değeri
   const c = await p.$eval('.w-item.is-active', (n) => n.style.getPropertyValue('--c'));
@@ -525,6 +527,47 @@ sc('13.11 Renk: ana sette bölge hapı + 7 kademeli ısı ölçeği; diğer blok
   assert.equal(await p.evaluate(() => document.documentElement.style.zoom), '1.4');
   assert.equal((await s.ls('ysk.prefs')).yazi, 1.4);
   await p.click('#pref-yazi [data-v="1"]');
+});
+
+sc('13.12 Düzeltme (yüzme): dinlenirken biten tekrar kutusuna dokun → süre ±5 sn, kutu ve özet düzeltilmiş; yüzerken kutular kilitli', async ({ launch }) => {
+  const s = await launch({ ref: true }); const p = s.page;
+  await s.openToday();
+  await s.tap(240); await s.tap(20);           // 1. set bitti, 2. sete geçilir
+  await p.waitForTimeout(800);
+  await s.tap(65); await s.tap(5);              // 4×50: 1. tekrar yüzüldü (1:05) → dinlenme
+  const box = '.w-item.is-active .w-reps [data-rep="0"]';
+  assert.equal(await p.$eval(box + ' b', (b) => b.textContent.trim()), '1:05');
+  await p.click(box); await s.waitModal('tekrar süreleri');
+  await p.click('#modal [data-dz="0:5"]');
+  await s.modalClick('Kaydet');
+  await p.waitForSelector('#modal', { state: 'hidden' });
+  assert.equal(await p.$eval(box + ' b', (b) => b.textContent.trim()), '1:10', 'kutu düzeltilmiş süreyi gösterir');
+  assert.match(await p.$eval('.w-item.is-active .w-ri', (e) => e.textContent.replace(/\s+/g, ' ')), /SON TEKRAR1:10/, 'son tekrar bilgisi de düzeltmeyi kullanır');
+  const ed = (await s.session()).form.edits;
+  assert.deepEqual(Object.values(ed)[0], { 0: 70000 });
+  await s.tap(0); await s.adv(5);               // 2. tekrar yüzülüyor: kutular kilitli
+  const before = (await s.session()).form.edits;
+  await p.click('.w-item.is-active .w-card', { position: { x: 30, y: 12 } }).catch(() => {});
+  assert.deepEqual((await s.session()).form.edits, before, 'yüzerken düzeltme açılmaz');
+});
+
+sc('13.12 Düzeltme (kara): biten her set kutusu (önceki setler dahil) tekrar ve ağırlığı düzeltir; özete düzeltilmiş gider', async ({ launch }) => {
+  const s = await launch({ salonSheets: bugunPlanli(salonV12()), ref: true }); const p = s.page;
+  await s.waitScreen('home');
+  await p.waitForFunction(() => !document.getElementById('home-gym-go').hidden);
+  await gymBasla(s);
+  await p.waitForSelector('#sl-wheel .w-item.is-active');
+  await setler(s, 2);                            // iki set bitti
+  const box1 = '#sl-wheel .w-item.is-active [data-sl-set$=":0"]';
+  assert.equal(await p.$eval(box1 + ' b', (b) => b.textContent.trim()), '10');
+  await p.click(box1); await s.waitModal('1. set');
+  await p.click('#modal [data-sd="r:-1"]'); await p.click('#modal [data-sd="r:-1"]');
+  await s.modalClick('Kaydet');
+  await p.waitForSelector('#modal', { state: 'hidden' });
+  assert.equal(await p.$eval(box1 + ' b', (b) => b.textContent.trim()), '8', '1. set (önceki set) 8 tekrar');
+  assert.equal(await p.$eval('#sl-wheel .w-item.is-active [data-sl-set$=":1"] b', (b) => b.textContent.trim()), '10', '2. set aynı kaldı');
+  const reps = Object.values((await s.ls('ysk.salonSession')).reps)[0];
+  assert.equal(reps[0], 8); assert.ok(reps[1] == null, 'girilmeyen set planlanan tekrar sayılır');
 });
 
 if (require.main === module) runScenarios('Sürüm 13 senaryoları', only ? S.filter(([n]) => n.toLowerCase().includes(only.toLowerCase())) : S, 8160);

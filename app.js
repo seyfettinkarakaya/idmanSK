@@ -142,8 +142,16 @@ const BLOKLAR = {
   AS: { ad: 'Yardımcı set', renk: '#E59A84', ink: '#2B120A' },
   CD: { ad: 'Soğuma', renk: '#A9C4E3', ink: '#0C1A2B' },
 };
+/** Dolgu rengi üzerindeki en okunur yazı rengi (siyaha yakın ya da beyaz). */
+function inkOn(hex) {
+  const ch = (v) => { const c = v / 255; return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4; };
+  const h = String(hex).replace('#', '');
+  const L = 0.2126 * ch(parseInt(h.slice(0, 2), 16)) + 0.7152 * ch(parseInt(h.slice(2, 4), 16)) + 0.0722 * ch(parseInt(h.slice(4, 6), 16));
+  return (L + 0.05) / 0.05 >= 1.05 / (L + 0.05) ? '#0B0F14' : '#FFFFFF';
+}
 const BLOK_DIGER = { ad: '', renk: '#7B8794', ink: '#0B0F14' };
 const ZONE_FILL = { 1: '#A9BDD0', 2: '#F4B860', 3: '#EE8434', 4: '#E4572E', 5: '#C1272D', 6: '#8E1B2A', 7: '#5E0F1C' };
+const ZONE_ACC = { 6: '#C2415A', 7: '#B0344C' };
 const blokOf = (s) => {
   const key = String(s.blok || '').trim().toUpperCase();
   const b = BLOKLAR[key] || BLOK_DIGER;
@@ -1987,15 +1995,24 @@ function repBoxes(i, withLive) {
   const st = zst();
   const reps = st.per[i].reps;
   const n = tekrarOf(s);
+  const edits = (state.session.form && state.session.form.edits[setKey(s, i)]) || {};
   const boxes = [];
   for (let r = 0; r < Math.max(n, reps.length); r++) {
     const rep = reps[r];
     let cls = '';
     let v = '—';
-    if (rep && rep.geldim != null) { cls = 'ok'; v = fmtShort(rep.geldim - rep.cik); }
+    let attr = '';
+    if (rep && rep.geldim != null) {
+      // 13.12: biten her tekrar dokunulabilir (düzelt); düzeltilmiş süre ve "çıkarıldı" kutuda görünür
+      const ms = rep.geldim - rep.cik;
+      const e = edits[r];
+      cls = e === 'drop' ? 'ok is-drop' : typeof e === 'number' ? 'ok is-ed' : 'ok';
+      v = e === 'drop' ? `<s>${fmtShort(ms)}</s>` : fmtShort(typeof e === 'number' ? e : ms);
+      attr = ` data-rep="${r}"`;
+    }
     else if (rep && withLive) { cls = 'now'; v = ''; }
     if (withLive && st.phase === 'rest' && st.cur === i && r === reps.length && r < n) { cls = 'rest'; v = ''; }
-    boxes.push(`<div class="${cls}"><small>${r + 1}.</small><b class="n">${v}</b></div>`);
+    boxes.push(`<div class="${cls}"${attr}><small>${r + 1}.</small><b class="n">${v}</b></div>`);
   }
   return `<div class="w-reps${boxes.length > 6 ? ' is-many' : ''}">${boxes.join('')}</div>`;
 }
@@ -2025,6 +2042,46 @@ function repStrip(i) {
     <div class="w-last3">${last3 ? `Son: ${last3}` : ''}</div>`;
 }
 
+const shortT = (v) => String(v).replace(/^0(\d:)/, '$1');
+
+/** 13.12: tekrar arası dinlenmede bilgi ekranı: son tekrar (hedefe fark), ortalama, tempo · bölge. */
+function restInfo(i) {
+  const s = state.plan.setler[i];
+  const st = zst();
+  const edits = (state.session.form && state.session.form.edits[setKey(s, i)]) || {};
+  const eff = zaman.effectiveTimes(zaman.repTimes(st, i), edits);
+  if (!eff.all.length) return '';
+  const last = eff.all[eff.all.length - 1];
+  const hedef = parseSec(s.hedef) * 1000;
+  const delta = hedef ? Math.round((last.ms - hedef) / 1000) : null;
+  const dHtml = delta == null ? '' : `<em class="${delta <= 0 ? 'g' : 'r'}">${delta > 0 ? '+' : delta < 0 ? '−' : '±'}${Math.abs(delta)} sn</em>`;
+  const pace = eff.avgMs ? pacePer100(eff.avgMs / 1000, s.mesafe) : 0;
+  const z = pace ? zoneOf(pace, s) : null;
+  const paceH = pace ? `<b class="${z ? `zc z${z.n}` : ''}">${fmtDur(pace)}</b><small class="u">/100 m${z ? ` · ${esc(z.zone)}` : ''}</small>` : '<b>—</b>';
+  return `<div class="w-ri"><div class="w-rt"><small>SON TEKRAR${last.dropped ? ' (çıkarıldı)' : ''}</small><b>${fmtShort(last.ms)}</b>${dHtml}</div>
+    <div class="w-rt"><small>ORTALAMA</small><b>${eff.avgMs ? fmtAvg(eff.avgMs) : '—'}</b></div>
+    <div class="w-rt wide"><small>TEMPO${s.hedef ? ` · HEDEF ${esc(shortT(s.hedef))}` : ''}</small>${paceH}</div></div>`;
+}
+
+/** Tekrar arası dinlenmede "Sıradaki" satırı. */
+function nextLine(i) {
+  const s = state.plan.setler[i];
+  const T = tekrarOf(s);
+  const d = zaman.doneReps(zst(), i);
+  if (d >= T) return '';
+  return `<div class="w-next2">Sıradaki: <b>${d + 1}. tekrar</b>${s.hedef ? ` · hedef <b>${esc(shortT(s.hedef))}</b>` : ''}${d + 1 === T ? '' : ''}</div>`;
+}
+
+/** Set sonu dinlenmesinde: biten setin tek satırlık özeti (dokun → tekrar sürelerini düzelt). */
+function prevSetLine(st) {
+  const cur = st.cur;
+  if (cur == null || !state.plan.setler[cur]) return '';
+  const cs = state.plan.setler[cur];
+  const eff = zaman.effectiveTimes(zaman.repTimes(st, cur), (state.session.form && state.session.form.edits[setKey(cs, cur)]) || {});
+  if (!eff.all.length) return '';
+  return `<button class="w-prevset" data-prevset="${cur}">Biten set: <b>${esc(setTitle(cs))}</b> · ort. <b>${fmtAvg(eff.avgMs)}</b> · ${zaman.doneReps(st, cur)}/${tekrarOf(cs)} <span>✎ düzelt</span></button>`;
+}
+
 /** Yüzerken/dinlenirken başlığın altındaki kısa bilgi: Hedef · Dinlen · Alet ve açıklamanın ilk satırı. */
 function setInfo(s) {
   const short = (v) => String(v).replace(/^0(\d:)/, '$1');
@@ -2052,37 +2109,42 @@ function renderItem(node, s, i, cum) {
   const T = tekrarOf(s);
   const isDone = status === 'tamam' || status === 'eksik';
 
-  let tag = `${esc(blok)}${b.ad ? ` · ${esc(b.ad.toLocaleUpperCase('tr'))}` : ''} · ${i + 1}/${n}`;
-  if (status === 'tamam') tag = `✓ TAMAMLANDI · ${tag}`;
-  else if (status === 'eksik') tag = `${d}/${T} · ERKEN BİTTİ · ${tag}`;
+  // 13.12: başlık okunurluğu — yazı hep sade; renk yalnız blok karesinde ve bölge rozetinin kenarında.
+  const hdName = b.ad ? b.ad.toLocaleUpperCase('tr') : blok;
+  let sub = `set ${i + 1}/${n}`;
+  if (status === 'tamam') sub += ' · ✓ tamamlandı';
+  else if (status === 'eksik') sub += ` · ${d}/${T} erken bitti`;
+  const swimming = mode === 'live' && st.phase === 'swim';
 
   // Hazır kartta başlık büyük: stil · tür Sürüm 9'daki gibi kendi satırında. Küçük başlıklı
   // kartlarda (yüzerken, dinlenirken, özet) başlığın yanında durur.
-  // 13.11.0: sıradaki set kartında (set sonu dinlenmesi) başlık ve stil·tür tek satırda: alan saate kalır.
+  // 13.11.0: sıradaki set kartında (set sonu dinlenmesi) başlık ve stil·tür tek satırda.
   const title = mode === 'ready'
     ? `<div class="w-title">${esc(`${T} × ${s.mesafe}`)}</div>${styleTur ? `<div class="w-sub">${esc(styleTur)}</div>` : ''}`
     : `<div class="w-title">${esc(`${T} × ${s.mesafe}`)}${styleTur ? `<small>${esc(styleTur)}</small>` : ''}</div>`;
   const timer = '<div class="w-timer"><span class="w-tmode"></span><b class="w-tbig n"></b><span class="w-tsub n"></span></div>';
+  const timerBar = timer.replace('class="w-timer"', 'class="w-timer is-bar"');
   let body;
   const foot = `<div class="w-foot">
         ${s.alet ? `<span><span class="w-alet">Alet</span> <b>${esc(s.alet)}</b></span>` : ''}
         <span class="w-last">${s.hedef && pacePer100(parseSec(s.hedef), s.mesafe) ? `<span class="w-pace"><span class="w-alet">Tempo</span> ${paceHtml(parseSec(s.hedef), s)}</span>` : '<span></span>'}<span class="w-dist">${fmtNum(setDist(s))} / ${fmtNum(c.dist)} m</span></span>
       </div>`;
   if (mode === 'live') {
-    const plus = st.phase === 'rest' && st.cur === i ? '<button class="w-plus" data-plus>＋1 tekrar</button>' : '';
-    body = `${title}${setInfo(s)}${T > 4 ? repStrip(i) : repBoxes(i, true)}${plus}${timer}`;
+    // 13.12: yüzerken yalnız kronometre (başlık satırı + ince tekrar çubuğu + dev saat); DUR sonrası bilgi ekranı
+    // (orta saat, tekrar kutuları, son tekrar/ortalama/tempo, sıradaki tekrar). Biten her tekrar kutusu dokunulup düzeltilir.
+    if (swimming) body = `${title}${repStrip(i)}${timer}`;
+    else body = `<div class="w-trow">${title}<button class="w-plus" data-plus>＋1 tekrar</button></div>${repBoxes(i, true)}${timerBar}${restInfo(i)}${s.aciklama ? `<div class="w-desc2">${esc(s.aciklama)}</div>` : ''}${nextLine(i)}`;
   } else if (mode === 'next') {
-    // Set sonu dinlenmesi: sıradaki setin içeriği öne alınır, kalan alanı büyük sayaç doldurur.
-    // 13.11.0: biten setin özeti ("✓ … bitti · ort.") sıradaki kartın üstüne binmez; kendi kartında kalır.
+    // Set sonu dinlenmesi: sıradaki setin içeriği öne alınır, orta boy sayaç; biten set tek satırda altta.
     body = `${title}
       ${s.aciklama ? `<div class="w-desc">${esc(s.aciklama)}</div>` : ''}
       ${tiles ? `<div class="w-tiles">${tiles}</div>` : ''}
       ${foot}
       <div class="w-ninfo">${setInfo({ ...s, aciklama: '' }).replace(/<\/?div[^>]*>/g, '')}${s.hedef && pacePer100(parseSec(s.hedef), s.mesafe) ? ` · Tempo ${paceHtml(parseSec(s.hedef), s)}` : ''}</div>
-      ${timer}`;
+      ${timerBar}${prevSetLine(st)}`;
   } else if (mode === 'sum') {
     const times = zaman.repTimes(st, i);
-    const avg = times.length ? fmtAvg(zaman.effectiveTimes(times).avgMs) : '';
+    const avg = times.length ? fmtAvg(zaman.effectiveTimes(times, (state.session.form && state.session.form.edits[setKey(s, i)]) || {}).avgMs) : '';
     body = `${title}${times.length ? repBoxes(i, false) : ''}
       <div class="w-summary n">${avg ? `Ortalama <b>${avg}</b> · ` : ''}${times.length ? `${d}/${T} tekrar` : 'Önceki sürümde işaretlendi'}</div>
       ${tiles ? `<div class="w-tiles">${tiles}</div>` : ''}`;
@@ -2093,24 +2155,31 @@ function renderItem(node, s, i, cum) {
       ${foot}`;
   }
 
-  // 13.11: kartta hem blok hem bölge. Ana sette bölge dolgulu hap + 7 kademeli ısı ölçeği; diğer bloklarda soluk bölge kodu.
-  let ztag = ''; let meter = '';
+  // Bölge rozeti: ana sette bölge adı + 7 kademeli ısı ölçeği; diğer bloklarda (hedef tempo varsa) nötr kenarlı bölge kodu.
+  let zb = ''; let meter = '';
   const sn = s.hedef && s.mesafe ? pacePer100(parseSec(s.hedef), s.mesafe) : 0;
   const zz = b.zone || (sn ? zoneOf(sn, s) : null);
   if (b.zone) {
-    ztag = `<b class="w-ztag z${b.zone.n}">${esc(b.zone.zone)}</b>`;
-    meter = `<div class="w-meter">${[1, 2, 3, 4, 5, 6, 7].map((n) => `<i class="z${n}${n === b.zone.n ? ' on' : ''}"></i>`).join('')}</div>`;
+    zb = `<div class="w-zb z${b.zone.n}"><b>${esc(b.zone.zone)}</b><small>${esc(b.zone.ad || '')}</small></div>`;
+    meter = `<div class="w-meter">${[1, 2, 3, 4, 5, 6, 7].map((k) => `<i class="z${k}${k === b.zone.n ? ' on' : ''}"></i>`).join('')}</div>`;
   } else if (zz || (sn && ref.isDrill(s))) {
-    ztag = `<b class="w-ztag is-plain">${esc(zz ? zz.zone : 'TEC')}</b>`;
+    zb = `<div class="w-zb is-plain"><b>${esc(zz ? zz.zone : 'TEC')}</b><small>${esc(zz ? (zz.ad || '') : 'Teknik')}</small></div>`;
   }
+  const hdr = `<div class="w-hd"><i class="w-blk">${esc(blok || '?')}</i><div class="w-hn"><b>${esc(hdName || '—')}</b><small>${esc(sub)}</small></div>${zb}</div>`;
   node.classList.toggle('is-done', isDone);
   for (const m of ['live', 'next', 'sum', 'ready']) node.classList.toggle(`m-${m}`, m === mode);
   node.classList.add('w-item');
   node.dataset.mode = mode;
-  node.style.setProperty('--c', b.renk);
-  node.style.setProperty('--c-soft', hexA(b.renk, 0.35));
-  node.style.setProperty('--c-glow', hexA(b.renk, 0.55));
-  node.style.setProperty('--c-wash', hexA(b.renk, 0.12));
+  // kart vurgusu: koyu bordo (SP2/SP3) zeminde kaybolmasın diye açılmış ton; şerit ve haritada dolgu rengi kalır
+  const accent = b.zone && ZONE_ACC[b.zone.n] ? ZONE_ACC[b.zone.n] : b.renk;
+  node.style.setProperty('--c', accent);
+  node.style.setProperty('--c-soft', hexA(accent, 0.35));
+  node.style.setProperty('--c-glow', hexA(accent, 0.55));
+  node.style.setProperty('--c-wash', hexA(accent, 0.12));
+  node.style.setProperty('--blk', blok === 'MS' ? '#C9D1D9' : b.renk);
+  node.style.setProperty('--blk-ink', blok === 'MS' ? '#0B0F14' : b.ink);
+  node.classList.toggle('ph-swim', swimming);
+  node.classList.toggle('ph-rest', mode === 'live' && !swimming);
   node.innerHTML = `
     <div class="w-line"></div>
     <div class="w-dot"></div>
@@ -2119,7 +2188,7 @@ function renderItem(node, s, i, cum) {
       <span class="w-nm"><i class="w-bk">${esc(blok)}</i>${esc(rowName)}${status === 'eksik' ? ` · ${d}/${T}` : ''}</span>
     </div>
     <div class="w-ctm">${c.time ? fmtDur(c.time) : ''}${setTime(s) ? `<small>+${fmtDur(setTime(s))}</small>` : ''}</div>
-    <div class="w-card">${(() => { const dr = (mode === 'ready' || mode === 'next') && drillOf(s); return dr ? `<a class="sl-vid" href="${esc(dr.video)}" target="_blank" rel="noopener noreferrer" aria-label="${esc(dr.ad)} videosu">▶ Drill</a>` : ''; })()}<div class="w-tag"><span>${tag}</span>${ztag}</div>${meter}${body}</div>`;
+    <div class="w-card">${(() => { const dr = (mode === 'ready' || mode === 'next') && drillOf(s); return dr ? `<a class="sl-vid" href="${esc(dr.video)}" target="_blank" rel="noopener noreferrer" aria-label="${esc(dr.ad)} videosu">▶ Drill</a>` : ''; })()}${hdr}${meter}${body}</div>`;
 }
 
 // --- Sürüm 12 (yüzme): set sonu ara şeridi — omuz rahatlatma, kulaç, nabız; drill videosu --------
@@ -3174,6 +3243,14 @@ function onWheelClick(e) {
   wheelDown = null;
   if (d && Math.hypot(e.clientX - d.x, e.clientY - d.y) > 12) return;
   if (e.target.closest && e.target.closest('[data-plus]')) return plusOneRep();
+  // 13.12: biten tekrar kutusuna / "Biten set" satırına dokun → tekrar sürelerini düzelt (yüzerken kilitli)
+  const pv = e.target.closest && e.target.closest('[data-prevset]');
+  if (pv) return duzeltSet(Number(pv.dataset.prevset));
+  const rb = e.target.closest && e.target.closest('.w-item.is-active .w-reps [data-rep]');
+  if (rb && state.wheel && zst().phase !== 'swim' && zst().mola == null) {
+    const ri = state.wheel.items.indexOf(rb.closest('.w-item'));
+    if (ri >= 0) return duzeltSet(ri);
+  }
   const card = e.target.closest && e.target.closest('.w-item.is-active .w-card');
   if (!card || !state.wheel || zst().mola != null) return;
   const i = state.wheel.items.indexOf(card.closest('.w-item'));
@@ -4275,10 +4352,11 @@ function slBoxes(h, live) {
   for (let j = 0; j < n; j++) {
     let cls = '';
     let v = String(x.sure || x.tekrar);
-    if (j < reps.length) { cls = 'ok'; v = fmtDec(reps[j]); }
+    let attr = '';
+    if (j < reps.length) { cls = 'ok'; v = fmtDec(reps[j]); attr = ` data-sl-set="${h}:${j}"`; } // 13.12: biten her set dokunulup düzeltilir
     else if (live && sets[j] && sets[j].bit == null) { cls = 'now'; v = String(x.sure || x.tekrar); }
     else if (live && st.phase === 'rest' && j === reps.length) { cls = 'rest'; v = '—'; }
-    out.push(`<div class="${cls}"><small>${j + 1}.</small><b class="n">${v}</b></div>`);
+    out.push(`<div class="${cls}"${attr}><small>${j + 1}.</small><b class="n">${v}</b></div>`);
   }
   return `<div class="w-reps sl-sets">${out.join('')}</div>`;
 }
@@ -4296,6 +4374,11 @@ function slRenderItem(node, x, h) {
   if (isnN) tag = `${tag} · ISINMA ${isnN}`;
   if (stat === 'tamam') tag = `✓ TAMAMLANDI · ${tag}`;
   else if (stat === 'eksik') tag = `${salon.doneSets(st, h)}/${x.set} · ERKEN BİTTİ · ${tag}`;
+  // 13.12: kara kartı başlığı yüzmeyle aynı stil: renk yalnız grup karesinde, yazı sade
+  let tag2 = `hareket ${h + 1}/${n}`;
+  if (isnN) tag2 += ` · ISINMA ${isnN}`;
+  if (stat === 'tamam') tag2 += ' · ✓ tamamlandı';
+  else if (stat === 'eksik') tag2 += ` · ${salon.doneSets(st, h)}/${x.set} erken bitti`;
   const vid = k && k.video ? `<a class="sl-vid" href="${esc(k.video)}" target="_blank" rel="noopener noreferrer" aria-label="Videoyu YouTube'da aç">▶ Video</a>`
     : videoOf(x.ad) ? `<button class="sl-vid sl-vform" data-bilgi="${esc(x.ad)}" aria-label="Formu izle">▶ Form</button>` : '';
   const pin = data.getHareketNot(x.ad).not;
@@ -4334,6 +4417,9 @@ function slRenderItem(node, x, h) {
   for (const m of ['live', 'next', 'sum', 'ready']) node.classList.toggle(`m-${m}`, m === mode);
   node.dataset.mode = mode;
   node.style.setProperty('--c', g.renk);
+  node.style.setProperty('--blk', g.renk);
+  node.style.setProperty('--blk-ink', inkOn(g.renk));
+  
   node.style.setProperty('--c-soft', hexA(g.renk, 0.35));
   node.style.setProperty('--c-glow', hexA(g.renk, 0.55));
   node.style.setProperty('--c-wash', hexA(g.renk, 0.12));
@@ -4341,7 +4427,7 @@ function slRenderItem(node, x, h) {
     <div class="w-line"></div><div class="w-dot"></div>
     <div class="w-row"><span class="w-tm">${h + 1}</span><span class="w-nm">${esc(x.ad)}</span></div>
     <div class="w-ctm">${h + 1}</div>
-    <div class="w-card">${vid}<div class="w-tag">${tag}</div>${body}</div>`;
+    <div class="w-card">${vid}<div class="w-tag w-hd"><i class="w-blk">${esc(String(g.ad || x.ad || '?').slice(0, 2).toLocaleUpperCase('tr'))}</i><div class="w-hn"><b>${esc((g.ad || x.ad || '').toLocaleUpperCase('tr'))}</b><small>${esc(tag2)}</small></div></div>${body}</div>`;
 }
 
 /** Üst bilgi, ilerleme çubuğu, büyük düğme. */
@@ -4444,6 +4530,42 @@ function onSlUndo() {
   toast('Son dokunuş geri alındı', 1500);
 }
 
+/**
+ * 13.12: Biten herhangi bir setin tekrarını (süreli harekette süreyi) ve hareketin ağırlığını düzeltir;
+ * önceki setler ve biten hareketler dahil. Değerler özete ve karaVeri'ye düzeltilmiş gider.
+ */
+async function slDuzeltSet(h, j) {
+  const x = slH()[h];
+  if (!x) return;
+  const arr = sl.ses.reps[x._k] || (sl.ses.reps[x._k] = []);
+  const plan = x.sure || x.tekrar;
+  let rep = arr[j] != null ? arr[j] : plan;
+  let kg = x.agirlik;
+  const step = x.sure ? 5 : 1;
+  const kgStep = data.getHareketNot(x.ad).adim || 2.5;
+  const el = document.createElement('div');
+  const ciz = () => {
+    el.innerHTML = `<div class="dz-r"><span>${x.sure ? 'SÜRE (SN)' : 'TEKRAR'}</span><b class="n">${fmtDec(rep)}</b><span class="dz-b"><button data-sd="r:-1">−${step}</button><button data-sd="r:1">+${step}</button></span></div>
+      ${typeof kg === 'number' ? `<div class="dz-r"><span>AĞIRLIK</span><b class="n">${esc(fmtKg(kg))}</b><span class="dz-b"><button data-sd="w:-1">−${fmtDec(kgStep)}</button><button data-sd="w:1">+${fmtDec(kgStep)}</button></span></div><p class="oy-not">Ağırlık hareketin tüm setleri için geçerlidir.</p>` : ''}`;
+  };
+  ciz();
+  el.addEventListener('click', (ev) => {
+    const b = ev.target.closest('[data-sd]');
+    if (!b) return;
+    const [w, d] = b.dataset.sd.split(':');
+    if (w === 'r') rep = Math.max(0, rep + Number(d) * step);
+    else kg = Math.max(0, Math.round((kg + Number(d) * kgStep) * 100) / 100);
+    ciz();
+  });
+  const ok = await modal({ title: `${x.ad} · ${j + 1}. set`, body: el, actions: [{ label: 'Kaydet', value: true, cls: 'btn-primary' }, { label: 'Vazgeç', value: false }] });
+  if (!ok) return;
+  arr[j] = rep;
+  if (typeof x.agirlik === 'number') x.agirlik = kg;
+  slPersist();
+  slRefreshAll();
+  toast('Set düzeltildi', 1500);
+}
+
 /** Set tekrarı ± (yapılan / son biten set) ve ağırlık ±. */
 function onSlWheelClick(e) {
   const t = e.target;
@@ -4451,6 +4573,8 @@ function onSlWheelClick(e) {
   const vf = t.closest('[data-bilgi]');
   if (vf) { e.stopPropagation(); bilgiKarti(vf.dataset.bilgi); return; } // form videosu (uygulama içinde)
   const st = slst();
+  const setBox = t.closest('[data-sl-set]');
+  if (setBox) { e.stopPropagation(); const [bh, bj] = setBox.dataset.slSet.split(':').map(Number); slDuzeltSet(bh, bj); return; }
   const repBtn = t.closest('[data-sl-rep]');
   if (repBtn) {
     const h = st.cur;
