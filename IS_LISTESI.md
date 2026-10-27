@@ -9,6 +9,19 @@ Tamamlandı (sürüm 8), bkz. Tamamlanan. Kalan: Code.gs'in yeniden dağıtılma
 
 ## Sıradaki
 
+### Yeni işler (27.10.2026, kullanıcı; sürüm 13.11.0 sonrası) — önce resimli çözüm, onaydan sonra kod
+- [ ] **Y1 Seans saati 12 saat kayıyor:** yuzmeSeans Tarih sütunu öğleden sonra yapılan idmanı gece gibi gösteriyor
+  (27.10.2026 02:24:08 → olması gereken 14:24:08). Kod `dd.mm.yyyy hh:mm` biçimi yazıyor (idman.gs SEANS_SAAT_FMT); olası neden: 12 saatlik
+  gösterim (AM/PM dar sütunda görünmüyor) ya da sütunun kendi biçimi. Öneri: açık 24 saat `dd.mm.yyyy HH:mm:ss` yaz.
+- [ ] **Y2 Kronometre set kartında hâlâ küçük + tekrar kutuları geri gelsin:** 13.10'da yüzerken/dinlenirken tekrar kutuları
+  ("1. 0:38 · 2. …") gizlenmişti; idman anında çok kıymetli. Hem tekrar çubuğu hem büyük saat kartta birlikte olmalı.
+- [ ] **Y3 Ortak takvim:** yüzme/kara ayrı takvimler yerine ana sayfanın en üstünde tek ortak takvim; altında Yüzme, altında Kara,
+  altında diğerleri (Form ve denge, Haftanın özeti, Geçmiş, Ayarlar).
+- [ ] **Y4 Geçmişle mukayese Drive'daki eski kayıtlardan:** telefon geçmişi belli aralıkla silindiği için kıyas sağlıksız. idman.gs yeni
+  salt okuma eylemi (yuzmeVeri/eski sayfası) → telefon önbelleği → kıyas, rekor, RPE kayması buradan. Mantık hataları (aşağıda resimli):
+  imza `tekrar` içeriyor (5×200 ≠ 4×200 sayılıyor) ama alet, havuz boyu ve hedef bölge içermiyor (pull ile serbest, Taban-1 ile Taban-3 aynı
+  set sayılıyor); aynı gün iki idmanda RPE tarihe göre karışıyor.
+
 ### Açık işler özeti (temizlik 14.10.2026)
 - **Yapıldı (13.6.0, 14.10):** P3 aynı kas grubundan alternatif; F.7 çevrimdışı açılış; görünüm paketi (kurulum kartları,
   "Kaydedildi" animasyonu, SVG simgeler, yeni uygulama simgesi, ekran geçişi, açık tema, yazı boyutu).
