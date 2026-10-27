@@ -10,22 +10,22 @@ Tamamlandı (sürüm 8), bkz. Tamamlanan. Kalan: Code.gs'in yeniden dağıtılma
 ## Sıradaki
 
 ### Yeni işler (27.10.2026, kullanıcı; sürüm 13.11.0 sonrası) — önce resimli çözüm, onaydan sonra kod
-- [ ] **Y1 Seans saati 12 saat kayıyor:** yuzmeSeans Tarih sütunu öğleden sonra yapılan idmanı gece gibi gösteriyor
+- [x] **Y1 Seans saati 12 saat kayıyor:** yuzmeSeans Tarih sütunu öğleden sonra yapılan idmanı gece gibi gösteriyor
   (27.10.2026 02:24:08 → olması gereken 14:24:08). Kod `dd.mm.yyyy hh:mm` biçimi yazıyor (idman.gs SEANS_SAAT_FMT); olası neden: 12 saatlik
   gösterim (AM/PM dar sütunda görünmüyor) ya da sütunun kendi biçimi. Öneri: açık 24 saat `dd.mm.yyyy HH:mm:ss` yaz.
-- [ ] **Y2 Kronometre set kartında hâlâ küçük + tekrar kutuları geri gelsin:** 13.10'da yüzerken/dinlenirken tekrar kutuları
+- [x] **Y2 Kronometre set kartında hâlâ küçük + tekrar kutuları geri gelsin:** 13.10'da yüzerken/dinlenirken tekrar kutuları
   ("1. 0:38 · 2. …") gizlenmişti; idman anında çok kıymetli. Hem tekrar çubuğu hem büyük saat kartta birlikte olmalı.
-- [ ] **Y3 Ortak takvim:** yüzme/kara ayrı takvimler yerine ana sayfanın en üstünde tek ortak takvim; altında Yüzme, altında Kara,
+- [x] **Y3 Ortak takvim:** yüzme/kara ayrı takvimler yerine ana sayfanın en üstünde tek ortak takvim; altında Yüzme, altında Kara,
   altında diğerleri (Form ve denge, Haftanın özeti, Geçmiş, Ayarlar).
-- [ ] **Y4 Geçmişle mukayese Drive'daki eski kayıtlardan:** telefon geçmişi belli aralıkla silindiği için kıyas sağlıksız. idman.gs yeni
+- [x] **Y4 Geçmişle mukayese Drive'daki eski kayıtlardan:** telefon geçmişi belli aralıkla silindiği için kıyas sağlıksız. idman.gs yeni
   salt okuma eylemi (yuzmeVeri/eski sayfası) → telefon önbelleği → kıyas, rekor, RPE kayması buradan. Mantık hataları (aşağıda resimli):
   imza `tekrar` içeriyor (5×200 ≠ 4×200 sayılıyor) ama alet, havuz boyu ve hedef bölge içermiyor (pull ile serbest, Taban-1 ile Taban-3 aynı
   set sayılıyor); aynı gün iki idmanda RPE tarihe göre karışıyor.
 
 - **Y1 güncellendi (27.10, karar):** seans zamanı yuzmeSeans'taki mevcut tek Tarih sütununa gerçek tarih-saat (timestamp, saniyeli) olarak yazılsın, 24 saat biçimi (`dd.mm.yyyy HH:mm:ss`) her yazışta açıkça ayarlansın. Tablo yapısı DEĞİŞMEZ (yeni sütun yok, her set/tekrar zamanı yok).
-- [ ] **Y5 Set kartı başlığı okunurluğu (karar 27.10):** başlıkta hiçbir yazı renkli olmasın (koyu tema beyaz, açık tema siyah); bölge kısaltması (EN3, SP1…) 38 px kalın yazı, siyah rozet içinde, bölge rengi rozet kenarı + sol çizgi + hafif zeminde; blok adı 25 px, blok kodu ayrı kare rozette. SP2/SP3 kenarı koyu bordo yerine açılmış bordo. Her bölge için örnek kart resmi onaylanacak.
-- [ ] **Y6 Yüzerken dev saat, dinlenirken orta saat + bilgi (karar 27.10: orta saat ~105 px yeterli):** yüzerken yalnız kronometre (kart minimum, ince tekrar çubuğu, rakam ~400 px); DUR sonrası dinlenmede saat orta boy (~105 px), son tekrar süresi, ortalama, hedef farkı, tempo/bölge, tekrar kutuları, sıradaki adım; set sonu dinlenmesinde sıradaki setin tüm bilgisi + orta saat. (13.10.1'de set sonu saati büyütmüştük; kullanıcı yeni isteğiyle dinlenmeyi bilgi ağırlıklı istiyor.)
-- [ ] **Y7 Her tekrar/set her zaman düzeltilebilsin:** yüzmede tekrar süresi yalnız set bitince (son tekrar dahil değil) düzeltilebiliyor; kara idmanında tekrar sayısı yalnız son set için ±. Öneri: tekrar/set kutusuna dokun → düzelt (yüzerken kilitli; dinlenirken ve sonrasında açık); kara: her set (tekrar, ağırlık, süre) ve biten hareket.
+- [x] **Y5 Set kartı başlığı okunurluğu (karar 27.10):** başlıkta hiçbir yazı renkli olmasın (koyu tema beyaz, açık tema siyah); bölge kısaltması (EN3, SP1…) 38 px kalın yazı, siyah rozet içinde, bölge rengi rozet kenarı + sol çizgi + hafif zeminde; blok adı 25 px, blok kodu ayrı kare rozette. SP2/SP3 kenarı koyu bordo yerine açılmış bordo. Her bölge için örnek kart resmi onaylanacak.
+- [x] **Y6 Yüzerken dev saat, dinlenirken orta saat + bilgi (karar 27.10: orta saat ~105 px yeterli):** yüzerken yalnız kronometre (kart minimum, ince tekrar çubuğu, rakam ~400 px); DUR sonrası dinlenmede saat orta boy (~105 px), son tekrar süresi, ortalama, hedef farkı, tempo/bölge, tekrar kutuları, sıradaki adım; set sonu dinlenmesinde sıradaki setin tüm bilgisi + orta saat. (13.10.1'de set sonu saati büyütmüştük; kullanıcı yeni isteğiyle dinlenmeyi bilgi ağırlıklı istiyor.)
+- [x] **Y7 Her tekrar/set her zaman düzeltilebilsin:** yüzmede tekrar süresi yalnız set bitince (son tekrar dahil değil) düzeltilebiliyor; kara idmanında tekrar sayısı yalnız son set için ±. Öneri: tekrar/set kutusuna dokun → düzelt (yüzerken kilitli; dinlenirken ve sonrasında açık); kara: her set (tekrar, ağırlık, süre) ve biten hareket.
 
 ### Açık işler özeti (temizlik 14.10.2026)
 - **Yapıldı (13.6.0, 14.10):** P3 aynı kas grubundan alternatif; F.7 çevrimdışı açılış; görünüm paketi (kurulum kartları,
@@ -717,6 +717,8 @@ Sürüm 8 görünümü korunuyor; v10/v11 önerileri beğenilmedi, görsel yenil
   video "YouTube'da aç" bağlantısına düşer — beğenmediğini H · Video sütununa başka adresle yaz).
 
 ## Tamamlanan
+
+- [x] Sürüm 13.12.0 (27.10): Y1 seans zamanı timestamp (tek Tarih sütunu, 24 saat), Y3 ortak takvim, Y4 geçmişle kıyas Drive'dan (getGecmis; anahtar: mesafe+stil+tür+alet+bölge+havuz), Y5 başlık okunurluğu (bölge rozeti), Y6 yüzerken dev saat / dinlenirken orta saat + bilgi, Y7 tekrar ve set düzeltme. Dağıtım: idman.gs yeni sürüm (Y1 ve Y4).
 
 - [x] Sürüm 13.11.0 (24.10): renk sistemi (rol başına tek renk; ana sette bölge ısı rampası; blok renkleri soğuk→sıcak→soğuk), yeni set kartı stili (yüzme + kara), ana sayfa kimlik renkleri, okunurluk (14 px taban, açık gri metin, En büyük yazı boyutu). Dağıtım gerekmez.
 

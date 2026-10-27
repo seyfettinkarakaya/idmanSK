@@ -1,4 +1,4 @@
-# idmanSK — Teknik şartname (sürüm 13.11.0, 22.10.2026)
+# idmanSK — Teknik şartname (sürüm 13.12.0, 22.10.2026)
 
 Bu belge uygulamanın mimarisini, veri modelini, arka uç sözleşmesini ve ekran akışlarını anlatır. Yeni bir
 Claude Code oturumu buradan kaldığı yerden devam edebilmelidir. Kurallar ve günlük komutlar: `CLAUDE.md`.
@@ -34,7 +34,7 @@ Sayfa adları dizi olarak tanımlı: ilk ad güncel, sonrakiler eski adlar (`she
 |---|---|---|
 | **yuzmePlan** (havuzPlan) | Tarih, Sıra, Blok, Tekrar, Mesafe, Stil, Tür, Açıklama, Hedef, Dinlen, Alet, Set Mesafe, Yığımlı Mesafe, Set Süre, Yığımlı Süre, Gerçek, Kulaç, Nabız, RPE, MSI, Not, Etiket, Hafta, Hedef Zone, Gerçek Zone, Hedef Pace, Gerçek Pace (formül sütunları kullanıcının) | Kullanıcı / idman oturumu yazar; uygulama okur, kayıtta günün satırlarını siler |
 | **yuzmeVeri** (havuzVeri) | Plan sütunlarıyla aynı (+ Etiket). Tarih **yalnız gün** | finishSession: yapılan her set bir satır, en yeni üstte |
-| **yuzmeSeans** (havuzSeans, isteğe bağlı) | Tarih, Süre, Mesafe, Havuz, RPE, MSI, Açıklama. Tarih **başlangıç saatli** (13.9, `dd.mm.yyyy hh:mm`) | finishSession: seans başına 1 satır |
+| **yuzmeSeans** (havuzSeans, isteğe bağlı) | Tarih, Süre, Mesafe, Havuz, RPE, MSI, Açıklama. Tarih **başlangıç saatli** (13.9, `dd.mm.yyyy HH:mm:ss` (13.12: timestamp, 24 saat)) | finishSession: seans başına 1 satır |
 | **karaPlan** (salonPlan) | Tarih, Sıra, Hareket, Set, Tekrar, Ağırlık, Süre, Dinlen, Süperset, Not, Durum | savePlan (uygulamadaki "Plana yaz") / kullanıcı |
 | **karaVeri** (salonVeri) | Tarih, No, Hareket, Set, Tekrar, Ağırlık, Nabız, RPE, MSI, Açıklama, Süre | saveSalon |
 | **karaSeans** (salonSeans, isteğe bağlı) | Tarih (başlangıç saatli, 13.9), Süre, RPE, MSI, Yer, Açıklama | saveSalon (req.seans varsa) |
@@ -68,6 +68,7 @@ LOCKED, SERVER.
 | finishSession | aşağıda | `{ yazilanSet, silinenSet, kalanSet?, uyari? }` |
 | getSalon | – | `{ katalog, etki, bw, gecmis, plan?, seans? }` (katalog/etki artık kütüphaneden gelir) |
 | saveSalon | `tarih, hareketler:[{hareket,set,tekrar,agirlik,nabiz,rpe,msi,aciklama,sure}], seans?:{sure,rpe,msi,yer,aciklama,baslangic}` | karaVeri'ye yazar (o gün varsa DUPLICATE), karaSeans 1 satır (hata → hepsi geri), günün karaPlan satırlarını siler |
+| getGecmis | `gun?` (7–400, varsayılan 120) | `{ sets:[{t,b,n,m,s,u,a,h,g,z}], seans:[{t,ts,rpe,havuz,mesafe,sure}], gun, alindi }` yuzmeVeri (+ yuzmeSeans) salt okuma, kıyas kaynağı (13.12) |
 | savePlan | `tarih, hareketler` | karaPlan'da o günü değiştirir (yoksa sayfayı açar) |
 | planYapildi | `tarih` | karaPlan'da o günü siler |
 
@@ -111,6 +112,7 @@ silinir (`birak` hariç).
 | ysk.prefs | havuz, css(elle), ses, bildirim, yer, karaYorgunluk, tema, yazi … (beyaz liste) |
 | ysk.ref / ysk.kutuphane / ysk.salon | arka uç cevaplarının önbelleği |
 | ysk.salonSession / ysk.salonPlan | kara idmanı seansı ve telefondaki plan |
+| ysk.gecmis | (13.12) Drive'daki yuzmeVeri/yuzmeSeans son günleri `{sets, seans, alindi}`; kıyas, rekor, RPE kayması (analiz.gecmisListe + benzerMi) |
 | ysk.hazir / ysk.hareketNot | günlük hazır olma kontrolü, harekete sabit not |
 
 - Kuyruk: `enqueue`, `flushQueue` (başarılı ve DUPLICATE çıkar; SAME_DAY kalır, `markQueueIkinci(id)` ile
@@ -131,6 +133,10 @@ Seans bir **olay listesidir**; süre hiçbir yerde biriktirilmez, her şey `repl
 
 `show(name)` ekranları değiştirir; `state` tek global durum (session, plan, zst, wheel, screen, dates…).
 
+- **13.12:** ortak takvim (`#home-cal`: `renderHomeCal`, gün noktaları, seçili günün özeti; `#home-swim` ve `#home-gym-cal` artık özet satırları);
+  set kartı başlığı `.w-hd` (blok karesi `.w-blk`, ad `.w-hn`, bölge rozeti `.w-zb` + 7 kademeli `.w-meter`); yüzerken `ph-swim` (dev saat), dinlenirken
+  `ph-rest` (`.w-timer.is-bar`, `restInfo`, `nextLine`), set sonunda `prevSetLine`; düzeltme: yüzmede `data-rep` kutusu → `duzeltSet`, karada `data-sl-set` → `slDuzeltSet`;
+  kıyas: `analiz.gecmisListe/benzerMi/benzerGecmis/kiyas2/rekor2`, `gecmisEsitle()` (kayıttan sonra zorla, ana sayfada 20 dk).
 - **Renk sistemi (13.11):** rol başına tek renk — sarı `--accent` (birincil eylem), yeşil `--done` (durum), amber `--warn`, kırmızı `#FF6B6B`/`#EF4444`,
   dinlenme/mola nötr (`var(--text)`). Blok renkleri `BLOKLAR` (WU krem, PS gül, AS somon, CD açık mavi); ana set `blokOf(s)` ile bölgeden:
   `ZONE_FILL` (n: 1 REC … 7 SP3). Bölge metin/çubuk rengi `.z1–.z7` (`--zc` metin, `--zf` dolgu, `--zi` hap yazısı). Kimlik: `--t-teal` yüzme

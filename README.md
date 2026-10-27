@@ -372,6 +372,24 @@ Hata kodları: `AUTH`, `LOCKED`, `DUPLICATE`, `SAME_DAY`, `NOT_FOUND`, `PLAN_MIS
 3. Telefonda yeni yerel anahtarlar: `ysk.hazir` (hazır olma kontrolleri, 60 gün), `ysk.hareketNot` (harekete sabit not);
    ayarlar: `yer` (Salon/Ev/Otel), `bildirim`. Ayarlar → Yedek indir: anahtarlar hariç JSON.
 
+## Sürüm 13.12.0'da neler var (dağıtım: idman.gs yeni sürüm — tablo yapısı değişmez)
+
+- **Seans zamanı (Y1):** yuzmeSeans / karaSeans Tarih sütununa gerçek tarih-saat (timestamp, saniyeli) yazılır; biçim açıkça 24 saat
+  (`dd.mm.yyyy HH:mm:ss`). Öğleden sonra yapılan idman artık gece görünmez (14:24 → 14:24). Eski satırlar için sütun biçimini bir kez 24 saate çevir.
+- **Set kartı başlığı (Y5):** yazı hep sade (koyu temada açık, açık temada koyu). Renk yalnız blok karesinde (WU, PS, MS…) ve bölge rozetinin
+  kenarında; bölge kısaltması (EN3, SP1…) 36 px kalın yazı, siyah rozet içinde, altında bölge adı. Kara idmanı kartı da aynı başlık stilinde.
+- **Yüzerken / dinlenirken (Y6):** yüzerken kartta yalnız ince başlık satırı, ince tekrar çubuğu ve dev saat (rakam ~400 px). DUR sonrası
+  tekrar arası dinlenmede bilgi ekranı: orta boy saat, tekrar kutuları, son tekrar (hedefe fark), ortalama, tempo · bölge, açıklama, sıradaki tekrar.
+  Set sonu dinlenmesinde sıradaki setin tüm bilgisi + orta saat; biten set tek satırda altta.
+- **Düzeltme (Y7):** yüzmede dinlenirken ve set bittikten sonra biten her tekrar kutusuna dokun → süreyi düzelt / ortalamadan çıkar (son tekrar dahil;
+  yüzerken kilitli). Kara idmanında biten her set kutusuna dokun → tekrar (süreli harekette süre) ve ağırlığı düzelt; önceki setler ve biten hareketler dahil.
+- **Ortak takvim (Y3):** ana sayfanın en üstünde tek hafta şeridi; her günün altında yüzme (su mavisi) ve kara (mor) noktaları (dolu = yapıldı,
+  halka = planlı). Güne dokununca o günün yüzme ve kara özeti; satıra dokununca ilgili gün listesi / kara programı açılır. Kartlardaki ayrı "Takvim" düğmeleri kalktı.
+- **Geçmişle kıyas Drive'dan (Y4):** idman.gs yeni salt okuma eylemi `getGecmis` (yuzmeVeri son 120 gün + yuzmeSeans RPE/havuz). Telefon önbelleğe alır
+  (açılışta 20 dk'da bir, kayıttan sonra). Aynı set = mesafe + stil + tür + alet + **gerçek bölge** + havuz boyu; tekrar sayısı eşleşmeyi bozmaz
+  (4×200 ile 5×200 karşılaştırılır). Özette geçen benzer set, trend sütunları, rekor ve RPE kayması bu kayıtlardan; planlanan set önizlemesi hedef tempoya göre.
+  Düzeltilen hatalar: farklı yoğunluk aynı sayılıyordu, alet/havuz yok sayılıyordu, aynı gün iki idmanda RPE karışıyordu, kaynak silinebilen telefon geçmişiydi.
+
 ## Sürüm 13.11.0'da neler var (dağıtım: yalnız uygulama; .gs değişmedi)
 
 - **Tek renk mantığı (rol başına tek renk):** sarı = birincil eylem/seçili (YÜZ, BAŞLA, Kaydet, İdmanı aç…); yeşil = yalnız durum (tamam,

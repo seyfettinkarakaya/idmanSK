@@ -118,6 +118,8 @@ function handle_(req) {
         return ok_(getPlan_(req));
       case 'finishSession':
         return withLock_(function () { return ok_(finishSession_(req)); });
+      case 'getGecmis':
+        return ok_(getGecmis_(req));
       case 'getSalon':
         return ok_(getSalon_());
       case 'saveSalon':
@@ -246,6 +248,62 @@ function planSet_(plan, c, i) {
   };
   if (c.etiket >= 0) set.etiket = text_(disp, c.etiket); // sütun yoksa alan da yok (eski tablolar aynı)
   return set;
+}
+
+// ---------------------------------------------------------------------------
+// getGecmis (13.12, salt okuma): geçmişle kıyas için yuzmeVeri'nin son günleri + yuzmeSeans (RPE, havuz).
+// Telefondaki geçmiş belli aralıkla silindiği için kıyas, rekor ve RPE kayması buradan beslenir.
+// ---------------------------------------------------------------------------
+
+var GECMIS_GUN = 120;
+var GECMIS_MAX = 2500;
+var COL_GERCEK_ZONE = 'Gerçek Zone';
+
+function getGecmis_(req) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var tz = ss.getSpreadsheetTimeZone();
+  var gun = Math.max(7, Math.min(400, Number(req && req.gun) || GECMIS_GUN));
+  var limit = Utilities.formatDate(new Date(Date.now() - gun * 86400000), tz, 'yyyy-MM-dd');
+
+  var t = readSheet_(ss, SHEET_ESKI, { display: true });
+  var c = {
+    tarih: col_(t, COL.tarih, true), blok: col_(t, COL.blok), tekrar: col_(t, COL.tekrar), mesafe: col_(t, COL.mesafe),
+    stil: col_(t, COL.stil), tur: col_(t, COL.tur), alet: col_(t, COL.alet), hedef: col_(t, COL.hedef), gercek: col_(t, COL.gercek, true),
+    zone: col_(t, COL_GERCEK_ZONE)
+  };
+  var sets = [];
+  for (var i = 0; i < t.values.length && sets.length < GECMIS_MAX; i++) {
+    var row = t.values[i];
+    var disp = t.display[i];
+    var key = dateKey_(row[c.tarih], tz);
+    if (!key || key < limit) continue;
+    var gercek = durationText_(cell_(disp, c.gercek));
+    if (!gercek) continue; // yapılmamış / süresiz set kıyasa girmez
+    sets.push({
+      t: key, b: text_(disp, c.blok), n: toNumber_(cell_(row, c.tekrar)) || 1, m: toNumber_(cell_(row, c.mesafe)) || 0,
+      s: text_(disp, c.stil), u: text_(disp, c.tur), a: text_(disp, c.alet), h: durationText_(cell_(disp, c.hedef)),
+      g: gercek, z: c.zone >= 0 ? text_(disp, c.zone) : ''
+    });
+  }
+
+  var seans = [];
+  var ssheet = sheetOf_(ss, SHEET_SEANS);
+  if (ssheet) {
+    var st = readSheet_(ss, SHEET_SEANS, { display: true });
+    var sc = { tarih: col_(st, SEANS_COL.tarih), rpe: col_(st, SEANS_COL.rpe), havuz: col_(st, SEANS_COL.havuz), mesafe: col_(st, SEANS_COL.mesafe), sure: col_(st, SEANS_COL.sure) };
+    if (sc.tarih >= 0) {
+      st.values.forEach(function (row, j) {
+        var k = dateKey_(row[sc.tarih], tz);
+        if (!k || k < limit) return;
+        var v = row[sc.tarih];
+        seans.push({
+          t: k, ts: v instanceof Date ? v.getTime() : null, rpe: toNumber_(cell_(row, sc.rpe)),
+          havuz: toNumber_(cell_(row, sc.havuz)), mesafe: toNumber_(cell_(row, sc.mesafe)), sure: durationText_(cell_(st.display[j], sc.sure))
+        });
+      });
+    }
+  }
+  return { sets: sets, seans: seans, gun: gun, alindi: Date.now() };
 }
 
 // ---------------------------------------------------------------------------

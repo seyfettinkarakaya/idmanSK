@@ -570,4 +570,55 @@ sc('13.12 Düzeltme (kara): biten her set kutusu (önceki setler dahil) tekrar v
   assert.equal(reps[0], 8); assert.ok(reps[1] == null, 'girilmeyen set planlanan tekrar sayılır');
 });
 
+sc('13.12 Ortak takvim (Y3): ana sayfanın üstünde hafta şeridi, yüzme/kara noktaları; güne dokun → o günün özeti; ok ile hafta; kartlarda Takvim düğmesi yok', async ({ launch }) => {
+  const s = await launch({ salonSheets: bugunPlanli(salonV12()), ref: true }); const p = s.page;
+  await s.waitScreen('home'); await p.waitForFunction(() => localStorage.getItem('ysk.salon'));
+  await p.waitForFunction(() => /hareket/.test(document.getElementById('hcal-k').textContent));
+  assert.equal(await p.$$eval('#hcal-wk .hcal-d', (e) => e.length), 7);
+  assert.equal(await p.$eval('#hcal-wk .hcal-d.today', (e) => e.dataset.d), '2026-09-23');
+  assert.equal(await p.$eval('#hcal-wk .hcal-d.sel', (e) => e.dataset.d), '2026-09-23', 'varsayılan seçim bugün');
+  // bugün: yüzme + kara planlı → iki nokta
+  assert.deepEqual(await p.$$eval('#hcal-wk .hcal-d.today .dts i', (e) => e.map((x) => x.className)), ['y plan', 'k plan']);
+  assert.match(await txt(s, '#hcal-y'), /\d+ set · [\d.]+ m/);
+  assert.match(await txt(s, '#hcal-k'), /2 hareket/);
+  assert.equal(await p.$$eval('.home-card .hc-cal, #home-swim.hc-cal', (e) => e.length), 0, 'kartlarda ayrı Takvim düğmesi yok');
+  // yarına dokun: yalnız yüzme planı var
+  await p.click('#hcal-wk [data-d="2026-09-24"]');
+  assert.match(await txt(s, '#hcal-dh'), /^Yarın/);
+  assert.match(await txt(s, '#hcal-y'), /1 set · 400 m/);
+  assert.equal(await txt(s, '#hcal-k'), 'Plan yok');
+  // önceki hafta
+  await p.click('#hcal-prev');
+  assert.equal(await txt(s, '#hcal-title'), '14 Eylül – 20 Eylül');
+  assert.equal(await p.$eval('#hcal-wk .hcal-d:last-child', (e) => e.dataset.d), '2026-09-20');
+  await p.click('#hcal-next');
+  assert.equal(await txt(s, '#hcal-title'), '21 Eylül – 27 Eylül');
+  // yüzme satırı gün listesini açar
+  await p.click('#home-swim'); await s.waitScreen('days');
+});
+
+sc('13.12 Geçmişle kıyas (Y4): kaynak Drive yuzmeVeri; aynı set = mesafe + stil + tür + alet + bölge (farklı bölge/alet karışmaz, tekrar sayısı fark etmez); trend sütunları', async ({ launch }) => {
+  const { ESKI_H, D: Dd } = require('./fakegas.cjs');
+  const eskiH = [...ESKI_H, 'Gerçek Zone'];
+  const er = (t, tk, m, g, z, alet = '') => [Dd(t), 1, 'MS', tk, m, 'FR', 'Swim', '', '04:04', '01:00', alet, g, '', '', '', '', '', z];
+  const eskiRows = [
+    er('2026-09-16', 1, 200, '04:06.0', 'EN3'),               // eşleşir
+    er('2026-09-09', 1, 200, '03:52.0', 'SP1'),               // farklı bölge (sprint): eşleşmez
+    er('2026-09-02', 1, 200, '04:00.0', 'EN3', 'Snorkel'),    // farklı alet: eşleşmez
+    er('2026-08-26', 5, 200, '04:08.0', 'EN3'),               // tekrar sayısı farklı ama aynı iş: eşleşir
+  ];
+  const rows = [prow('2026-09-23', 1, 'MS', 1, 200, 'Swim', '04:04', '01:00')];
+  const s = await launch({ rows, eskiH, eskiRows, ref: true }); const p = s.page;
+  await p.waitForFunction(() => { const g = JSON.parse(localStorage.getItem('ysk.gecmis') || 'null'); return g && g.sets.length === 4; });
+  await s.openToday();
+  await s.press(); await s.adv(243); await s.press();
+  await s.waitScreen('rpe'); await p.click('#rpe-grid button[data-v="7"]'); await s.waitScreen('msi'); await p.click('#msi-none'); await s.waitScreen('ozet');
+  const oz = await p.$eval('.oz-set', (e) => e.innerText.replace(/\s+/g, ' '));
+  assert.match(oz, /Geçen \(16 Eylül[^)]*\): ort\. 4:06\.0/, oz);
+  assert.match(oz, /↑ 2,7 sn hızlı/, oz);
+  assert.ok(!/3:52/.test(oz) && !/Snorkel/.test(oz), 'farklı bölge ve alet karışmaz: ' + oz);
+  assert.equal(await p.$$eval('.oz-tr div', (e) => e.length), 3, 'iki benzer geçmiş + bugün');
+  assert.match(oz, /200 m · FR Swim · alet yok · EN3 · .*kaynak: Drive \(4 kayıt\)/, oz);
+});
+
 if (require.main === module) runScenarios('Sürüm 13 senaryoları', only ? S.filter(([n]) => n.toLowerCase().includes(only.toLowerCase())) : S, 8160);

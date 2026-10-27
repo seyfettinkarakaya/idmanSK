@@ -1,25 +1,25 @@
 // idmanSK — arayüz. Veriye yalnızca data.js üzerinden erişir.
 
-import * as data from './data.js?v=13.11.0';
-import { Wheel } from './wheel.js?v=13.11.0';
-import * as zaman from './zaman.js?v=13.11.0';
-import * as ref from './ref.js?v=13.11.0';
-import * as duzen from './duzen.js?v=13.11.0';
-import * as salon from './salon.js?v=13.11.0';
-import * as grup from './grup.js?v=13.11.0';
-import * as kisit from './kisit.js?v=13.11.0';
-import * as yuk from './yuk.js?v=13.11.0';
-import * as harita from './harita.js?v=13.11.0';
-import * as bilgi from './bilgi.js?v=13.11.0';
-import * as analiz from './analiz.js?v=13.11.0';
-import * as video from './video.js?v=13.11.0';
-import * as hazir from './hazir.js?v=13.11.0';
-import { VIDEOLAR } from './videolar.js?v=13.11.0';
-import * as model from './model.js?v=13.11.0';
-import * as gosterge from './gosterge.js?v=13.11.0';
+import * as data from './data.js?v=13.12.0';
+import { Wheel } from './wheel.js?v=13.12.0';
+import * as zaman from './zaman.js?v=13.12.0';
+import * as ref from './ref.js?v=13.12.0';
+import * as duzen from './duzen.js?v=13.12.0';
+import * as salon from './salon.js?v=13.12.0';
+import * as grup from './grup.js?v=13.12.0';
+import * as kisit from './kisit.js?v=13.12.0';
+import * as yuk from './yuk.js?v=13.12.0';
+import * as harita from './harita.js?v=13.12.0';
+import * as bilgi from './bilgi.js?v=13.12.0';
+import * as analiz from './analiz.js?v=13.12.0';
+import * as video from './video.js?v=13.12.0';
+import * as hazir from './hazir.js?v=13.12.0';
+import { VIDEOLAR } from './videolar.js?v=13.12.0';
+import * as model from './model.js?v=13.12.0';
+import * as gosterge from './gosterge.js?v=13.12.0';
 
 // Telefonun güncel kodu çalıştırıp çalıştırmadığını görmek için ekranda gösterilir.
-export const APP_VERSION = '13.11.0';
+export const APP_VERSION = '13.12.0';
 
 const $ = (id) => document.getElementById(id);
 
@@ -122,9 +122,10 @@ function esc(s) {
  * data-bg / data-grow / data-glow olarak yazılır, burada CSSOM ile uygulanır.
  */
 function paint(root) {
-  for (const el of root.querySelectorAll('[data-bg],[data-grow]')) {
+  for (const el of root.querySelectorAll('[data-bg],[data-grow],[data-h]')) {
     if (el.dataset.bg) el.style.background = el.dataset.bg;
     if (el.dataset.grow) el.style.flexGrow = el.dataset.grow;
+    if (el.dataset.h) el.style.height = `${el.dataset.h}px`;
     if (el.dataset.glow) el.style.setProperty('--g', el.dataset.glow);
   }
   return root;
@@ -1045,6 +1046,7 @@ function showHome() {
   show('home');
   renderHome();
   loadDates();
+  gecmisEsitle();
   const c = data.getCachedSalon();
   if (data.isConfigured('salon') && (!c || Date.now() - c.savedAt > 5 * 60 * 1000)) loadSalon();
 }
@@ -1108,6 +1110,7 @@ function renderHome() {
   const q = data.getQueue().length;
   $('home-history-meta').textContent = (n ? `${n} kayıt` : 'Henüz kayıt yok') + (q ? ` · ${q} gönderilmeyi bekliyor` : '');
   renderHomeGym();
+  try { renderHomeCal(); } catch (err) { console.warn('ortak takvim', err); }
   try { renderHafta(); } catch (err) { $('home-week').innerHTML = ''; console.warn('haftalık şerit', err); }
   fitListLines();
 }
@@ -1191,6 +1194,73 @@ async function hazirKontrol() {
   if (!ok) return;
   data.setHazir(todayKey(), { uyku: k.uyku, agri: k.agri, enerji: k.enerji, eklem: k.eklem });
   renderHome();
+}
+
+// --- 13.12 (Y4): geçmişle kıyas Drive'daki yuzmeVeri kayıtlarından -----------------------------------
+
+state.gecmis = data.getGecmisCache();
+let gecmisBusy = false;
+/** Drive'daki son günleri çeker (sessiz; hata olursa son önbellek kalır). Kayıttan sonra zorla, ana sayfada 20 dk'da bir. */
+async function gecmisEsitle(force = false) {
+  if (gecmisBusy || !data.isConfigured('yuzme')) return;
+  const c = state.gecmis;
+  if (!force && c && Date.now() - c.alindi < 20 * 60 * 1000) return;
+  gecmisBusy = true;
+  try { state.gecmis = await data.fetchGecmis(); } catch (err) { console.warn('geçmiş eşitleme', err && err.code); } finally { gecmisBusy = false; }
+}
+
+/** Drive + telefon geçmişi tek liste (her çağrıda yeniden; küçük). */
+const gecmisListe = () => analiz.gecmisListe(state.gecmis, data.getHistory());
+
+/** Planlanan set + gerçek ortalama (sn/tekrar) → kıyas sorgusu (mesafe, stil, tür, alet, tempo, bölge, havuz). */
+function kiyasSorgu(s, ortSn) {
+  const tempo = ortSn && s.mesafe ? (ortSn / Number(s.mesafe)) * 100 : 0;
+  const z = tempo ? zoneOf(tempo, s) : null;
+  return { mesafe: Number(s.mesafe), stil: s.stil, tur: s.tur, alet: s.alet || '', tempo, ortSn, zone: z ? z.zone : '', havuz: Number(prefs().havuz) || null };
+}
+
+// --- 13.12 (Y3): ana sayfanın en üstünde tek ortak takvim (yüzme + kara) ---------------------------
+
+/** Güne ait yüzme / kara bilgisi: { y: {done, d}, k: {done, rows} }. */
+function gunBilgisi(k) {
+  const hist = data.getHistory();
+  const y = { done: hist.some((x) => x && x.tarih === k && turOf(x) === 'yuzme'), d: visibleDates().find((d) => d.tarih === k) || null };
+  const rows = data.isConfigured('salon') ? programGun(k).filter((r) => !r.durum) : [];
+  const kr = { done: hist.some((x) => x && x.tarih === k && turOf(x) === 'salon'), rows };
+  return { y, k: kr };
+}
+
+function renderHomeCal() {
+  const today = todayKey();
+  if (!state.hcalBas) state.hcalBas = mondayOf(today);
+  if (!state.hcalSel) state.hcalSel = today;
+  const bas = state.hcalBas;
+  const gunler = Array.from({ length: 7 }, (_, i) => addDays(bas, i));
+  const b0 = parseKey(gunler[0]); const b6 = parseKey(gunler[6]);
+  $('hcal-title').textContent = `${b0.getDate()} ${AYLAR[b0.getMonth()]} – ${b6.getDate()} ${AYLAR[b6.getMonth()]}`;
+  $('hcal-wk').innerHTML = gunler.map((k) => {
+    const g = gunBilgisi(k);
+    const dt = parseKey(k);
+    const dot = (cls, done, plan) => (done ? `<i class="${cls} on"></i>` : plan ? `<i class="${cls} plan"></i>` : '');
+    return `<button class="hcal-d${k === today ? ' today' : ''}${k === state.hcalSel ? ' sel' : ''}${k < today ? ' past' : ''}" data-d="${k}"><small>${['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'][dt.getDay()]}</small><b>${dt.getDate()}</b><span class="dts">${dot('y', g.y.done, g.y.d)}${dot('k', g.k.done, g.k.rows.length)}</span></button>`;
+  }).join('');
+  const sel = state.hcalSel;
+  const g = gunBilgisi(sel);
+  $('hcal-dh').innerHTML = gunBasligi(sel);
+  const hs = g.y.d ? hedefSureOf(g.y.d) : 0;
+  $('hcal-y').textContent = g.y.d
+    ? `${g.y.done ? '✓ yapıldı · ' : ''}${g.y.d.setSayisi} set · ${fmtNum(g.y.d.toplamMesafe)} m${hs ? ` · ${fmtDur(hs)}` : ''}`
+    : g.y.done ? '✓ yapıldı' : 'Plan yok';
+  $('hcal-k').textContent = g.k.rows.length
+    ? `${g.k.done ? '✓ yapıldı · ' : ''}${g.k.rows.length} hareket`
+    : g.k.done ? '✓ yapıldı' : (data.isConfigured('salon') ? 'Plan yok' : 'Kurulmadı');
+}
+
+function onHomeCalClick(e) {
+  const nav = e.target.closest('#hcal-prev, #hcal-next');
+  if (nav) { state.hcalBas = addDays(state.hcalBas || mondayOf(todayKey()), nav.id === 'hcal-prev' ? -7 : 7); return renderHomeCal(); }
+  const d = e.target.closest('[data-d]');
+  if (d) { state.hcalSel = d.dataset.d; renderHomeCal(); }
 }
 
 /** Programdaki (gönderilmemiş) yüzme günleri: [{ tarih, metre }] */
@@ -2118,7 +2188,7 @@ function renderItem(node, s, i, cum) {
 
   // Hazır kartta başlık büyük: stil · tür Sürüm 9'daki gibi kendi satırında. Küçük başlıklı
   // kartlarda (yüzerken, dinlenirken, özet) başlığın yanında durur.
-  // 13.11.0: sıradaki set kartında (set sonu dinlenmesi) başlık ve stil·tür tek satırda.
+  // 13.12.0: sıradaki set kartında (set sonu dinlenmesi) başlık ve stil·tür tek satırda.
   const title = mode === 'ready'
     ? `<div class="w-title">${esc(`${T} × ${s.mesafe}`)}</div>${styleTur ? `<div class="w-sub">${esc(styleTur)}</div>` : ''}`
     : `<div class="w-title">${esc(`${T} × ${s.mesafe}`)}${styleTur ? `<small>${esc(styleTur)}</small>` : ''}</div>`;
@@ -2962,7 +3032,9 @@ async function cssTestiAc() {
 /** Aynı set türünün son 8 seferi: ortalama tempo /100 m (yukarı = hızlı), CSS çizgisi. */
 function tempoGrafik(s) {
   const imza = analiz.setImza({ ...s, tekrar: tekrarOf(s) });
-  const g = analiz.setGecmisi(data.getHistory(), imza).slice(0, 8).reverse();
+  // 13.12: aynı set = mesafe + stil + tür + alet + bölge + havuz; kaynak Drive + telefon
+  const hs = parseSec(s.hedef);
+  const g = analiz.benzerGecmis(gecmisListe(), { ...kiyasSorgu(s, 0), hedefTempo: hs && s.mesafe ? (hs / Number(s.mesafe)) * 100 : 0 }, '9999', 8).slice().reverse();
   if (g.length < 2) return '';
   const c = cssOf(s);
   const v = g.map((x) => x.tempo);
@@ -3567,12 +3639,20 @@ function ozetEk(i, eff) {
   if (kd && kd.durum === 'yuksek') out.push(`<p class="oz-x warn">⚠ ${esc(kd.metin)}</p>`);
   const ort = eff.avgMs ? eff.avgMs / 1000 : 0;
   if (ort) {
-    const imza = analiz.setImza({ ...s, tekrar: tekrarOf(s) });
-    const hist = data.getHistory();
-    const ky = analiz.kiyas(hist, imza, state.session.tarih, ort);
-    if (ky) out.push(`<p class="oz-x">Geçen (${esc(fmtDateTR(ky.tarih))}): ort. ${esc(fmtAvg(ky.onceki * 1000))} · <b class="${ky.fark < 0 ? 'ok' : ky.fark > 0 ? 'warn' : ''}">${ky.fark < 0 ? `↑ ${fmtDec(-ky.fark)} sn hızlı` : ky.fark > 0 ? `↓ ${fmtDec(ky.fark)} sn yavaş` : 'aynı'}</b></p>`);
-    const rk = analiz.setRekor(hist, imza, state.session.tarih, ort);
+    // 13.12 (Y4): kıyas Drive + telefon kayıtlarından; aynı set = mesafe + stil + tür + alet + bölge + havuz (tekrar sayısı değil)
+    const lst = gecmisListe();
+    const q = kiyasSorgu(s, ort);
+    const ky = analiz.kiyas2(lst, q, state.session.tarih);
+    if (ky) out.push(`<p class="oz-x">Geçen (${esc(fmtDateTR(ky.tarih))}${ky.tekrar !== tekrarOf(s) ? `, ${ky.tekrar} tekrar` : ''}): ort. ${esc(fmtAvg(ky.onceki * 1000))} · <b class="${ky.fark < 0 ? 'ok' : ky.fark > 0 ? 'warn' : ''}">${ky.fark < 0 ? `↑ ${esc(String(-ky.fark).replace('.', ','))} sn hızlı` : ky.fark > 0 ? `↓ ${esc(String(ky.fark).replace('.', ','))} sn yavaş` : 'aynı'}</b></p>`);
+    const bz = analiz.benzerGecmis(lst, q, state.session.tarih, 5);
+    if (bz.length >= 2) {
+      const pts = [...bz.slice().reverse().map((x) => ({ t: `${x.tarih.slice(8, 10)}.${x.tarih.slice(5, 7)}`, v: x.tempo })), { t: 'BUGÜN', v: q.tempo, now: true }];
+      const lo = Math.min(...pts.map((x) => x.v)); const hi = Math.max(...pts.map((x) => x.v));
+      out.push(`<div class="oz-tr" aria-label="Son benzer setler, yüksek sütun hızlı">${pts.map((x) => `<div class="${x.now ? 'n' : ''}"><i data-h="${Math.round(14 + ((hi - x.v) / ((hi - lo) || 1)) * 40)}"></i>${esc(x.t)}</div>`).join('')}</div>`);
+    }
+    const rk = analiz.rekor2(lst, q, state.session.tarih);
     if (rk) out.push(`<p class="oz-x pr">🏆 Bu setin en hızlı ortalaması (önceki ${esc(fmtAvg(rk.onceki * 1000))})</p>`);
+    if (bz.length) out.push(`<p class="oz-x oz-kay">${esc([`${q.mesafe} m`, [q.stil, q.tur].filter(Boolean).join(' '), q.alet || 'alet yok', q.zone, q.havuz ? `${q.havuz} m havuz` : ''].filter(Boolean).join(' · '))} · kaynak: ${state.gecmis ? `Drive (${state.gecmis.sets.length} kayıt)` : 'telefon geçmişi'}</p>`);
   }
   return out.join('');
 }
@@ -3594,15 +3674,14 @@ function ozetStres() {
   const dk = zaman.idmanMs(st, Date.now()) / 60000;
   const rpeYuk = f.rpe == null ? null : Math.round(dk * f.rpe);
   // RPE kayması: en çok stres veren setlerden geçmişte aynısı (aynı imza) olan ilki
-  const hist = data.getHistory();
-  const rpeOf = Object.fromEntries(hist.filter((r) => r && r.tur !== 'salon' && r.seans).map((r) => [r.tarih, r.seans.rpe]));
+  const lst = gecmisListe();
   let kay = null;
   for (const [i, s] of state.plan.setler.entries()) {
     if (kay || f.rpe == null) break;
     const { eff } = st.per[i].reps.length ? setNotes(i) : {};
     if (!eff || !eff.avgMs || !['MS', 'AS'].includes(String(s.blok || '').toUpperCase())) continue;
-    const imza = analiz.setImza({ ...s, tekrar: tekrarOf(s) });
-    const g = analiz.setGecmisi(hist, imza, state.session.tarih).map((x) => ({ ...x, rpe: rpeOf[x.tarih] }));
+    // 13.12: RPE kıyası aynı tür sette, RPE'si bilinen (aynı gün iki idmanda karışmayan) kayıtlarla
+    const g = analiz.benzerGecmis(lst, kiyasSorgu(s, eff.avgMs / 1000), state.session.tarih, 12).filter((x) => x.rpe != null).map((x) => ({ tarih: x.tarih, ortSn: x.ortSn, rpe: x.rpe }));
     const k = gosterge.rpeKaymasi(g, eff.avgMs / 1000, f.rpe);
     if (k) kay = { ...k, ad: setTitle(s), simdi: eff.avgMs };
   }
@@ -3858,6 +3937,7 @@ async function saveSessionForm() {
   }
   // Tekrar dene / ikinci idman: kilit (state.saving) açıldıktan sonra yeniden gönderilir.
   if (again) return saveSessionForm();
+  if (result) gecmisEsitle(true);
   if (!result) return;
   keepInHistory(payload, 'sent');
   endSessionLocally(Boolean(result && result.kalanSet));
@@ -4198,7 +4278,7 @@ async function loadSalon() {
     sl.loading = null;
     kimlikCache.clear(); // H'deki Görsel sütunu değişmiş olabilir
     if (state.screen === 'salon-start') renderSalonStart();
-    if (state.screen === 'home') { renderHomeGym(); try { renderHafta(); } catch { /* şerit bir sonraki çizimde */ } }
+    if (state.screen === 'home') { renderHomeGym(); try { renderHafta(); renderHomeCal(); } catch { /* şerit bir sonraki çizimde */ } }
   });
   return sl.loading;
 }
@@ -4679,8 +4759,8 @@ function slPlusSet() {
 
 let hdb = null; // hareketdb.js (yalnızca kart açılınca yüklenir)
 let adb = null; // adimlar.js (Türkçe adımlar, yalnızca kart açılınca)
-const adimYukle = () => adb || (adb = import('./adimlar.js?v=13.11.0').then((m) => m.ADIMLAR).catch(() => ({})));
-const hdbYukle = () => hdb || (hdb = import('./hareketdb.js?v=13.11.0'));
+const adimYukle = () => adb || (adb = import('./adimlar.js?v=13.12.0').then((m) => m.ADIMLAR).catch(() => ({})));
+const hdbYukle = () => hdb || (hdb = import('./hareketdb.js?v=13.12.0'));
 let bilgiTimer = null;
 
 /** Hareketin videosu (H · Video önce, sonra uygulamadaki liste) ya da null. */
@@ -5838,7 +5918,7 @@ function wireSalon() {
     showSalonPlan();
     if (sl.plan && hz && hz.tarih && hz.tarih !== todayKey()) sl.plan.hedefTarih = todayKey(); // "Bugün için planla"
   });
-  $('home-gym-cal').addEventListener('click', () => { if (!data.isConfigured('salon')) return showSetup(true); showSalonProgram(); state.pgHome = true; loadSalon(); });
+  $('home-gym-cal').addEventListener('click', () => { if (!data.isConfigured('salon')) return showSetup(true); showSalonProgram(state.hcalSel ? salon.haftaBasi(state.hcalSel) : undefined); state.pgHome = true; loadSalon(); });
 }
 
 function wire() {
@@ -5855,7 +5935,8 @@ function wire() {
   });
 
   $('home-settings').addEventListener('click', () => showSetup(true));
-  $('home-swim').addEventListener('click', () => showDays());
+  $('home-swim').addEventListener('click', () => { if (state.hcalSel) { state.selDate = state.hcalSel; state.weekStart = mondayOf(state.hcalSel); } showDays(); });
+  $('home-cal').addEventListener('click', onHomeCalClick);
   $('home-open').addEventListener('click', () => {
     if (state.session) resumeSession();
     else if (state.homeNext) openDate(state.homeNext);

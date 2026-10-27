@@ -85,7 +85,8 @@ sc('Ana sayfa salon kartı: bugünün salonPlan planı (metro + liste) → Planl
   const s = await launch({ salonSheets: sh, ref: true, viewport: { width: 390, height: 844 } }); const p = s.page;
   await s.waitScreen('home');
   await p.waitForFunction(() => /karaPlan/.test(document.getElementById('home-gym-go').textContent));
-  assert.match(await txt(s, '#home-gym-go'), /Bugün · Çarşamba 23 Eylül\s*2 hareket · 6 set · ~\d+ dk\s*Dumbbell Shoulder Press\s*3×10 · 12,5 kg\s*Band Bent Over Row\s*3×15 · 15 kg\s*karaPlan · tablodan\s*İdmanı aç\s*Takvim\s*＋ Planla/);
+  // 13.12 (bilerek değişti): kartlardaki ayrı "Takvim" düğmesi kalktı; ana sayfanın üstünde tek ortak takvim var
+  assert.match(await txt(s, '#home-gym-go'), /Bugün · Çarşamba 23 Eylül\s*2 hareket · 6 set · ~\d+ dk\s*Dumbbell Shoulder Press\s*3×10 · 12,5 kg\s*Band Bent Over Row\s*3×15 · 15 kg\s*karaPlan · tablodan\s*İdmanı aç\s*＋ Planla/);
   assert.equal(await p.$$eval('#home-gym-metro .metro circle', (c) => c.length), 2, 'durak = hareket');
   // Planla → Omuz → hareket → Plana yaz → Yarın
   await p.click('#home-gym-planla'); await s.waitScreen('salon-plan');
@@ -114,7 +115,8 @@ sc('Ana sayfa salon kartı: bugün plan yok → sıradaki gün ("Bu planla başl
   const s = await launch({ salonSheets: sh, ref: true }); const p = s.page;
   await s.waitScreen('home');
   await p.waitForFunction(() => /karaPlan/.test(document.getElementById('home-gym-go').textContent));
-  assert.match(await txt(s, '#home-gym-go'), /Cuma · 25 Eylül\s*1 hareket · 3 set.*Dumbbell Shoulder Press\s*3×10 · 15 kg\s*karaPlan · bugün plan yok, sıradaki gün\s*Bu planla başla\s*Takvim\s*＋ Bugün için planla/);
+  // 13.12 (bilerek değişti): kartlardaki ayrı "Takvim" düğmesi kalktı; ana sayfanın üstünde tek ortak takvim var
+  assert.match(await txt(s, '#home-gym-go'), /Cuma · 25 Eylül\s*1 hareket · 3 set.*Dumbbell Shoulder Press\s*3×10 · 15 kg\s*karaPlan · bugün plan yok, sıradaki gün\s*Bu planla başla\s*＋ Bugün için planla/);
   await p.click('#home-gym-start'); await s.waitScreen('salon'); // 15 kg planda: +2,5 kg önerisi sorulmaz
   const ses = await s.ls('ysk.salonSession');
   assert.equal(ses.tarih, '2026-09-23'); assert.equal(ses.programTarih, '2026-09-25'); assert.equal(ses.hareketler[0].agirlik, 15);
@@ -122,7 +124,8 @@ sc('Ana sayfa salon kartı: bugün plan yok → sıradaki gün ("Bu planla başl
   const s2 = await launch({ salonSheets: salonV12(), ref: true }); const p2 = s2.page;
   await s2.waitScreen('home');
   await p2.waitForFunction(() => /Sırada kara planı yok/.test(document.getElementById('home-gym-go').textContent));
-  assert.match(await txt(s2, '#home-gym-go'), /Plan yok\s*Sırada kara planı yok.*＋ İdman planla\s*Takvim/);
+  // 13.12 (bilerek değişti): kartlardaki ayrı "Takvim" düğmesi kalktı; ana sayfanın üstünde tek ortak takvim var
+  assert.match(await txt(s2, '#home-gym-go'), /Plan yok\s*Sırada kara planı yok.*＋ İdman planla/);
   assert.equal(await p2.isHidden('#home-gym-planla'), true);
   await p2.click('#home-gym-start'); await s2.waitScreen('salon-plan');
 });

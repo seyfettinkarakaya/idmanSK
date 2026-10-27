@@ -18,6 +18,7 @@ const KEYS = {
   salonSession: 'ysk.salonSession',
   salonPlan: 'ysk.salonPlan',   // kaydedilmiş salon planı (ana sayfada "Hazır plan"), yalnızca telefonda
   hazir: 'ysk.hazir',           // (sürüm 13) günlük hazır olma kontrolü { 'YYYY-MM-DD': { uyku, agri, enerji, eklem } }
+  gecmis: 'ysk.gecmis',         // (13.12) Drive'daki yuzmeVeri/yuzmeSeans son günleri: kıyas, rekor, RPE kayması kaynağı
   hareketNot: 'ysk.hareketNot', // (sürüm 13) harekete sabit not ve ağırlık adımı { ad: { not, adim } }
 };
 
@@ -465,6 +466,23 @@ export function getCachedRef() {
   return r && validRef(r.data) ? r : null;
 }
 
+/**
+ * 13.12: Geçmişle kıyas için Drive'daki kayıtlar (idman.gs getGecmis, salt okuma). Telefon geçmişi silinse de kıyas bozulmaz.
+ * Cevap beklenen biçimde değilse (eski betik: UNKNOWN_ACTION ya da BAD_RESPONSE) önbellek korunur.
+ */
+export async function fetchGecmis(gun) {
+  const r = await call('getGecmis', gun ? { gun } : {}, 'yuzme', SLOW_TIMEOUT_MS);
+  if (!r || !Array.isArray(r.sets)) throw new ApiError('BAD_RESPONSE', 'getGecmis cevabı beklenen biçimde değil (idman.gs güncel sürümü dağıtıldı mı?).');
+  const v = { sets: r.sets, seans: Array.isArray(r.seans) ? r.seans : [], alindi: Date.now() };
+  store(KEYS.gecmis, v);
+  return v;
+}
+
+export function getGecmisCache() {
+  const v = load(KEYS.gecmis, null);
+  return v && Array.isArray(v.sets) ? v : null;
+}
+
 /** CSS testi sonucu: sporRef css sayfasına yeni satır (SporRef.gs addCss; eski satırlara dokunmaz). */
 export function addCss(payload) {
   return call('addCss', payload, 'ref');
@@ -529,7 +547,7 @@ export function saveSalonProgram(tarih, hareketler) {
   return call('savePlan', { tarih, hareketler }, 'salon');
 }
 
-/** Salon programı: o günün salonPlan satırlarını siler (13.11.0; saveSalon da siler). */
+/** Salon programı: o günün salonPlan satırlarını siler (13.12.0; saveSalon da siler). */
 export function salonProgramYapildi(tarih) {
   return call('planYapildi', { tarih }, 'salon');
 }

@@ -94,7 +94,7 @@ async function launch(opts = {}) {
   // 13.2: iki betik — idman.gs (yüzme + salon girişleri: havuzPlan/havuzVeri/havuzSeans, salonVeri/salonPlan) ve
   // idmanRef.gs (bölgeler, CSS, … + salonHar/salonHKEtki/bilgi BW). Test kurguları eski sayfa adlarıyla yazılır (fakegas ALIAS).
   const salonSheets = opts.salonSheets || (opts.salon ? sampleSalon() : null);
-  const giris = { Plan: new Sheet('Plan', opts.planH || PLAN_H, opts.rows || samplePlan()), eski: new Sheet('eski', opts.eskiH || ESKI_H), seans: new Sheet('seans', SEANS_H) }; // 13.8: planH / eskiH (ör. Etiket sütunu)
+  const giris = { Plan: new Sheet('Plan', opts.planH || PLAN_H, opts.rows || samplePlan()), eski: new Sheet('eski', opts.eskiH || ESKI_H, opts.eskiRows || []), seans: new Sheet('seans', SEANS_H, opts.seansRows || []) }; // 13.8: planH / eskiH (ör. Etiket sütunu)
   const refSheets = { ...(opts.refSheets || sampleRef()) };
   if (salonSheets) {
     giris.idman = salonSheets.idman;

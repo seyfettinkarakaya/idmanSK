@@ -229,6 +229,27 @@ test('13.12 Seans Tarih öğleden sonra: 27.10.2026 14:24:08 gerçek timestamp (
   assert.strictEqual(e.sheets.seans.fmt[1][0], 'dd.mm.yyyy HH:mm:ss');
 });
 
+test('13.12 getGecmis (salt okuma): yuzmeVeri son günleri + yuzmeSeans RPE/havuz; süresiz set ve eski satır dışarıda; tablo değişmez', () => {
+  const gun = (k) => new Date(Date.now() - k * 86400000).toISOString().slice(0, 10);
+  const eskiH = [...ESKI_H, 'Gerçek Zone'];
+  const r = (k, blok, tk, m, g, z, alet = '') => [D(gun(k)), 1, blok, tk, m, 'FR', 'Swim', '', '04:00', '00:30', alet, g, '', '', '', '', '', z];
+  const eskiRows = [r(3, 'MS', 1, 200, '04:02.4', 'EN3'), r(3, 'WU', 1, 400, ''), r(9, 'MS', 5, 200, '04:16.0', 'EN2', 'Snorkel'), r(300, 'MS', 1, 200, '04:30.0', 'EN2')];
+  const e = makeEnv({ Plan: new Sheet('Plan', H, []), eski: new Sheet('eski', eskiH, eskiRows), seans: new Sheet('seans', SEANS_H, [[new Date(Date.now() - 3 * 86400000), '01:04:06', 2400, 25, 7, '', '']]) });
+  const ev = e.sheets.eski; const sn = e.sheets.seans;
+  const before = JSON.stringify([ev.data, sn.data]);
+  const res = e.call({ action: 'getGecmis' });
+  assert.ok(res.ok, JSON.stringify(res));
+  assert.deepStrictEqual(res.data.sets.map((x) => [x.b, x.n, x.m, x.g, x.z, x.a]), [['MS', 1, 200, '04:02.4', 'EN3', ''], ['MS', 5, 200, '04:16.0', 'EN2', 'Snorkel']], '120 günden eski ve süresiz setler dışarıda');
+  assert.strictEqual(res.data.seans.length, 1);
+  assert.deepStrictEqual([res.data.seans[0].rpe, res.data.seans[0].havuz, res.data.seans[0].mesafe], [7, 25, 2400]);
+  assert.ok(res.data.seans[0].ts > 0, 'saatli başlangıç ms');
+  assert.strictEqual(JSON.stringify([ev.data, sn.data]), before, 'salt okuma: tablo değişmedi');
+  // Gerçek Zone sütunu yoksa z boş; yuzmeSeans sayfası yoksa seans boş
+  const e2 = makeEnv({ Plan: new Sheet('Plan', H, []), eski: new Sheet('eski', ESKI_H, [[D(gun(2)), 1, 'MS', 1, 100, 'FR', 'Swim', '', '', '', '', '01:30.0', '', '', '', '', '']]) }, undefined);
+  const r2 = e2.call({ action: 'getGecmis' });
+  assert.ok(r2.ok, JSON.stringify(r2)); assert.strictEqual(r2.data.sets[0].z, ''); assert.deepStrictEqual(r2.data.seans, []);
+});
+
 test('13.9 ikinci idman: onaysız SAME_DAY, ikinci:true ile yazılır; aynı başlangıç saati yinelenme; Seans Tarih saatli', () => {
   const e = env([row('2026-10-20', 1, 'WU', 1, 200), row('2026-10-20', 2, 'MS', 4, 100), row('2026-10-20', 3, 'CD', 1, 200)]);
   const t1 = Date.UTC(2026, 9, 20, 7, 42, 13);

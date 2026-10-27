@@ -147,3 +147,77 @@ export function cssTestiZamani(hist, css, bugun, gun = 21) {
   const rpeOrt = rpes.length ? rpes.reduce((a, b) => a + b, 0) / rpes.length : null;
   return css - ort >= 2 && (rpeOrt == null || rpeOrt <= 6) ? { setSayisi: t.length, ortTempo: Math.round(ort * 10) / 10, rpe: rpeOrt } : null;
 }
+
+// --- 13.12: geçmişle kıyas Drive kayıtlarından (getGecmis) + telefon geçmişi ------------------------
+
+/** Planlanan tekrar süresi ("04:04") → hedef tempo (sn/100 m); yoksa 0. */
+const hedefTempo = (h, m) => { const sn = lapSn(h); return sn != null && Number(m) > 0 ? (sn / Number(m)) * 100 : 0; };
+const norm = (v) => String(v == null ? '' : v).trim().toLowerCase().replace(/\s+/g, ' ');
+/** Sayfada bölge yoksa tempo bu bantta (sn/100 m) aynı sayılır. */
+const TEMPO_BANT = 6;
+
+/**
+ * Drive (getGecmis: { sets, seans }) ve telefon geçmişini (ysk.history) tek düz listeye çevirir:
+ * { tarih, ts, id, blok, tekrar, mesafe, stil, tur, alet, zone, ortSn (tekrar ort.), tempo (sn/100 m), havuz, rpe, kaynak }.
+ * Aynı kayıt iki yerde varsa Drive kalır. Havuz ve RPE yalnız o gün tek seans varsa atanır (aynı gün iki idmanda karışmaz).
+ */
+export function gecmisListe(drive, hist) {
+  const out = [];
+  const seansBy = {};
+  for (const x of (drive && drive.seans) || []) (seansBy[x.t] = seansBy[x.t] || []).push(x);
+  const tekSeans = (t) => (seansBy[t] && seansBy[t].length === 1 ? seansBy[t][0] : null);
+  for (const r of (drive && drive.sets) || []) {
+    const sn = lapSn(r.g);
+    if (sn == null || !(Number(r.m) > 0)) continue;
+    const ses = tekSeans(r.t);
+    out.push({ tarih: r.t, ts: ses && ses.ts ? ses.ts : null, id: null, blok: r.b, tekrar: Number(r.n) || 1, mesafe: Number(r.m), stil: r.s, tur: r.u, alet: r.a || '', zone: r.z || '', ortSn: sn, tempo: (sn / Number(r.m)) * 100, hedefTempo: hedefTempo(r.h, r.m), havuz: ses && ses.havuz ? ses.havuz : null, rpe: ses && ses.rpe != null ? ses.rpe : null, kaynak: 'drive' });
+  }
+  const key = (x) => [x.tarih, norm(x.blok), x.tekrar, x.mesafe, norm(x.stil), norm(x.tur), norm(x.alet), Math.round(x.ortSn * 10)].join('|');
+  const seen = new Set(out.map(key));
+  for (const r of hist || []) {
+    if (!r || r.tur === 'salon') continue;
+    for (const s of r.setler || []) {
+      if (!s.tamamlandi) continue;
+      const sn = lapSn(s.gercek);
+      if (sn == null || !(Number(s.mesafe) > 0)) continue;
+      const x = { tarih: r.tarih, ts: null, id: r.id || null, blok: s.blok, tekrar: Number(s.tekrar) || 1, mesafe: Number(s.mesafe), stil: s.stil, tur: s.tur, alet: s.alet || '', zone: s.zone || '', ortSn: sn, tempo: (sn / Number(s.mesafe)) * 100, hedefTempo: hedefTempo(s.hedef, s.mesafe), havuz: r.seans && r.seans.havuz ? Number(r.seans.havuz) : null, rpe: r.seans && r.seans.rpe != null ? r.seans.rpe : null, kaynak: 'telefon' };
+      if (!seen.has(key(x))) out.push(x);
+    }
+  }
+  return out.sort((a, b) => (a.tarih < b.tarih ? 1 : a.tarih > b.tarih ? -1 : 0));
+}
+
+/**
+ * Aynı set mi? q: { mesafe, stil, tur, alet, tempo (sn/100), zone, havuz }.
+ * Mesafe, stil, tür, alet aynı; havuz boyu (ikisi de biliniyorsa) aynı; bölge (ikisi de varsa) aynı, yoksa tempo ±6 sn/100 m.
+ * Tekrar sayısı eşleşmeyi bozmaz (4×200 ile 5×200 kıyaslanır; tempo 100 m başınadır).
+ */
+export function benzerMi(a, q) {
+  if (Number(a.mesafe) !== Number(q.mesafe)) return false;
+  if (norm(a.stil) !== norm(q.stil) || norm(a.tur) !== norm(q.tur) || norm(a.alet) !== norm(q.alet)) return false;
+  if (a.havuz && q.havuz && Number(a.havuz) !== Number(q.havuz)) return false;
+  // planlanan set önizlemesi (q.hedefTempo): aynı plan yoğunluğu (hedef tempo ±3 sn/100 m); biri bilinmiyorsa yalnız yapı
+  if (q.hedefTempo > 0 && a.hedefTempo > 0) return Math.abs(a.hedefTempo - q.hedefTempo) <= 3;
+  if (!(q.tempo > 0)) return true;
+  if (a.zone && q.zone) return norm(a.zone) === norm(q.zone);
+  return Math.abs(a.tempo - q.tempo) <= TEMPO_BANT;
+}
+
+/** Benzer geçmiş setler (yeniden eskiye), verilen günden önce; en çok n. */
+export function benzerGecmis(liste, q, once = '9999', n = 99) {
+  return (liste || []).filter((x) => x.tarih < once && benzerMi(x, q)).slice(0, n);
+}
+
+/** Geçen benzer setle kıyas: { tarih, onceki (sn), fark (sn; − = daha hızlı), tekrar } ya da null. */
+export function kiyas2(liste, q, once) {
+  const g = benzerGecmis(liste, q, once, 1)[0];
+  return g && q.ortSn > 0 ? { tarih: g.tarih, onceki: g.ortSn, fark: Math.round((q.ortSn - g.ortSn) * 10) / 10, tekrar: g.tekrar } : null;
+}
+
+/** Rekor: en hızlı ortalamadan da hızlı mı ({ onceki }) ya da null (ilk kez değilse). */
+export function rekor2(liste, q, once) {
+  const g = benzerGecmis(liste, q, once);
+  if (!g.length || !(q.ortSn > 0)) return null;
+  const best = Math.min(...g.map((x) => x.ortSn));
+  return q.ortSn < best ? { onceki: best } : null;
+}

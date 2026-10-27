@@ -337,6 +337,19 @@ await test('idmanRef/salon: beklenmeyen cevap BAD_RESPONSE, önbelleğe yazılma
   assert.equal(data.getCachedSalon(), null);
 });
 
+await test('13.12 getGecmis: Drive geçmişi önbelleğe yazılır; beklenmeyen cevap BAD_RESPONSE ve eski önbellek korunur', async () => {
+  cfg();
+  assert.equal(data.getGecmisCache(), null);
+  handler = () => ({ json: { ok: true, data: { sets: [{ t: '2026-10-20', b: 'MS', n: 1, m: 200, s: 'FR', u: 'Swim', a: '', h: '04:04', g: '04:02.4', z: 'EN3' }], seans: [{ t: '2026-10-20', ts: 1, rpe: 7, havuz: 25 }] } } });
+  const v = await data.fetchGecmis();
+  assert.equal(v.sets.length, 1);
+  assert.equal(calls[calls.length - 1], 'getGecmis');
+  assert.equal(data.getGecmisCache().sets[0].z, 'EN3');
+  handler = () => ({ json: { ok: true, data: { uygulama: 'eski betik' } } });
+  await assert.rejects(data.fetchGecmis(), (e) => e.code === 'BAD_RESPONSE');
+  assert.equal(data.getGecmisCache().sets.length, 1, 'eski önbellek korunur');
+});
+
 await test('salon kuyruğu: salon kaydı saveSalon ile gider; salon bağlı değilse bekler; geçmiş türe göre', async () => {
   cfg();
   const sp = { tarih: '2026-10-01', hareketler: [{ hareket: 'Row', set: 3, tekrar: 10, agirlik: 20 }] };

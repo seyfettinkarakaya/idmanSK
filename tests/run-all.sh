@@ -10,6 +10,7 @@ node tests/test-data.mjs
 node tests/test-ref.mjs
 node tests/test-duzen.mjs
 node tests/test-salon.mjs
+node tests/test-gecmis.mjs
 node tests/test-zaman.mjs
 node tests/test-cekirdek.mjs
 node tests/test-gosterge.mjs

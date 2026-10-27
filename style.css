@@ -2060,3 +2060,39 @@ b.tur, .tur { color: #F97316; }
 .w-item.ph-rest.fit-3 .w-timer.is-bar .w-tbig { --fs: 52px; --sy: 1.2; }
 .w-item.ph-rest.fit-3 .w-ri { display: none; }
 .w-item.ph-rest.fit-3 .w-reps small { display: none; }
+
+/* 13.12 (Y3): ana sayfa ortak takvim (yüzme + kara) */
+.home-cal { margin: 6px 0 14px; padding: 10px 10px 12px; border-radius: 24px; background: var(--d-card, var(--panel)); border: 1px solid var(--d-line, var(--line)); }
+.hcal-hd { display: flex; align-items: center; justify-content: space-between; padding: 0 2px 8px; }
+.hcal-hd b { font-size: 17px; font-weight: 800; }
+.hcal-hd .icon-btn { width: 40px; height: 40px; }
+.hcal-wk { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
+.hcal-d { border: 0; border-radius: 14px; padding: 6px 0 8px; text-align: center; background: var(--n3); color: var(--text); font-family: inherit; }
+.hcal-d small { display: block; font-size: 13px; font-weight: 700; color: var(--m3); }
+.hcal-d b { display: block; font-family: var(--num); font-size: 24px; font-weight: 800; line-height: 1.15; }
+.hcal-d .dts { display: flex; justify-content: center; gap: 4px; height: 10px; margin-top: 3px; }
+.hcal-d .dts i { box-sizing: border-box; width: 10px; height: 10px; border-radius: 50%; }
+.dts i.y { --c: var(--t-teal); } .dts i.k { --c: var(--t-amber); }
+.dts i.on { background: var(--c); }
+.dts i.plan { border: 2px solid var(--c); }
+.hcal-d.past:not(.today) { opacity: 0.8; }
+.hcal-d.today { background: var(--accent); color: #14110A; }
+.hcal-d.today small { color: #3A3000; }
+.hcal-d.sel { box-shadow: inset 0 0 0 2px var(--text); }
+.hcal-day { margin-top: 10px; padding: 10px 10px 6px; border-radius: 16px; background: var(--n2); }
+.hcal-dh { margin: 0 0 4px 4px; font-size: 15px; font-weight: 800; }
+.hcal-dh span { color: var(--m3); font-weight: 600; }
+.hcal-r { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 54px; margin-bottom: 4px; padding: 6px 8px; border: 0; border-radius: 12px; background: transparent; color: var(--text); text-align: left; font-family: inherit; }
+.hcal-r i { flex: none; width: 12px; height: 12px; border-radius: 50%; background: var(--c); }
+.hcal-r.y { --c: var(--t-teal); } .hcal-r.k { --c: var(--t-amber); }
+.hcal-r span { flex: 1; min-width: 0; }
+.hcal-r b { display: block; font-size: 17px; font-weight: 800; }
+.hcal-r small { display: block; font-size: 14px; font-weight: 600; color: var(--s2); }
+.hcal-r em { color: var(--m3); }
+
+/* 13.12 (Y4): özet ekranında geçmişle kıyas: son benzer setlerin tempo sütunları (yüksek = hızlı) */
+.oz-tr { display: flex; gap: 6px; align-items: flex-end; height: 78px; margin: 8px 0 2px; }
+.oz-tr div { flex: 1; min-width: 0; text-align: center; font-size: 12px; font-weight: 700; color: var(--m3); }
+.oz-tr i { display: block; margin-bottom: 3px; border-radius: 6px 6px 2px 2px; background: #A9BDD0; }
+.oz-tr .n i { background: var(--accent); }
+.oz-kay { font-size: 13px; color: var(--m3); }
