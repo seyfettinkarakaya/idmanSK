@@ -22,6 +22,11 @@ Tamamlandı (sürüm 8), bkz. Tamamlanan. Kalan: Code.gs'in yeniden dağıtılma
   imza `tekrar` içeriyor (5×200 ≠ 4×200 sayılıyor) ama alet, havuz boyu ve hedef bölge içermiyor (pull ile serbest, Taban-1 ile Taban-3 aynı
   set sayılıyor); aynı gün iki idmanda RPE tarihe göre karışıyor.
 
+- **Y1 güncellendi (27.10):** seans zamanı gerçek timestamp (saniyeli, 24 saat biçimi açıkça ayarlı) olarak yazılsın; kullanıcı "hiçbir zaman verisi kaybolmasın" istedi. Seçenekler: A seans Başlangıç+Bitiş, B (öneri) + her set Başlangıç/Bitiş (yuzmeVeri), C + tekrar zamanları.
+- [ ] **Y5 Set kartı başlığı okunurluğu:** pembe zemin + koyu pembe yazı havuzda okunmuyor (renk üstüne renk, 13 px). Başlık yazısı sade (koyu tema beyaza yakın, açık tema siyaha yakın); renk yalnız dolgu hap (blok) ve bölge hapında; hap içi yazı en yüksek kontrastlı ink.
+- [ ] **Y6 Yüzerken dev saat, dinlenirken orta saat + bilgi:** yüzerken yalnız kronometre (kart minimum, ince tekrar çubuğu, rakam ~400 px); DUR sonrası dinlenmede saat orta boy (~105 px), son tekrar süresi, ortalama, hedef farkı, tempo/bölge, tekrar kutuları, sıradaki adım; set sonu dinlenmesinde sıradaki setin tüm bilgisi + orta saat. (13.10.1'de set sonu saati büyütmüştük; kullanıcı yeni isteğiyle dinlenmeyi bilgi ağırlıklı istiyor.)
+- [ ] **Y7 Her tekrar/set her zaman düzeltilebilsin:** yüzmede tekrar süresi yalnız set bitince (son tekrar dahil değil) düzeltilebiliyor; kara idmanında tekrar sayısı yalnız son set için ±. Öneri: tekrar/set kutusuna dokun → düzelt (yüzerken kilitli; dinlenirken ve sonrasında açık); kara: her set (tekrar, ağırlık, süre) ve biten hareket.
+
 ### Açık işler özeti (temizlik 14.10.2026)
 - **Yapıldı (13.6.0, 14.10):** P3 aynı kas grubundan alternatif; F.7 çevrimdışı açılış; görünüm paketi (kurulum kartları,
   "Kaydedildi" animasyonu, SVG simgeler, yeni uygulama simgesi, ekran geçişi, açık tema, yazı boyutu).
