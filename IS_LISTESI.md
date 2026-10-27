@@ -718,7 +718,7 @@ Sürüm 8 görünümü korunuyor; v10/v11 önerileri beğenilmedi, görsel yenil
 
 ## Tamamlanan
 
-- [x] Sürüm 13.12.1 (27.10 telefondan geri bildirim): dinlenme sayacı taşması, bölge yazısı kendi renginde, yüzerken sade kart + daha büyük saat. Dağıtım gerekmez.
+- [x] Sürüm 13.12.1 (27.10 telefondan geri bildirim): dinlenme sayacı taşması, bölge yazısı kendi renginde, yüzerken sade kart + daha büyük saat. Dağıtım gerekmez; tekrar/set kutularındaki sarı alt çizgi kaldırıldı. Test: 'sporRef beklenmeyen cevap' senaryosu 13.12'den beri ~%35 düşüyordu (ilk açılıştaki getRef cevabı önbelleği silmeden sonra yeniden yazıyordu); önbelleğin yazılması beklenerek giderildi (8 koşuda 0 hata).
 
 - [x] Sürüm 13.12.0 (27.10): Y1 seans zamanı timestamp (tek Tarih sütunu, 24 saat), Y3 ortak takvim, Y4 geçmişle kıyas Drive'dan (getGecmis; anahtar: mesafe+stil+tür+alet+bölge+havuz), Y5 başlık okunurluğu (bölge rozeti), Y6 yüzerken dev saat / dinlenirken orta saat + bilgi, Y7 tekrar ve set düzeltme. Dağıtım: idman.gs yeni sürüm (Y1 ve Y4).
 

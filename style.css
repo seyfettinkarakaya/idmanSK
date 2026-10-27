@@ -1944,7 +1944,7 @@ b.tur, .tur { color: #F97316; }
 .w-trow .w-title { margin: 0; }
 .w-trow .w-plus { margin: 0; min-height: 40px; padding: 4px 12px; font-size: 15px; }
 .w-item.ph-rest .w-reps { margin-top: 8px; }
-.w-item.ph-rest .w-reps div[data-rep], .w-item.m-sum .w-reps div[data-rep] { cursor: pointer; box-shadow: inset 0 -3px 0 color-mix(in srgb, var(--accent) 70%, transparent); }
+.w-item.ph-rest .w-reps div[data-rep], .w-item.m-sum .w-reps div[data-rep] { cursor: pointer; } /* 13.12.1: sarı alt çizgi kalktı */
 .w-reps .is-ed b { color: var(--accent-tx); }
 .w-reps .is-drop b { color: var(--m3); }
 .w-ri { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
@@ -2020,7 +2020,7 @@ b.tur, .tur { color: #F97316; }
 /* 13.12 kara idmanı: başlık yüzmeyle aynı stil; biten set kutuları dokunulabilir */
 .salon .w-tag.w-hd { margin-bottom: 4px; }
 .salon .w-hn b { font-size: 22px; }
-.sl-sets div[data-sl-set] { cursor: pointer; box-shadow: inset 0 -3px 0 color-mix(in srgb, var(--accent) 70%, transparent); }
+.sl-sets div[data-sl-set] { cursor: pointer; }
 
 /* 13.12: hazır / özet / sıradaki kartta (dar, çok içerikli) başlık daha kompakt */
 .w-item.m-ready .w-blk, .w-item.m-sum .w-blk, .w-item.m-next .w-blk { width: 38px; height: 38px; font-size: 21px; border-radius: 11px; }

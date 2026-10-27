@@ -346,6 +346,8 @@ sc('sporRef: bugünü kapsayan CSS yoksa en son değer ve "güncel değil" uyar�
 
 sc('sporRef beklenmeyen cevap verirse çökmez: idman açılır, Ayarlar sebebi yazar, elle CSS kullanılır', async ({ launch }) => {
   const s = await launch({ ref: true }); const p = s.page;
+  // 13.12: ilk açılıştaki getRef cevabı gelip önbelleği yazmadan silme yapılırsa geç gelen geçerli cevap testi bozuyordu
+  await p.waitForFunction(() => localStorage.getItem('ysk.ref'));
   s.net.override = (b) => (b.action === 'getRef' ? { ok: true, data: { uygulama: 'başka betik' } } : null);
   await p.evaluate(() => { localStorage.removeItem('ysk.ref'); localStorage.setItem('ysk.prefs', JSON.stringify({ ses: true, css: 117, havuz: 25 })); }); // 13.2.0: varsayılan CSS yok, elle girilmiş
   await p.reload(); await s.waitScreen('home');
