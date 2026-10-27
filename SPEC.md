@@ -1,4 +1,4 @@
-# idmanSK — Teknik şartname (sürüm 13.12.0, 22.10.2026)
+# idmanSK — Teknik şartname (sürüm 13.12.1, 22.10.2026)
 
 Bu belge uygulamanın mimarisini, veri modelini, arka uç sözleşmesini ve ekran akışlarını anlatır. Yeni bir
 Claude Code oturumu buradan kaldığı yerden devam edebilmelidir. Kurallar ve günlük komutlar: `CLAUDE.md`.

@@ -372,6 +372,14 @@ Hata kodları: `AUTH`, `LOCKED`, `DUPLICATE`, `SAME_DAY`, `NOT_FOUND`, `PLAN_MIS
 3. Telefonda yeni yerel anahtarlar: `ysk.hazir` (hazır olma kontrolleri, 60 gün), `ysk.hareketNot` (harekete sabit not);
    ayarlar: `yer` (Salon/Ev/Otel), `bildirim`. Ayarlar → Yedek indir: anahtarlar hariç JSON.
 
+## Sürüm 13.12.1'de neler var (dağıtım: yalnız uygulama)
+
+- **Dinlenme sayacı taşması:** eksiye düşen dinlenme (−0:20) şeritten taşıp tekrar kutularının üstüne biniyordu (eski canlı kart yazı boyu kuralı
+  5 haneli süreyi büyütüyordu); şerit boyu artık her uzunlukta sabit.
+- **Bölge yazısı kendi renginde:** rozetteki EN3, SP1… kısaltması bölgenin renginde (koyu bordo SP2/SP3 için okunur açık ton; açık temada koyu tonlar). TEC mavi.
+- **Yüzerken sade kart, daha büyük saat:** kartta yalnız blok karesi, bölge rozeti ve tekrar çubuğu; ad ve set başlığı dinlenme ekranında. Saat yatayda kartı
+  doldurur (dikey uzatma 3 → 1,6; rakam eni ~2 kat), boy sınırı korunur.
+
 ## Sürüm 13.12.0'da neler var (dağıtım: idman.gs yeni sürüm — tablo yapısı değişmez)
 
 - **Seans zamanı (Y1):** yuzmeSeans / karaSeans Tarih sütununa gerçek tarih-saat (timestamp, saniyeli) yazılır; biçim açıkça 24 saat

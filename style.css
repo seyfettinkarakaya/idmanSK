@@ -2096,3 +2096,24 @@ b.tur, .tur { color: #F97316; }
 .oz-tr i { display: block; margin-bottom: 3px; border-radius: 6px 6px 2px 2px; background: #A9BDD0; }
 .oz-tr .n i { background: var(--accent); }
 .oz-kay { font-size: 13px; color: var(--m3); }
+
+/* 13.12.1 (telefondan geri bildirim): dinlenme sayacı taşması, bölge yazısı kendi renginde, yüzerken sade kart + daha büyük saat */
+.w-item .w-timer.is-bar .w-tbig, .w-item .w-timer.is-bar .w-tbig.l5, .w-item .w-timer.is-bar .w-tbig.l6, .w-item .w-timer.is-bar .w-tbig.l7 { font-size: var(--fs); }
+.w-zb b { color: var(--zc, #A9BDD0); }
+.w-zb.z-tec b { color: #6FB1D9; }
+:root[data-theme="light"] .w-zb b { color: var(--zc); }
+:root[data-theme="light"] .z1 { --zc: #5B7C99; } :root[data-theme="light"] .z2 { --zc: #A86400; } :root[data-theme="light"] .z3 { --zc: #B5500A; }
+:root[data-theme="light"] .z4 { --zc: #B93515; } :root[data-theme="light"] .z5 { --zc: #A81E26; } :root[data-theme="light"] .z6 { --zc: #8E1B2A; } :root[data-theme="light"] .z7 { --zc: #5E0F1C; }
+:root[data-theme="light"] .w-zb.z-tec b { color: #1F6FA3; }
+/* yüzerken: başlık adı ve set başlığı gizli (yalnız blok karesi + bölge rozeti, tekrar çubuğu, dev saat) */
+#wheel.is-focus .w-item.ph-swim .w-hn, #wheel.is-focus .w-item.ph-swim .w-title { display: none; }
+#wheel.is-focus .w-item.ph-swim .w-blk { width: 30px; height: 30px; font-size: 17px; border-radius: 9px; }
+#wheel.is-focus .w-item.ph-swim .w-zb { min-width: 56px; padding: 0 8px 1px; }
+#wheel.is-focus .w-item.ph-swim .w-zb b { font-size: 24px; }
+#wheel.is-focus .w-item.ph-swim .w-strip { margin-top: 8px; }
+#wheel.is-focus .w-item.ph-swim .w-timer { padding: 0 0 4px; margin-top: 6px; }
+/* saat: yatayda kartı doldurur (genişliğe göre boy), dikey uzatma 1,6; yükseklik sınırı 0.85 × boy × 1,6 */
+#wheel.is-focus .w-item.ph-swim .w-tbig { --sy: 1.6; --fs: min(54cqw, calc((100cqh - 44px) / 1.36)); }
+#wheel.is-focus .w-item.ph-swim .w-tbig.l5 { --fs: min(43cqw, calc((100cqh - 44px) / 1.36)); }
+#wheel.is-focus .w-item.ph-swim .w-tbig.l6 { --fs: min(36cqw, calc((100cqh - 44px) / 1.36)); }
+#wheel.is-focus .w-item.ph-swim .w-tbig.l7 { --fs: min(31cqw, calc((100cqh - 44px) / 1.36)); }

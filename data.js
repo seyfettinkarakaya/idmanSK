@@ -547,7 +547,7 @@ export function saveSalonProgram(tarih, hareketler) {
   return call('savePlan', { tarih, hareketler }, 'salon');
 }
 
-/** Salon programı: o günün salonPlan satırlarını siler (13.12.0; saveSalon da siler). */
+/** Salon programı: o günün salonPlan satırlarını siler (13.12.1; saveSalon da siler). */
 export function salonProgramYapildi(tarih) {
   return call('planYapildi', { tarih }, 'salon');
 }
