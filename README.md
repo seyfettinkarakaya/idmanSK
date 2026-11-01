@@ -372,6 +372,18 @@ Hata kodları: `AUTH`, `LOCKED`, `DUPLICATE`, `SAME_DAY`, `NOT_FOUND`, `PLAN_MIS
 3. Telefonda yeni yerel anahtarlar: `ysk.hazir` (hazır olma kontrolleri, 60 gün), `ysk.hareketNot` (harekete sabit not);
    ayarlar: `yer` (Salon/Ev/Otel), `bildirim`. Ayarlar → Yedek indir: anahtarlar hariç JSON.
 
+## Sürüm 13.13.0'da neler var (dağıtım: yeni betik idmanAnalitik.gs + uygulama)
+
+- **Performans (rapor takibi):** Drive'daki "idman Analitik" tablosu uygulamada okunur. Ana sayfada "Performans" satırı
+  (`4 yolunda · 1 geride · 4 bekliyor`); geride kalan hedef "Bu hafta" şeridinde uyarı olarak çıkar ve Hedefler'i açar.
+  Sekmeler: Hedefler (✓/✗, ilerleme çubuğu), Hafta, Kontrol noktaları (KN-1/2/3 nabız ve kulaç grafikleri, KN-1'de hedef çizgisi),
+  Kesintisiz + KV, Rekor/CSS, Sezon + model, Bölge payları, Kara (barfiks setleri).
+- **Dördüncü bağlantı:** Ayarlar → idmanAnalitik (adres + anahtar). Betik salt okur, yalnız kendi tablosuna erişir; ham `veri` ve `arsiv`
+  sayfaları okunmaz. Hesaplar tablodaki formüllerde kalır; uygulama yalnız çevirir ve çizer (`rapor.js`).
+- Kurulum: idman Analitik tablosu → Uzantılar → Apps Script → `idmanAnalitik.gs` yapıştır → `tokenUret()` çalıştır (anahtar
+  Script Properties'te; `tokenGoster()` ile görülür) → Dağıt → Web uygulaması (Çalıştıran: ben, Erişim: herkes) → /exec adresi ve anahtarı uygulamaya gir.
+- Telefonda yeni yerel anahtar: `ysk.analitik` (son okuma önbelleği; internet yokken eski veri gösterilir).
+
 ## Sürüm 13.12.1'de neler var (dağıtım: yalnız uygulama)
 
 - **Dinlenme sayacı taşması:** eksiye düşen dinlenme (−0:20) şeritten taşıp tekrar kutularının üstüne biniyordu (eski canlı kart yazı boyu kuralı

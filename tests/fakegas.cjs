@@ -3,6 +3,7 @@ function lastNonEmpty(rows){ for(let i=rows.length-1;i>=0;i--) if(rows[i].some(v
 class Sheet {
   constructor(name, headers, rows=[]) { this.name=name; this.data=[headers.slice(), ...rows.map(r=>r.slice())]; this.fmt=this.data.map(r=>r.map(()=> '0.###############')); this.maxRows=Math.max(1000,this.data.length); this.w=headers.length; this.failOn=null; }
   _row(i){ while(this.data.length<=i){ this.data.push(Array(this.w).fill('')); this.fmt.push(Array(this.w).fill('0.###############')); } return this.data[i]; }
+  getName(){ return this.name; }
   getLastRow(){ return lastNonEmpty(this.data); }
   getLastColumn(){ return this.w; }
   getMaxRows(){ return this.maxRows; }
@@ -25,7 +26,7 @@ class Sheet {
 // idmanSK (13.2): betikler yeni sayfa adlarını kullanır; test kurguları eski adlarla yazılmıştır → eşleme.
 const ALIAS = { yuzmePlan: 'Plan', yuzmeVeri: 'eski', yuzmeSeans: 'seans', karaVeri: 'idman', karaPlan: 'plan', havuzPlan: 'Plan', havuzVeri: 'eski', havuzSeans: 'seans', salonVeri: 'idman', salonPlan: 'plan', salonHar: 'H', salonHKEtki: 'hkEtki', faz: 'fazBilgi' };
 function makeEnv(sheets, token='secret', file='idman.gs', { alias = true } = {}) {
-  const ss = { getSheetByName: n => sheets[n] || (alias && ALIAS[n] && sheets[ALIAS[n]]) || null, getSpreadsheetTimeZone: ()=>'UTC', insertSheet: n => { if (ss.failInsert) throw new Error('insert failed'); return (sheets[alias && ALIAS[n] ? ALIAS[n] : n] = new Sheet(n, [])); } };
+  const ss = { getSheets: () => Object.values(sheets), getSheetByName: n => sheets[n] || (alias && ALIAS[n] && sheets[ALIAS[n]]) || null, getSpreadsheetTimeZone: ()=>'UTC', insertSheet: n => { if (ss.failInsert) throw new Error('insert failed'); return (sheets[alias && ALIAS[n] ? ALIAS[n] : n] = new Sheet(n, [])); } };
   const pad=n=>String(n).padStart(2,'0');
   const ctx = {
     __init: true,

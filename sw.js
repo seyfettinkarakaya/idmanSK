@@ -1,10 +1,10 @@
 // idmanSK service worker (13.6, F7): uygulama dosyaları önbellekte, internet yokken de açılır.
 // Yalnızca bu sitenin dosyaları önbelleğe alınır; Apps Script (tablo) istekleri ve YouTube hiç dokunulmadan ağa gider.
-const SURUM = '13.12.1';
+const SURUM = '13.13.0';
 const AD = 'idmansk-';
 const ONBELLEK = AD + SURUM;
 const MODULLER = ['app.js', 'data.js', 'wheel.js', 'zaman.js', 'ref.js', 'duzen.js', 'salon.js', 'grup.js', 'kisit.js', 'yuk.js', 'harita.js',
-  'bilgi.js', 'analiz.js', 'video.js', 'hazir.js', 'videolar.js', 'model.js', 'gosterge.js', 'adimlar.js', 'hareketdb.js'];
+  'bilgi.js', 'analiz.js', 'video.js', 'hazir.js', 'videolar.js', 'model.js', 'gosterge.js', 'adimlar.js', 'hareketdb.js', 'rapor.js'];
 const CEKIRDEK = ['./', 'index.html', 'manifest.json', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png',
   `style.css?v=${SURUM}`, `fonts/fonts.css?v=${SURUM}`, ...MODULLER.map((m) => `${m}?v=${SURUM}`),
   'fonts/archivo-var-latin-ext.woff2', 'fonts/archivo-var-latin.woff2', 'fonts/barlow-condensed-600-latin-ext.woff2', 'fonts/barlow-condensed-600-latin.woff2', 'fonts/barlow-condensed-700-latin-ext.woff2', 'fonts/barlow-condensed-700-latin.woff2', 'fonts/barlow-condensed-800-latin-ext.woff2', 'fonts/barlow-condensed-800-latin.woff2',

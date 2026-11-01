@@ -1,25 +1,26 @@
 // idmanSK — arayüz. Veriye yalnızca data.js üzerinden erişir.
 
-import * as data from './data.js?v=13.12.1';
-import { Wheel } from './wheel.js?v=13.12.1';
-import * as zaman from './zaman.js?v=13.12.1';
-import * as ref from './ref.js?v=13.12.1';
-import * as duzen from './duzen.js?v=13.12.1';
-import * as salon from './salon.js?v=13.12.1';
-import * as grup from './grup.js?v=13.12.1';
-import * as kisit from './kisit.js?v=13.12.1';
-import * as yuk from './yuk.js?v=13.12.1';
-import * as harita from './harita.js?v=13.12.1';
-import * as bilgi from './bilgi.js?v=13.12.1';
-import * as analiz from './analiz.js?v=13.12.1';
-import * as video from './video.js?v=13.12.1';
-import * as hazir from './hazir.js?v=13.12.1';
-import { VIDEOLAR } from './videolar.js?v=13.12.1';
-import * as model from './model.js?v=13.12.1';
-import * as gosterge from './gosterge.js?v=13.12.1';
+import * as data from './data.js?v=13.13.0';
+import { Wheel } from './wheel.js?v=13.13.0';
+import * as zaman from './zaman.js?v=13.13.0';
+import * as ref from './ref.js?v=13.13.0';
+import * as duzen from './duzen.js?v=13.13.0';
+import * as salon from './salon.js?v=13.13.0';
+import * as grup from './grup.js?v=13.13.0';
+import * as kisit from './kisit.js?v=13.13.0';
+import * as yuk from './yuk.js?v=13.13.0';
+import * as harita from './harita.js?v=13.13.0';
+import * as bilgi from './bilgi.js?v=13.13.0';
+import * as analiz from './analiz.js?v=13.13.0';
+import * as video from './video.js?v=13.13.0';
+import * as hazir from './hazir.js?v=13.13.0';
+import { VIDEOLAR } from './videolar.js?v=13.13.0';
+import * as model from './model.js?v=13.13.0';
+import * as gosterge from './gosterge.js?v=13.13.0';
+import * as rapor from './rapor.js?v=13.13.0';
 
 // Telefonun güncel kodu çalıştırıp çalıştırmadığını görmek için ekranda gösterilir.
-export const APP_VERSION = '13.12.1';
+export const APP_VERSION = '13.13.0';
 
 const $ = (id) => document.getElementById(id);
 
@@ -37,7 +38,7 @@ const MSI_BOLGELER = [
   { key: 'boyun', label: 'Boyun' },
 ];
 
-const SCREENS = ['setup', 'home', 'days', 'history', 'program', 'rpe', 'msi', 'ozet', 'done', 'salon-start', 'salon', 'salon-ozet', 'salon-plan', 'form', 'hafta', 'salon-prog', 'bu-hafta'];
+const SCREENS = ['setup', 'home', 'days', 'history', 'program', 'rpe', 'msi', 'ozet', 'done', 'salon-start', 'salon', 'salon-ozet', 'salon-plan', 'form', 'hafta', 'salon-prog', 'bu-hafta', 'perf'];
 const WAKE_SCREENS = new Set(['program', 'rpe', 'msi', 'ozet', 'salon']); // salon: dinlenme sayacı görünür kalsın
 
 const state = {
@@ -122,10 +123,11 @@ function esc(s) {
  * data-bg / data-grow / data-glow olarak yazılır, burada CSSOM ile uygulanır.
  */
 function paint(root) {
-  for (const el of root.querySelectorAll('[data-bg],[data-grow],[data-h]')) {
+  for (const el of root.querySelectorAll('[data-bg],[data-grow],[data-h],[data-w]')) {
     if (el.dataset.bg) el.style.background = el.dataset.bg;
     if (el.dataset.grow) el.style.flexGrow = el.dataset.grow;
     if (el.dataset.h) el.style.height = `${el.dataset.h}px`;
+    if (el.dataset.w) el.style.width = `${el.dataset.w}%`;
     if (el.dataset.glow) el.style.setProperty('--g', el.dataset.glow);
   }
   return root;
@@ -452,6 +454,7 @@ const CONN = [
   { target: 'yuzme', url: 'setup-url', token: 'setup-token', ad: 'idman' },
   { target: 'ref', url: 'setup-ref-url', token: 'setup-ref-token', ad: 'idmanRef' },
   { target: 'kutuphane', url: 'setup-lib-url', token: 'setup-lib-token', ad: 'idmanKutuphane' }, // 13.4
+  { target: 'analitik', url: 'setup-ana-url', token: 'setup-ana-token', ad: 'idmanAnalitik' }, // 13.13
 ];
 
 function showSetup(canGoBack) {
@@ -505,7 +508,7 @@ async function saveSetup() {
   btn.disabled = true;
   btn.textContent = 'Bağlanıyor…';
   try {
-    const [yuzme, refR, kutR] = await Promise.allSettled([data.getDates(), data.isConfigured('ref') ? data.getRef() : null, data.isConfigured('kutuphane') ? data.getKutuphane() : null]);
+    const [yuzme, refR, kutR, anaR] = await Promise.allSettled([data.getDates(), data.isConfigured('ref') ? data.getRef() : null, data.isConfigured('kutuphane') ? data.getKutuphane() : null, data.isConfigured('analitik') ? data.getAnalitik() : null]);
     const [salonR] = await Promise.allSettled([data.isConfigured('salon') && yuzme.status === 'fulfilled' ? data.getSalon() : null]); // katalog için idmanRef önce
     const errs = [];
     if (yuzme.status === 'fulfilled') {
@@ -517,6 +520,8 @@ async function saveSetup() {
     }
     if (refR.status === 'rejected') errs.push(connError(CONN[1], refR.reason));
     if (kutR.status === 'rejected') errs.push(connError(CONN[2], kutR.reason));
+    if (anaR.status === 'rejected') errs.push(connError(CONN[3], anaR.reason));
+    if (anaR.status === 'fulfilled' && anaR.value) state.analitik = data.getCachedAnalitik();
     if (salonR.status === 'rejected') errs.push(connError({ ad: 'Kara (idman)' }, salonR.reason));
     if (refR.status === 'fulfilled') { state.ref = okRef(refR.value); state.refErr = null; } else if (refR.reason) state.refErr = refR.reason.message;
     if (!errs.length) return showHome();
@@ -532,7 +537,7 @@ async function saveSetup() {
 async function forgetKey() {
   const ok = await modal({
     title: 'Anahtarlar unutulsun mu?',
-    body: '<p>Üç bağlantının adresi ve anahtarı bu telefondan silinir; yeniden girmeden tabloya bağlanılamaz.</p><p class="muted">Yapılmış idmanlar ve gönderilmeyi bekleyen kayıtlar silinmez.</p>',
+    body: '<p>Bağlantıların (idman, idmanRef, idmanKutuphane, idmanAnalitik) adresi ve anahtarı bu telefondan silinir; yeniden girmeden tabloya bağlanılamaz.</p><p class="muted">Yapılmış idmanlar ve gönderilmeyi bekleyen kayıtlar silinmez.</p>',
     actions: [{ label: 'Evet, unut', value: true, cls: 'btn-danger' }, { label: 'Vazgeç', value: false }],
   });
   if (!ok) return;
@@ -1047,6 +1052,7 @@ function showHome() {
   renderHome();
   loadDates();
   gecmisEsitle();
+  analitikEsitle();
   const c = data.getCachedSalon();
   if (data.isConfigured('salon') && (!c || Date.now() - c.savedAt > 5 * 60 * 1000)) loadSalon();
 }
@@ -1111,6 +1117,7 @@ function renderHome() {
   $('home-history-meta').textContent = (n ? `${n} kayıt` : 'Henüz kayıt yok') + (q ? ` · ${q} gönderilmeyi bekliyor` : '');
   renderHomeGym();
   try { renderHomeCal(); } catch (err) { console.warn('ortak takvim', err); }
+  renderHomePerf();
   try { renderHafta(); } catch (err) { $('home-week').innerHTML = ''; console.warn('haftalık şerit', err); }
   fitListLines();
 }
@@ -1295,6 +1302,7 @@ function renderHafta() {
     ${dinOn.oner ? `<p class="hw-g warn">⚠ Dinlenme haftası öner: ${esc(dinOn.nedenler.join(', '))}</p>` : ''}
     ${new Date().getDay() === 0 && gun ? '<button class="hw-g hw-oz" data-hw="hafta">📋 Haftanın özeti hazır ›</button>' : ''}
     ${testZ ? '<button class="hw-g hw-test" data-hw="css">💡 CSS testi zamanı: eşik setleri hedefin altında · testi yap ›</button>' : ''}
+    ${(() => { const A = aVeri(); return A ? rapor.uyarilar(A.hedefler).slice(0, 2).map((u) => `<button class="hw-g warn hw-hd" data-hw="perf">⚠ Hedef geride: ${esc(u.hedef)}${u.guncel ? ` · ${esc(u.guncel)}` : ''} ›</button>`).join('') : ''; })()}
     <button class="hw-g hw-bh" data-hw="buhafta">🗓 Bu hafta · yüzme + kara planı ›</button>`;
 }
 
@@ -2188,7 +2196,7 @@ function renderItem(node, s, i, cum) {
 
   // Hazır kartta başlık büyük: stil · tür Sürüm 9'daki gibi kendi satırında. Küçük başlıklı
   // kartlarda (yüzerken, dinlenirken, özet) başlığın yanında durur.
-  // 13.12.1: sıradaki set kartında (set sonu dinlenmesi) başlık ve stil·tür tek satırda.
+  // 13.13.0: sıradaki set kartında (set sonu dinlenmesi) başlık ve stil·tür tek satırda.
   const title = mode === 'ready'
     ? `<div class="w-title">${esc(`${T} × ${s.mesafe}`)}</div>${styleTur ? `<div class="w-sub">${esc(styleTur)}</div>` : ''}`
     : `<div class="w-title">${esc(`${T} × ${s.mesafe}`)}${styleTur ? `<small>${esc(styleTur)}</small>` : ''}</div>`;
@@ -4759,8 +4767,8 @@ function slPlusSet() {
 
 let hdb = null; // hareketdb.js (yalnızca kart açılınca yüklenir)
 let adb = null; // adimlar.js (Türkçe adımlar, yalnızca kart açılınca)
-const adimYukle = () => adb || (adb = import('./adimlar.js?v=13.12.1').then((m) => m.ADIMLAR).catch(() => ({})));
-const hdbYukle = () => hdb || (hdb = import('./hareketdb.js?v=13.12.1'));
+const adimYukle = () => adb || (adb = import('./adimlar.js?v=13.13.0').then((m) => m.ADIMLAR).catch(() => ({})));
+const hdbYukle = () => hdb || (hdb = import('./hareketdb.js?v=13.13.0'));
 let bilgiTimer = null;
 
 /** Hareketin videosu (H · Video önce, sonra uygulamadaki liste) ya da null. */
@@ -5969,6 +5977,11 @@ function wire() {
   $('pg-next').addEventListener('click', () => { state.pgBas = yuk.gunEkle(state.pgBas, 7); renderSalonProgram(); });
   $('pg-body').addEventListener('click', onSalonProgramClick);
   $('home-hafta').addEventListener('click', () => showHaftaOzeti());
+  $('home-perf').addEventListener('click', () => { if (!data.isConfigured('analitik')) return showSetup(true); showPerf(); });
+  $('pf-back').addEventListener('click', showHome);
+  $('pf-refresh').addEventListener('click', () => { analitikEsitle(true); });
+  $('pf-tabs').addEventListener('click', onPerfClick);
+  $('pf-body').addEventListener('click', onPerfClick);
   $('fm-back').addEventListener('click', showHome);
   $('hz-back').addEventListener('click', showHome);
   $('hz-prev').addEventListener('click', () => { state.haftaBas = yuk.gunEkle(state.haftaBas, -7); renderHaftaOzeti(); });
@@ -5981,6 +5994,7 @@ function wire() {
     else if (b.dataset.hw === 'css') cssTestiAc();
     else if (b.dataset.hw === 'hazir') hazirKontrol();
     else if (b.dataset.hw === 'buhafta') showBuHafta();
+    else if (b.dataset.hw === 'perf') showPerf('hedef');
   });
   $('bh-back').addEventListener('click', showHome);
   $('bh-body').addEventListener('click', onBuHaftaClick);
@@ -6093,6 +6107,177 @@ function gorunumUygula() {
   document.documentElement.style.zoom = p.yazi && p.yazi !== 1 ? String(p.yazi) : '';
   const m = document.querySelector('meta[name="theme-color"]');
   if (m) m.setAttribute('content', acik ? '#F3F5F8' : '#0B0F14');
+}
+
+// ---------------------------------------------------------------------------
+// Performans (13.13): "idman Analitik" tablosundan rapor ekranları (idmanAnalitik.gs, salt okuma)
+// ---------------------------------------------------------------------------
+
+state.analitik = data.getCachedAnalitik();
+let analitikBusy = false;
+
+/** Analitik verisini çeker (sessiz; hata olursa son veri kalır). Ana sayfada 30 dk'da bir, Performans açılınca 5 dk'da bir. */
+async function analitikEsitle(force = false) {
+  if (analitikBusy || !data.isConfigured('analitik')) return;
+  const c = state.analitik;
+  if (!force && c && Date.now() - c.savedAt < 30 * 60 * 1000) return;
+  analitikBusy = true;
+  state.analitikErr = null;
+  try {
+    await data.getAnalitik();
+    state.analitik = data.getCachedAnalitik();
+  } catch (err) {
+    state.analitikErr = err.message;
+  } finally {
+    analitikBusy = false;
+    if (state.screen === 'home') renderHomePerf();
+    if (state.screen === 'perf') renderPerf();
+  }
+}
+
+const aVeri = () => (state.analitik ? state.analitik.data : null);
+const tr1 = (v) => (v == null ? '–' : String(Math.round(v * 10) / 10).replace('.', ','));
+const dkMetin = (sn) => (sn == null ? '–' : `${Math.floor(sn / 60)}:${String(Math.round(sn % 60)).padStart(2, '0')}`);
+
+/** Ana sayfadaki "Performans" satırının özeti. */
+function renderHomePerf() {
+  const m = $('home-perf-meta');
+  if (!data.isConfigured('analitik')) { m.textContent = "Ayarlar'dan idmanAnalitik bağlantısını gir"; return; }
+  const A = aVeri();
+  if (!A) { m.textContent = state.analitikErr ? 'Okunamadı · dokun' : 'Yükleniyor…'; return; }
+  const o = rapor.hedefModel(A.hedefler).ozet;
+  m.textContent = `${o.ok} yolunda · ${o.bad} geride · ${o.wait} bekliyor`;
+}
+
+const PF_SEKMELER = [['hedef', 'Hedefler'], ['hafta', 'Hafta'], ['kn', 'Kontrol'], ['kes', 'Kesintisiz'], ['rekor', 'Rekor'], ['sezon', 'Sezon'], ['bolge', 'Bölge'], ['kara', 'Kara']];
+
+function showPerf(tab) {
+  if (!data.isConfigured('analitik')) return showSetup(true);
+  state.pfTab = tab || state.pfTab || 'hedef';
+  show('perf');
+  renderPerf();
+  analitikEsitle(!state.analitik || Date.now() - state.analitik.savedAt > 5 * 60 * 1000);
+}
+
+/** Çizgi grafiği (SVG; renkler CSS sınıfından): değer etiketleri, tarih etiketleri, isteğe bağlı hedef çizgisi. */
+function pfCizgi(vals, labels, { cls = 'c1', hedef = null, w = 330, h = 96, fmt = tr1 } = {}) {
+  const n = vals.length;
+  if (!n) return '';
+  const all = hedef != null ? [...vals, hedef] : vals;
+  const lo = Math.min(...all); const hi = Math.max(...all);
+  const span = hi - lo || 1;
+  const X = (i) => (n === 1 ? w / 2 : 22 + (i * (w - 44)) / (n - 1));
+  const Y = (v) => h - 22 - ((v - lo) / span) * (h - 40);
+  const pts = vals.map((v, i) => [X(i), Y(v), v]);
+  const hl = hedef != null ? `<line class="hd" x1="0" x2="${w}" y1="${Y(hedef).toFixed(1)}" y2="${Y(hedef).toFixed(1)}"/><text class="ax" x="${w - 2}" y="${(Y(hedef) + 12).toFixed(1)}" text-anchor="end">hedef ${esc(fmt(hedef))}</text>` : '';
+  return `<svg class="pf-svg" viewBox="0 0 ${w} ${h}" role="img" aria-label="Grafik">${hl}<polyline class="ln ${cls}" points="${pts.map((q) => `${q[0].toFixed(1)},${q[1].toFixed(1)}`).join(' ')}"/>${pts.map((q, i) => `<circle class="dt ${cls}" cx="${q[0].toFixed(1)}" cy="${q[1].toFixed(1)}" r="4"/><text class="vl" x="${q[0].toFixed(1)}" y="${(q[1] - 8).toFixed(1)}" text-anchor="middle">${esc(fmt(q[2]))}</text><text class="ax" x="${q[0].toFixed(1)}" y="${h - 4}" text-anchor="middle">${esc(labels[i] || '')}</text>`).join('')}</svg>`;
+}
+
+const pfBar = (oran, cls = '') => (oran == null ? '' : `<div class="pf-bar"><i class="${cls}" data-w="${Math.round(oran * 100)}"></i></div>`);
+const pfBos = (t) => `<p class="pf-bos">${esc(t)}</p>`;
+
+function pfHedef(A) {
+  const m = rapor.hedefModel(A.hedefler);
+  if (!m.items.length) return pfBos('Hedefler sayfasında kayıt yok.');
+  const dtag = { ok: 'yolunda', bad: 'geride', wait: 'bekliyor' };
+  return `<div class="pf-chips"><div><b class="ok">${m.ozet.ok}</b>yolunda</div><div><b class="bad">${m.ozet.bad}</b>geride</div><div><b class="wait">${m.ozet.wait}</b>bekliyor</div></div>
+    ${m.items.map((x) => `<div class="pf-g is-${x.durumKod}"><div class="pf-t"><span>${esc(x.hedef)}</span><em class="${x.durumKod}">${esc(x.durum || dtag[x.durumKod])}</em></div>
+      <div class="pf-v">${x.esik ? `<small>Eşik: ${esc(x.esik)}</small>` : ''}${x.guncel ? `<b>${esc(x.guncel)}</b>` : ''}</div>${pfBar(x.oran, x.durumKod)}${x.aciklama ? `<div class="pf-a">${esc(x.aciklama)}</div>` : ''}</div>`).join('')}`;
+}
+
+function pfHafta(A) {
+  const m = rapor.haftaModel(A.durum);
+  if (!m.list.length) return pfBos('durum sayfasında kayıt yok.');
+  const bars = m.list.map((x) => `<div class="pf-col"><div class="pf-cb ${x.tip === 'Yük' ? 'yuk' : ''}" data-h="${Math.round(((x.km || 0) / (m.maxKm || 1)) * 100) + 14}">${esc(tr1(x.km))}</div><b>H${esc(x.hafta)}</b><small>${esc((x.baslangic || '').slice(0, 5))}</small></div>`).join('');
+  return `<p class="pf-lb">KM / HAFTA <small>(sarı = Yük haftası)</small></p><div class="pf-g"><div class="pf-cols">${bars}</div></div>
+    <div class="pf-g"><table class="pf-tb"><tr><th>HAFTA</th><th>YÜZME</th><th>ARA</th><th>KARA</th><th>EŞİK+HIZ</th><th>MSI</th></tr>
+    ${m.list.map((x) => `<tr><td class="l">H${esc(x.hafta)} · ${esc(x.tip)}</td><td>${tr1(x.yuzme)}</td><td>${tr1(x.ara)}</td><td class="${x.kara === 0 ? 'bad' : ''}">${tr1(x.kara)}</td><td>${x.esikhiz == null ? '–' : `%${tr1(x.esikhiz)}`}</td><td>${tr1(x.msi)}</td></tr>`).join('')}</table></div>
+    ${m.karasiz.length ? `<div class="pf-g is-bad"><div class="pf-v"><b>Kara seansı yok:</b> ${m.karasiz.map((h) => `H${esc(h)}`).join(', ')}</div></div>` : ''}`;
+}
+
+function pfKn(A) {
+  const m = rapor.knModel(A.kn);
+  const es = rapor.knEsik(A.hedefler);
+  if (!m.noktalar[0].seri.length) return pfBos('KN sayfasında kayıt yok.');
+  const lab = (seri) => seri.map((x) => rapor.gunAy(x.tarih));
+  return `<p class="pf-lb">Her hafta aynı üç set · sarı kesik çizgi = hedef eşiği</p>${m.noktalar.map((k, i) => {
+    const seri = k.seri;
+    const sureler = seri.map((x) => x.sure).join(' → ');
+    return `<div class="pf-g"><div class="pf-t"><span>${esc(k.ad)}</span><em class="wait">${esc(sureler)}</em></div>
+      <div class="pf-two"><div><p class="pf-lb2">ORT NABIZ</p>${pfCizgi(seri.map((x) => x.ort).filter((v) => v != null), lab(seri.filter((x) => x.ort != null)), { cls: 'c2', w: 160, h: 78, hedef: i === 0 ? es.ort : null, fmt: (v) => String(Math.round(v)) })}</div>
+      <div><p class="pf-lb2">KULAÇ / 25 m</p>${pfCizgi(seri.map((x) => x.kulac).filter((v) => v != null), lab(seri.filter((x) => x.kulac != null)), { cls: 'c1', w: 160, h: 78, hedef: i === 0 ? es.kulac : null })}</div></div></div>`;
+  }).join('')}`;
+}
+
+function pfKes(A) {
+  const m = rapor.kesintisizModel(A.kesintisiz, A.kv, A.hedefler);
+  if (!m.satirlar.length && !m.kv.length) return pfBos('Kesintisiz ve KV sayfalarında kayıt yok.');
+  const lab = m.satirlar.map((x) => rapor.gunAy(x.tarih));
+  const son = m.satirlar[m.satirlar.length - 1];
+  return `${m.satirlar.length ? `<div class="pf-chips"><div><b class="ok">${tr1(m.enUzunDk)} dk</b>en uzun</div>${m.hedefDk ? `<div><b>${tr1(m.hedefDk)} dk</b>hedef</div><div><b class="warn">${tr1(Math.max(0, m.hedefDk - m.enUzunDk))} dk</b>kalan</div>` : ''}</div>
+    <div class="pf-g"><p class="pf-lb2">SÜRE (dk)</p>${pfCizgi(m.satirlar.map((x) => x.sureSn / 60), lab, { cls: 'c1', hedef: m.hedefDk })}</div>
+    <div class="pf-g"><p class="pf-lb2">ORT. NABIZ <small>(aynı tempoda düşüş = form)</small></p>${pfCizgi(m.satirlar.map((x) => x.ort || 0), lab, { cls: 'c2', fmt: (v) => String(Math.round(v)) })}</div>
+    <div class="pf-g"><p class="pf-lb2">SON KESİNTİSİZ · ${esc(rapor.gunAy(son.tarih))}</p><div class="pf-v"><b>${esc(fmtNum(son.mesafe))} m</b> · ${esc(son.sure)} · tempo <b>${esc(son.tempo)}</b>${son.hedef ? ` (hedef ${esc(son.hedef)})` : ''} · ort nabız <b>${tr1(son.ort)}</b> · max ${tr1(son.max)} · kulaç <b>${tr1(son.kulac)}</b></div></div>` : ''}
+    ${m.kv.length ? `<p class="pf-lb">KALİTE SETLERİ (KV)</p>${m.kv.slice().reverse().map((x) => `<div class="pf-g"><div class="pf-t"><span>${esc(rapor.gunAy(x.tarih))} · ${esc(x.set)}</span><em class="${x.fark != null && x.fark <= 0 ? 'ok' : 'bad'}">${x.fark == null ? '' : `${x.fark > 0 ? '+' : ''}${tr1(x.fark)} sn/100`}</em></div><div class="pf-v">Tempo <b>${esc(x.tempo)}</b>${x.hedef ? ` (hedef ${esc(x.hedef)})` : ''} · SWOLF <b>${tr1(x.swolf)}</b>${x.dswolf ? ` (${x.dswolf > 0 ? '+' : ''}${tr1(x.dswolf)})` : ''} · ort nabız ${tr1(x.ort)} · RPE ${tr1(x.rpe)}</div></div>`).join('')}` : ''}`;
+}
+
+function pfRekor(A) {
+  const m = rapor.rekorModel(A.derece, A.test, A.hedefler);
+  const css = m.css.slice(-6);
+  return `${css.length ? `<div class="pf-g"><p class="pf-lb2">CSS TAHMİNİ (sn/100)${m.hedefCss ? ` · hedef ${tr1(m.hedefCss)}` : ''}</p>${pfCizgi(css.map((x) => x.css), css.map((x) => rapor.gunAy(x.tarih)), { cls: 'c3', hedef: m.hedefCss })}<div class="pf-v">Son: <b>${esc(dkMetin(css[css.length - 1].css))}</b> (${esc(css[css.length - 1].yontem)}${css[css.length - 1].girdi ? `, ${esc(css[css.length - 1].girdi)}` : ''})${m.hedefCss && css[css.length - 1].css > m.hedefCss ? ` · hedefe <b class="warn">${tr1(css[css.length - 1].css - m.hedefCss)} sn</b>` : ''}</div></div>` : ''}
+    ${m.etiketler.length ? `<div class="pf-g"><table class="pf-tb"><tr><th>ETİKET</th><th>EN İYİ</th><th>SON</th><th>FARK</th></tr>${m.etiketler.map((x) => `<tr><td class="l">${esc(x.etiket)}${x.alet ? ` <small>${esc(x.alet)}</small>` : ''}</td><td>${esc(x.eniyi)}<small>${esc(x.eniyiTarih)}</small></td><td>${esc(x.son)}<small>${esc(x.sonTarih)}</small></td><td class="${x.fark > 0 ? 'bad' : x.fark === 0 ? 'ok' : ''}">${x.fark == null ? '' : x.fark === 0 ? '=' : `${x.fark > 0 ? '+' : ''}${tr1(x.fark)} sn`}</td></tr>`).join('')}</table></div>` : ''}
+    ${m.testler.length ? `<p class="pf-lb">TESTLER</p>${m.testler.map((x) => `<div class="pf-g"><div class="pf-t"><span>${esc(x.tarih)} · ${esc(x.etiket)}</span><em class="wait">CSS ${esc(x.css)}</em></div><div class="pf-v">${esc(x.mesafe)} m · ${esc(x.sure)} · tempo ${esc(x.tempo)} · ort nabız ${esc(x.ort)}</div></div>`).join('')}` : ''}
+    ${!css.length && !m.etiketler.length && !m.testler.length ? pfBos('derece ve Test sayfalarında kayıt yok.') : ''}`;
+}
+
+function pfSezon(A) {
+  const m = rapor.sezonModel(A.sezon, A.model);
+  if (!m.sezonlar.length) return pfBos('sezon sayfasında kayıt yok.');
+  const bars = m.sezonlar.map((x, i) => `<div class="pf-col"><div class="pf-cb ${i === m.sezonlar.length - 1 ? 'son' : ''}" data-h="${Math.round(((x.km || 0) / (m.maxKm || 1)) * 110) + 10}">${esc(tr1(x.km))}</div><b>${esc(x.sezon)}</b></div>`).join('');
+  return `<p class="pf-lb">KM / SEZON</p><div class="pf-g"><div class="pf-cols">${bars}</div></div>
+    <div class="pf-g"><table class="pf-tb"><tr><th>SEZON</th><th>SEANS</th><th>/HAFTA</th><th>MS PAYI</th><th>14+ ARA</th></tr>${m.sezonlar.slice(-5).map((x) => `<tr><td class="l">${esc(x.sezon)}</td><td>${tr1(x.seans)}</td><td>${tr1(x.seanshafta)}</td><td>${x.ms == null ? '–' : `%${tr1(x.ms)}`}</td><td>${tr1(x.ara14)}</td></tr>`).join('')}</table></div>
+    ${m.model.length ? `<p class="pf-lb">REKORDAN ÖNCE 12 HAFTA ↔ ŞİMDİ</p><div class="pf-g">${m.model.map((x) => `<div class="pf-v"><b>${esc(x.donem)}</b><br>${tr1(x.seanshafta)} seans/hf · ${tr1(x.kmhafta)} km/hf · MS ${x.ms == null ? '–' : `%${tr1(x.ms)}`}</div>`).join('<hr class="pf-hr">')}</div>` : ''}`;
+}
+
+function pfBolge(A) {
+  const b = rapor.bolgeModel(A.bolge);
+  if (!b.length) return pfBos('bolge sayfasında kayıt yok.');
+  const ad = [['kolay', 'Kolay', 1], ['orta', 'Orta', 2], ['esik', 'Eşik', 3], ['hiz', 'Hız', 4], ['tec', 'TEC', 5], ['aletli', 'Aletli', 6]];
+  return `<p class="pf-lb">ANA SET KM İÇİNDE % <small>(sezon başına)</small></p><div class="pf-g">${b.slice(-6).map((x) => {
+    const top = ad.reduce((a, k) => a + x[k[0]], 0) || 1;
+    return `<div class="pf-sr"><span class="${/^\d{2}-\d{2}$/.test(x.sezon) ? 'son' : ''}">${esc(x.sezon)}</span><div class="pf-st">${ad.filter((k) => x[k[0]] > 0).map((k) => `<i class="bz${k[2]}" data-w="${(x[k[0]] / top) * 100}"></i>`).join('')}</div></div>`;
+  }).join('')}<div class="pf-lg">${ad.map((k) => `<span><i class="bz${k[2]}"></i>${k[1]}</span>`).join('')}</div></div>
+    ${(() => { const s = b[b.length - 1]; return s.esikhiz == null ? '' : `<div class="pf-chips"><div><b>%${tr1(s.esikhiz)}</b>eşik+hız (${esc(s.sezon)})</div><div><b>%${tr1(s.kolay + s.orta)}</b>kolay+orta</div></div>`; })()}`;
+}
+
+function pfKara(A) {
+  const k = rapor.karaModel(A.kara);
+  if (!k.length) return pfBos('Kara sayfasında barfiks kaydı yok.');
+  return `<p class="pf-lb">BARFİKS</p>${k.slice().reverse().map((x) => `<div class="pf-g"><div class="pf-t"><span>${esc(rapor.gunAy(x.tarih))}${x.yer ? ` · ${esc(x.yer)}` : ''}</span><em class="wait">${esc(x.test || '')}</em></div><div class="pf-sets">${x.setler.map((n) => `<b>${n}</b>`).join('')}</div><div class="pf-v">Ort <b>${tr1(x.ort)}</b>${x.dort ? ` (${esc(x.dort)})` : ''} · toplam <b>${tr1(x.toplam)}</b>${x.rpe != null ? ` · RPE ${tr1(x.rpe)}` : ''}</div></div>`).join('')}`;
+}
+
+const PF_GOVDE = { hedef: pfHedef, hafta: pfHafta, kn: pfKn, kes: pfKes, rekor: pfRekor, sezon: pfSezon, bolge: pfBolge, kara: pfKara };
+
+function renderPerf() {
+  const tab = state.pfTab || 'hedef';
+  $('pf-tabs').innerHTML = PF_SEKMELER.map(([k, ad]) => `<button class="${k === tab ? 'is-on' : ''}" role="tab" aria-selected="${k === tab}" data-pf="${k}">${esc(ad)}</button>`).join('');
+  const body = $('pf-body');
+  const A = aVeri();
+  if (!A) {
+    body.innerHTML = state.analitikErr
+      ? `<p class="pf-bos">idman Analitik okunamadı: ${esc(state.analitikErr)}</p><button class="btn btn-primary btn-block" data-pf-act="retry">Tekrar dene</button>`
+      : '<p class="pf-bos">Yükleniyor…</p>';
+    return;
+  }
+  const at = new Date(state.analitik.savedAt);
+  body.innerHTML = `${PF_GOVDE[tab](A)}<p class="pf-son">Kaynak: idman Analitik · son okuma ${String(at.getHours()).padStart(2, '0')}:${String(at.getMinutes()).padStart(2, '0')}${state.analitikErr ? ' · yenilenemedi (eski veri)' : ''}</p>`;
+  paint(body);
+}
+
+function onPerfClick(e) {
+  const t = e.target.closest('[data-pf]');
+  if (t) { state.pfTab = t.dataset.pf; renderPerf(); $('pf-body').scrollTop = 0; return; }
+  if (e.target.closest('[data-pf-act="retry"]')) analitikEsitle(true).then(renderPerf);
 }
 
 function boot() {

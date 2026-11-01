@@ -28,6 +28,7 @@ Tamamlandı (sürüm 8), bkz. Tamamlanan. Kalan: Code.gs'in yeniden dağıtılma
 - [x] **Y7 Her tekrar/set her zaman düzeltilebilsin:** yüzmede tekrar süresi yalnız set bitince (son tekrar dahil değil) düzeltilebiliyor; kara idmanında tekrar sayısı yalnız son set için ±. Öneri: tekrar/set kutusuna dokun → düzelt (yüzerken kilitli; dinlenirken ve sonrasında açık); kara: her set (tekrar, ağırlık, süre) ve biten hareket.
 
 ### Açık işler özeti (temizlik 14.10.2026)
+- **ÖNEMLİ — sonra dönülecek (kullanıcı 01.11): Garmin verisini otomatik çekme.** Aday: Garmin Personal API (21.10.2026'da yeniden açıldı, ücretsiz, salt okur, OAuth2 PKCE, JSON+FIT; FIT'te havuz uzunluğu başına veri) — erişim anahtarı Garmin Connect'te doğrulanmadı; yedek: Intervals.icu aktarımı. Eşleme: başlangıç zamanıyla; tablo yapısı değişmez.
 - **Yapıldı (13.6.0, 14.10):** P3 aynı kas grubundan alternatif; F.7 çevrimdışı açılış; görünüm paketi (kurulum kartları,
   "Kaydedildi" animasyonu, SVG simgeler, yeni uygulama simgesi, ekran geçişi, açık tema, yazı boyutu).
 - **Beklemede (kullanıcı 14.10):** B20 gün düzeni ve B21 zaruri/seçimlik — bilgi sayfası önerisi hazır (aşağıda maddelerde).
@@ -717,6 +718,8 @@ Sürüm 8 görünümü korunuyor; v10/v11 önerileri beğenilmedi, görsel yenil
   video "YouTube'da aç" bağlantısına düşer — beğenmediğini H · Video sütununa başka adresle yaz).
 
 ## Tamamlanan
+
+- [x] Sürüm 13.13.0 (01.11): Performans ekranları (idman Analitik): Hedefler, Hafta, Kontrol, Kesintisiz+KV, Rekor/CSS, Sezon+model, Bölge, Kara; ana sayfada hedef durumu satırı + geride kalan hedef uyarısı; dördüncü bağlantı idmanAnalitik. Dağıtım: yeni betik idmanAnalitik.gs + uygulama.
 
 - [x] Sürüm 13.12.1 (27.10 telefondan geri bildirim): dinlenme sayacı taşması, bölge yazısı kendi renginde, yüzerken sade kart + daha büyük saat. Dağıtım gerekmez; tekrar/set kutularındaki sarı alt çizgi kaldırıldı. Test: 'sporRef beklenmeyen cevap' senaryosu 13.12'den beri ~%35 düşüyordu (ilk açılıştaki getRef cevabı önbelleği silmeden sonra yeniden yazıyordu); önbelleğin yazılması beklenerek giderildi (8 koşuda 0 hata).
 

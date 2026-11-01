@@ -18,9 +18,9 @@
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-  <link rel="stylesheet" href="fonts/fonts.css?v=13.12.1">
-  <link rel="stylesheet" href="style.css?v=13.12.1">
-  <script type="module" src="app.js?v=13.12.1"></script>
+  <link rel="stylesheet" href="fonts/fonts.css?v=13.13.0">
+  <link rel="stylesheet" href="style.css?v=13.13.0">
+  <script type="module" src="app.js?v=13.13.0"></script>
 </head>
 <body>
 
@@ -60,6 +60,15 @@
       <label class="field">
         <span>Gizli anahtar (token)</span>
         <input id="setup-lib-token" type="text" autocomplete="off" autocapitalize="off" spellcheck="false">
+      </label></div>
+      <div class="conn-card"><h3 class="conn-h">idmanAnalitik <small>rapor ve performans takibi · isteğe bağlı</small></h3>
+      <label class="field">
+        <span>Apps Script adresi</span>
+        <input id="setup-ana-url" type="url" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="boş: Performans ekranı kapalı">
+      </label>
+      <label class="field">
+        <span>Gizli anahtar (token)</span>
+        <input id="setup-ana-token" type="text" autocomplete="off" autocapitalize="off" spellcheck="false">
       </label></div>
       <p id="setup-msg" class="msg" hidden></p>
       <button id="setup-save" class="btn btn-primary btn-block">Kaydet ve bağlan</button>
@@ -153,6 +162,10 @@
         <span><b>Form ve denge</b><small>Yük, toparlanma, stil, blok</small></span>
         <em><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></em>
       </button>
+      <button class="home-row" id="home-perf">
+        <span><b>Performans</b><small id="home-perf-meta">Hedefler, haftalık durum, kontrol noktaları, rekorlar</small></span>
+        <em><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></em>
+      </button>
       <button class="home-row" id="home-hafta">
         <span><b>Haftanın özeti</b><small id="home-hafta-meta">Bu hafta</small></span>
         <em><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></em>
@@ -182,6 +195,17 @@
     </header>
     <div class="hz-nav"><button class="icon-btn" id="hz-prev" aria-label="Önceki hafta"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><b id="hz-title"></b><button class="icon-btn" id="hz-next" aria-label="Sonraki hafta"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button></div>
     <div class="scroll pad" id="hz-body"></div>
+  </section>
+
+  <!-- Performans (13.13): idman Analitik tablosundan hedefler, haftalık durum, kontrol noktaları, kesintisiz, rekorlar, sezonlar, bölge, kara -->
+  <section id="screen-perf" class="screen days perf" hidden>
+    <header class="days-top">
+      <button class="icon-btn" id="pf-back" aria-label="Ana sayfa"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <h1 class="days-title">Performans</h1>
+      <button class="icon-btn" id="pf-refresh" aria-label="Yenile"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.4-5.7M20 4v5h-5"/></svg></button>
+    </header>
+    <div class="pf-tabs" id="pf-tabs" role="tablist"></div>
+    <div class="scroll pad" id="pf-body"></div>
   </section>
 
   <!-- Bu hafta (sürüm 13): yüzme + salon tek plan, yük hedefi, sağlık bütçesi -->

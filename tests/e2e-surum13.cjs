@@ -621,4 +621,68 @@ sc('13.12 Geçmişle kıyas (Y4): kaynak Drive yuzmeVeri; aynı set = mesafe + s
   assert.match(oz, /200 m · FR Swim · alet yok · EN3 · .*kaynak: Drive \(4 kayıt\)/, oz);
 });
 
+sc('13.13 Performans: dördüncü bağlantı (idmanAnalitik); ana sayfada özet ve geride kalan hedef uyarısı; sekmeler hedefler, hafta, kontrol, kesintisiz, rekor, sezon, bölge, kara', async ({ launch }) => {
+  const s = await launch({ ref: true, analitik: true }); const p = s.page;
+  await s.waitScreen('home');
+  await p.waitForFunction(() => /yolunda/.test(document.getElementById('home-perf-meta').textContent));
+  assert.equal(await txt(s, '#home-perf-meta'), '4 yolunda · 1 geride · 4 bekliyor');
+  assert.match(await txt(s, '#home-week'), /Hedef geride: 2 · Kara seansı · 1\/2 hafta · bu hafta 0/, 'kara hedefi geride: ana sayfada uyarı');
+  await p.click('#home-week .hw-hd'); await s.waitScreen('perf');
+  const tabs = await p.$$eval('#pf-tabs button', (e) => e.map((x) => x.textContent));
+  assert.deepEqual(tabs, ['Hedefler', 'Hafta', 'Kontrol', 'Kesintisiz', 'Rekor', 'Sezon', 'Bölge', 'Kara']);
+  // Hedefler: 9 kart, durum renkleri, ilerleme çubuğu yalnız aynı birimli eşiklerde
+  assert.equal(await p.$$eval('#pf-body .pf-g', (e) => e.length), 9);
+  assert.deepEqual(await p.$$eval('#pf-body .pf-chips b', (e) => e.map((x) => x.textContent)), ['4', '1', '4']);
+  assert.equal(await p.$$eval('#pf-body .pf-g.is-bad', (e) => e.length), 1);
+  assert.equal(await p.$$eval('#pf-body .pf-bar', (e) => e.length), 2, 'Barfiks ve Kesintisiz: aynı birimli eşik');
+  assert.equal(await p.$eval('#pf-body .pf-g.is-wait .pf-bar i', (i) => i.style.width), '97%', 'paint(): genişlik CSP dostu');
+  // Hafta: 5 sütun, kara seansı olmayan haftalar
+  await p.click('[data-pf="hafta"]');
+  assert.equal(await p.$$eval('#pf-body .pf-col', (e) => e.length), 5);
+  assert.match(await txt(s, '#pf-body'), /Kara seansı yok: H7, H9/);
+  // Kontrol noktaları: üç nokta, her biri iki grafik; KN-1'de hedef çizgisi
+  await p.click('[data-pf="kn"]');
+  assert.equal(await p.$$eval('#pf-body .pf-g', (e) => e.length), 3);
+  assert.equal(await p.$$eval('#pf-body svg.pf-svg', (e) => e.length), 6);
+  assert.equal(await p.$$eval('#pf-body svg.pf-svg line.hd', (e) => e.length), 2, 'yalnız KN-1: nabız (161) ve kulaç (13,2) eşiği');
+  // Kesintisiz: en uzun süre, hedef 40 dk, KV
+  await p.click('[data-pf="kes"]');
+  assert.match(await txt(s, '#pf-body'), /37,3 dk\s*en uzun.*40 dk\s*hedef.*2,7 dk\s*kalan/);
+  assert.match(await txt(s, '#pf-body'), /8×150/);
+  // Rekor: CSS hedefi çizgisi, etiket tablosu
+  await p.click('[data-pf="rekor"]');
+  assert.match(await txt(s, '#pf-body'), /hedef 123/);
+  assert.match(await txt(s, '#pf-body'), /CSS 400.*\+27 sn/);
+  // Sezon, Bölge, Kara
+  await p.click('[data-pf="sezon"]');
+  assert.equal(await p.$$eval('#pf-body .pf-col', (e) => e.length), 4);
+  await p.click('[data-pf="bolge"]');
+  assert.equal(await p.$$eval('#pf-body .pf-sr', (e) => e.length), 3);
+  assert.match(await txt(s, '#pf-body'), /%86\s*kolay\+orta/);
+  await p.click('[data-pf="kara"]');
+  assert.deepEqual(await p.$$eval('#pf-body .pf-sets', (e) => e.map((x) => x.textContent)), ['999', '1199', '1075']);
+  assert.match(await txt(s, '#pf-body'), /Kaynak: idman Analitik · son okuma \d\d:\d\d/);
+});
+
+sc('13.13 Performans: bağlantı yoksa Ayarlar açılır; bozuk cevapta anlaşılır hata ve Tekrar dene; Ayarlar\'da dördüncü bağlantı', async ({ launch }) => {
+  const s = await launch({ ref: true, analitikEnv: true }); const p = s.page;
+  await s.waitScreen('home');
+  assert.match(await txt(s, '#home-perf-meta'), /idmanAnalitik bağlantısını gir/);
+  await p.click('#home-perf'); await s.waitScreen('setup');
+  assert.ok(await p.isVisible('#setup-ana-url') && await p.isVisible('#setup-ana-token'), 'dördüncü bağlantı alanları');
+  assert.match(await txt(s, '#setup-title'), /Ayarlar/);
+  // bağlantı gir, kaydet: bozuk cevap → hata ve Tekrar dene
+  await p.fill('#setup-ana-url', 'https://script.google.com/macros/s/ANA/exec'); await p.fill('#setup-ana-token', 'anakey');
+  s.net.override = (b) => (b.action === 'getAnalitik' ? { ok: true, data: { uygulama: 'başka betik' } } : null);
+  await p.click('#setup-save');
+  await p.waitForFunction(() => /idmanAnalitik: bağlanılamadı|beklenen biçimde değil/.test(document.getElementById('setup-msg').textContent));
+  await p.click('#setup-back'); await s.waitScreen('home');
+  await p.click('#home-perf'); await s.waitScreen('perf');
+  await p.waitForFunction(() => /okunamadı/.test(document.getElementById('pf-body').textContent));
+  assert.ok(await p.isVisible('[data-pf-act="retry"]'));
+  s.net.override = null;
+  await p.click('[data-pf-act="retry"]');
+  await p.waitForSelector('#pf-body .pf-g');
+});
+
 if (require.main === module) runScenarios('Sürüm 13 senaryoları', only ? S.filter(([n]) => n.toLowerCase().includes(only.toLowerCase())) : S, 8160);

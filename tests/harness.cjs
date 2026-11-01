@@ -9,6 +9,7 @@ const API = 'https://script.google.com/macros/s/TEST/exec';
 const REF_API = 'https://script.google.com/macros/s/REF/exec';
 const SALON_API = 'https://script.google.com/macros/s/SALON/exec';
 const KUT_API = 'https://script.google.com/macros/s/KUT/exec';
+const ANA_API = 'https://script.google.com/macros/s/ANA/exec'; // 13.13: idman Analitik
 const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.png': 'image/png', '.woff2': 'font/woff2', '.webp': 'image/webp', '.svg': 'image/svg+xml' };
 
 function startServer(port) {
@@ -108,6 +109,7 @@ async function launch(opts = {}) {
   const env = makeEnv(giris);
   const envs = { TEST: env, REF: makeEnv(refSheets, 'refkey', 'idmanRef.gs') };
   if (salonSheets) envs.SALON = { sheets: env.sheets, CDate: env.CDate }; // salon artık idman betiğinde
+  if (opts.analitik || opts.analitikEnv) envs.ANA = makeEnv(typeof opts.analitik === 'object' ? opts.analitik : require('./analitik-ornek.cjs').analitikSheets(), 'anakey', 'idmanAnalitik.gs', { alias: false }); // 13.13
   if (opts.kut && salonSheets) envs.KUT = makeEnv({ karaHareket: salonSheets.H, karaEtki: salonSheets.hkEtki }, 'kutkey', 'idmanKutuphane.gs', { alias: false });
   const net = { offline: Boolean(opts.offline), delay: {}, override: null, calls: [], external: [] };
   const browser = opts.browser;
@@ -150,6 +152,7 @@ async function launch(opts = {}) {
     const cfg = { apiUrl: API, token: 'secret' };
     if (opts.ref || salonSheets) cfg.ref = { apiUrl: REF_API, token: 'refkey' }; // salon kataloğu idmanRef'te
     if (opts.kut) cfg.kutuphane = { apiUrl: KUT_API, token: 'kutkey' };
+    if (opts.analitik) cfg.analitik = { apiUrl: ANA_API, token: 'anakey' };
     await page.evaluate((c) => localStorage.setItem('ysk.config', JSON.stringify(c)), cfg);
     if (opts.storage) await page.evaluate((s) => { for (const [k, v] of Object.entries(s)) localStorage.setItem(k, JSON.stringify(v)); }, opts.storage);
     await page.reload();
@@ -270,4 +273,4 @@ async function runScenarios(title, scenarios, port) {
   if (failed) process.exit(1);
 }
 
-module.exports = { PLAN_H, ESKI_H, launch, runScenarios, prow, samplePlan, sampleRef, sampleSalon, API, REF_API, SALON_API, KUT_API, D };
+module.exports = { PLAN_H, ESKI_H, launch, runScenarios, prow, samplePlan, sampleRef, sampleSalon, API, REF_API, SALON_API, KUT_API, ANA_API, D };

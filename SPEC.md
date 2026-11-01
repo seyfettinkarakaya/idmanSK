@@ -1,4 +1,4 @@
-# idmanSK — Teknik şartname (sürüm 13.12.1, 22.10.2026)
+# idmanSK — Teknik şartname (sürüm 13.13.0, 22.10.2026)
 
 Bu belge uygulamanın mimarisini, veri modelini, arka uç sözleşmesini ve ekran akışlarını anlatır. Yeni bir
 Claude Code oturumu buradan kaldığı yerden devam edebilmelidir. Kurallar ve günlük komutlar: `CLAUDE.md`.
@@ -96,6 +96,11 @@ silinir (`birak` hariç).
 ### idmanKutuphane.gs
 - getKutuphane → `{ katalog, etki }`.
 
+### idmanAnalitik.gs (13.13, 4. betik; "idman Analitik" tablosu, salt okuma)
+- getAnalitik → `{ hedefler, durum, kn, kesintisiz, kv, test, kara, derece:{etiketler,css}, sezon, model, bolge, bilgi, alindi }`
+  (görünen metinler; sayıya çevirme rapor.js'te). `veri`/`arsiv` okunmaz. İstemci: data.getAnalitik / getCachedAnalitik (`ysk.analitik`),
+  ekran: Performans (app.js showPerf; sekmeler data-pf), ana sayfa satırı `#home-perf`.
+
 ## 4. İstemci veri katmanı (data.js)
 
 - `TARGETS`: 'yuzme' (idman), 'ref' (idmanRef), 'kutuphane'; kara idmanı da idman bağlantısını kullanır.
@@ -178,6 +183,7 @@ Seans bir **olay listesidir**; süre hiçbir yerde biriktirilmez, her şey `repl
 - **kisit.js**: sağlık kısıtı kuralları (MSI kararı, hafifletme, süre bütçesi, kulaç normu).
 - **grup.js / harita.js**: 10 kas grubu, renkler, dokunmatik kas haritası.
 - **analiz.js**: SWOLF, set geçmişi/kıyas, rekor, CSS testi, derece tahmini, ağrı geçmişi.
+- **rapor.js** (13.13): idman Analitik metinlerini sayıya çevirir, Performans ekran modelleri (hedef, hafta, KN, kesintisiz, rekor, sezon, bölge, kara).
 - **salon.js**: kara olay modeli (`set`, `bitti`, `son`, mola), payload, öneri/puanlama, alternatifler, 1RM, hacim.
 
 ## 8. Testler (tests/)
@@ -194,7 +200,7 @@ Seans bir **olay listesidir**; süre hiçbir yerde biriktirilmez, her şey `repl
 
 ## 9. Bilinen durum ve açık işler (22.10.2026)
 
-- Son yayın 13.9.0; idman.gs 13.9 dağıtımı kullanıcıda (yapılmadıysa "kalsın" ve ikinci idman çalışmaz).
+- Son yayın 13.12.1; 13.13.0 (Performans) hazır, idmanAnalitik.gs dağıtımı ve main itişi kullanıcı onayında.
 - Beklemede: B20 gün düzeni, B21 zaruri/seçimlik (bilgi sayfası önerisi IS_LISTESI'nde).
 - Karar bekliyor: B2, B3. Ertelendi: uzak duvar ölçümü, P3-1, F4.
 - İzlenecek: kararsız e2e testleri (sahte saat); 13.4 ilk kara idmanı; 13.9 ilk gerçek kullanım.

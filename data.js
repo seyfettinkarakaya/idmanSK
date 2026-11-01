@@ -18,6 +18,7 @@ const KEYS = {
   salonSession: 'ysk.salonSession',
   salonPlan: 'ysk.salonPlan',   // kaydedilmiş salon planı (ana sayfada "Hazır plan"), yalnızca telefonda
   hazir: 'ysk.hazir',           // (sürüm 13) günlük hazır olma kontrolü { 'YYYY-MM-DD': { uyku, agri, enerji, eklem } }
+  analitik: 'ysk.analitik',     // (13.13) idman Analitik: hedefler, haftalık durum, KN, kesintisiz, rekorlar, sezonlar, bölge
   gecmis: 'ysk.gecmis',         // (13.12) Drive'daki yuzmeVeri/yuzmeSeans son günleri: kıyas, rekor, RPE kayması kaynağı
   hareketNot: 'ysk.hareketNot', // (sürüm 13) harekete sabit not ve ağırlık adımı { ad: { not, adim } }
 };
@@ -466,6 +467,25 @@ export function getCachedRef() {
   return r && validRef(r.data) ? r : null;
 }
 
+// ---------------------------------------------------------------------------
+// idman Analitik (13.13, salt okuma): rapor ve performans takibi (idmanAnalitik.gs)
+// ---------------------------------------------------------------------------
+
+const validAnalitik = (d) => Boolean(d && Array.isArray(d.hedefler) && Array.isArray(d.durum) && d.derece && Array.isArray(d.derece.etiketler));
+
+/** Cevap beklenen biçimde değilse BAD_RESPONSE; önbellek korunur (son iyi veri gösterilir). */
+export async function getAnalitik() {
+  const data = await call('getAnalitik', {}, 'analitik', SLOW_TIMEOUT_MS);
+  if (!validAnalitik(data)) throw new ApiError('BAD_RESPONSE', 'idman Analitik cevabı beklenen biçimde değil. Adres idmanAnalitik betiğinin mi (idmanAnalitik.gs), yeni sürüm dağıtıldı mı?');
+  store(KEYS.analitik, { data, savedAt: Date.now() });
+  return data;
+}
+
+export function getCachedAnalitik() {
+  const r = load(KEYS.analitik, null);
+  return r && validAnalitik(r.data) ? r : null;
+}
+
 /**
  * 13.12: Geçmişle kıyas için Drive'daki kayıtlar (idman.gs getGecmis, salt okuma). Telefon geçmişi silinse de kıyas bozulmaz.
  * Cevap beklenen biçimde değilse (eski betik: UNKNOWN_ACTION ya da BAD_RESPONSE) önbellek korunur.
@@ -547,7 +567,7 @@ export function saveSalonProgram(tarih, hareketler) {
   return call('savePlan', { tarih, hareketler }, 'salon');
 }
 
-/** Salon programı: o günün salonPlan satırlarını siler (13.12.1; saveSalon da siler). */
+/** Salon programı: o günün salonPlan satırlarını siler (13.13.0; saveSalon da siler). */
 export function salonProgramYapildi(tarih) {
   return call('planYapildi', { tarih }, 'salon');
 }

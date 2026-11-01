@@ -350,6 +350,26 @@ await test('13.12 getGecmis: Drive geçmişi önbelleğe yazılır; beklenmeyen 
   assert.equal(data.getGecmisCache().sets.length, 1, 'eski önbellek korunur');
 });
 
+await test('13.13 getAnalitik: dördüncü bağlantı (analitik); önbelleğe yazılır; beklenmeyen cevap BAD_RESPONSE ve son iyi veri korunur', async () => {
+  cfg();
+  const ANA = 'https://script.google.com/macros/s/ANA/exec';
+  assert.equal(data.isConfigured('analitik'), false);
+  data.setConfig({ apiUrl: ANA, token: 'a' }, 'analitik');
+  assert.equal(data.isConfigured('analitik'), true);
+  assert.equal(data.getCachedAnalitik(), null);
+  handler = () => ({ json: { ok: true, data: { hedefler: [{ hedef: 'Fren', durum: '✓' }], durum: [], derece: { etiketler: [], css: [] } } } });
+  const v = await data.getAnalitik();
+  assert.equal(v.hedefler.length, 1);
+  assert.equal(calls[calls.length - 1], 'getAnalitik');
+  assert.equal(urls[urls.length - 1], `${ANA}|a`, 'analitik kendi adresine ve anahtarına gider');
+  assert.equal(data.getCachedAnalitik().data.hedefler[0].hedef, 'Fren');
+  handler = () => ({ json: { ok: true, data: { uygulama: 'başka betik' } } });
+  await assert.rejects(data.getAnalitik(), (e) => e.code === 'BAD_RESPONSE');
+  assert.equal(data.getCachedAnalitik().data.hedefler.length, 1, 'son iyi veri korunur');
+  data.setConfig({ apiUrl: '', token: '' }, 'analitik');
+  assert.equal(data.isConfigured('analitik'), false);
+});
+
 await test('salon kuyruğu: salon kaydı saveSalon ile gider; salon bağlı değilse bekler; geçmiş türe göre', async () => {
   cfg();
   const sp = { tarih: '2026-10-01', hareketler: [{ hareket: 'Row', set: 3, tekrar: 10, agirlik: 20 }] };
