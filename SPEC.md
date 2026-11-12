@@ -1,4 +1,4 @@
-# idmanSK — Teknik şartname (sürüm 13.13.0, 22.10.2026)
+# idmanSK — Teknik şartname (sürüm 13.13.1, 22.10.2026)
 
 Bu belge uygulamanın mimarisini, veri modelini, arka uç sözleşmesini ve ekran akışlarını anlatır. Yeni bir
 Claude Code oturumu buradan kaldığı yerden devam edebilmelidir. Kurallar ve günlük komutlar: `CLAUDE.md`.
@@ -200,7 +200,7 @@ Seans bir **olay listesidir**; süre hiçbir yerde biriktirilmez, her şey `repl
 
 ## 9. Bilinen durum ve açık işler (22.10.2026)
 
-- Son yayın 13.12.1; 13.13.0 (Performans) hazır, idmanAnalitik.gs dağıtımı ve main itişi kullanıcı onayında.
+- Son yayın 13.12.1; 13.13.1 (Performans) hazır, idmanAnalitik.gs dağıtımı ve main itişi kullanıcı onayında.
 - Beklemede: B20 gün düzeni, B21 zaruri/seçimlik (bilgi sayfası önerisi IS_LISTESI'nde).
 - Karar bekliyor: B2, B3. Ertelendi: uzak duvar ölçümü, P3-1, F4.
 - İzlenecek: kararsız e2e testleri (sahte saat); 13.4 ilk kara idmanı; 13.9 ilk gerçek kullanım.

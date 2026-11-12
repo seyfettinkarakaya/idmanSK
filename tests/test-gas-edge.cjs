@@ -229,6 +229,20 @@ test('13.12 Seans Tarih öğleden sonra: 27.10.2026 14:24:08 gerçek timestamp (
   assert.strictEqual(e.sheets.seans.fmt[1][0], 'dd.mm.yyyy HH:mm:ss');
 });
 
+test('13.13.1 Seans Tarih telefondaki duvar saatiyle (baslangicYerel): ms başka güne düşse de saat atılmaz; yanlış güne ait yerel saat yok sayılır', () => {
+  const e = env([row('2026-11-12', 1, 'WU', 1, 200)]);
+  // ms tablonun saat diliminde (fake: UTC) bir önceki güne düşer; telefon yerel saati 12.11 07:15:30
+  const t = Date.UTC(2026, 10, 11, 20, 15, 30);
+  const r = e.call({ ...fin('2026-11-12', [{ sira: 1, tamamlandi: true, gercek: '04:00.0' }]), baslangic: t, baslangicYerel: '2026-11-12 07:15:30' });
+  assert.ok(r.ok, JSON.stringify(r));
+  const c = e.sheets.seans.data[1][0];
+  assert.deepStrictEqual([c.getUTCDate(), c.getUTCHours(), c.getUTCMinutes(), c.getUTCSeconds()], [12, 7, 15, 30], 'hücrede telefondaki saat');
+  const e2 = env([row('2026-11-12', 1, 'WU', 1, 200)]);
+  const r2 = e2.call({ ...fin('2026-11-12', [{ sira: 1, tamamlandi: true, gercek: '04:00.0' }]), baslangic: t, baslangicYerel: '2026-11-10 19:00:00' });
+  assert.ok(r2.ok, JSON.stringify(r2));
+  assert.deepStrictEqual([e2.sheets.seans.data[1][0].getUTCHours(), e2.sheets.seans.data[1][0].getUTCMinutes()], [0, 0], 'başka güne ait yerel saat: eski davranış (ms de başka gün → yalnız gün)');
+});
+
 test('13.12 getGecmis (salt okuma): yuzmeVeri son günleri + yuzmeSeans RPE/havuz; süresiz set ve eski satır dışarıda; tablo değişmez', () => {
   const gun = (k) => new Date(Date.now() - k * 86400000).toISOString().slice(0, 10);
   const eskiH = [...ESKI_H, 'Gerçek Zone'];

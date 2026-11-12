@@ -31,7 +31,7 @@ function makeEnv(sheets, token='secret', file='idman.gs', { alias = true } = {})
   const ctx = {
     __init: true,
     SpreadsheetApp: { getActiveSpreadsheet: ()=>ss, flush(){} },
-    Utilities: { formatDate:(d)=>`${d.getUTCFullYear()}-${pad(d.getUTCMonth()+1)}-${pad(d.getUTCDate())}`, parseDate:(s)=>{const [y,m,d]=s.split('-').map(Number); return new (vm.runInContext('Date',ctx))(Date.UTC(y,m-1,d));}, getUuid:()=>crypto.randomUUID() },
+    Utilities: { formatDate:(d)=>`${d.getUTCFullYear()}-${pad(d.getUTCMonth()+1)}-${pad(d.getUTCDate())}`, parseDate:(s)=>{const [dd,tt]=s.split(' '); const [y,m,d]=dd.split('-').map(Number); const [hh,mi,ss]=(tt||'0:0:0').split(':').map(Number); return new (vm.runInContext('Date',ctx))(Date.UTC(y,m-1,d,hh,mi,ss));}, getUuid:()=>crypto.randomUUID() },
     PropertiesService: { getScriptProperties: ()=>({ getProperty:()=>token, setProperty(){} }) },
     LockService: { getDocumentLock: ()=>({ tryLock:()=>true, releaseLock(){} }), getScriptLock: ()=>null },
     ContentService: { createTextOutput: s=>({ s, setMimeType(){ return this; } }), MimeType:{JSON:'json'} },

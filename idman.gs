@@ -356,7 +356,7 @@ function finishSession_(req) {
   var eskiTarihCol = col_(eski, COL.tarih, true);
   var seansTarihCol = seans ? col_(seans, SEANS_COL.tarih, true) : -1;
 
-  var baslangic = seansStart_(req.baslangic, tarih, tz);
+  var baslangic = seansStart_(req.baslangic, tarih, tz, req.baslangicYerel);
   var eskiOnce = rowsForDate_(eski, eskiTarihCol, tarih, tz).length;
   var seansOnce = seans ? rowsForDate_(seans, seansTarihCol, tarih, tz).length : 0;
 
@@ -524,7 +524,13 @@ function buildEskiRow_(plan, eski, planRow, sonuc, tarih, tz) {
 /**
  * Seansın başlangıç anı (ms) → Date; yalnızca aynı güne düşüyorsa (yoksa null: Tarih saatsiz yazılır).
  */
-function seansStart_(ms, tarih, tz) {
+function seansStart_(ms, tarih, tz, yerel) {
+  // 13.13.1: istemci telefondaki duvar saatini de yollar ("yyyy-MM-dd HH:mm:ss"). Tablonun saat diliminde ayrıştırılır:
+  // hücrede telefondaki saat görünür ve saat dilimi yanlış olsa da "aynı gün" kontrolü yüzünden saat atılmaz.
+  var m = typeof yerel === 'string' ? yerel.match(/^(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}:\d{2})$/) : null;
+  if (m && m[1] === tarih) {
+    try { return Utilities.parseDate(yerel, tz, 'yyyy-MM-dd HH:mm:ss'); } catch (e) { /* ms'ye düş */ }
+  }
   var n = Number(ms);
   if (!isFinite(n) || n <= 0) return null;
   var d = new Date(n);
@@ -1110,7 +1116,7 @@ function saveSalon_(req) {
     var ksTarih = col_(ks, KARA_SEANS_COL.tarih, true);
     var ksWritten = null;
     try {
-      ksWritten = writeRows_(ks, [buildKaraSeansRow_(ks, day, req.seans, seansStart_(req.seans.baslangic, tarih, tz))], true); // en yeni üstte
+      ksWritten = writeRows_(ks, [buildKaraSeansRow_(ks, day, req.seans, seansStart_(req.seans.baslangic, tarih, tz, req.seans.baslangicYerel))], true); // en yeni üstte
       SpreadsheetApp.flush();
       if (countDateInColumn_(ks.sheet, ksTarih, tarih, tz) !== 1) {
         throw appError_('WRITE_MISMATCH', adOf_(SHEET_KARA_SEANS) + ' satırı doğrulanamadı.');

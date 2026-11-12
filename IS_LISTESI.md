@@ -719,6 +719,8 @@ Sürüm 8 görünümü korunuyor; v10/v11 önerileri beğenilmedi, görsel yenil
 
 ## Tamamlanan
 
+- [x] Sürüm 13.13.1 (12.11): seans saati yanlış (tablo saat dilimi Los Angeles → akşam 08:47, sabah 00:00:00). baslangicYerel ile telefondaki saat yazılır. Dağıtım: idman.gs yeni sürüm. Eski satırların saati elle düzeltilecek.
+
 - [x] Sürüm 13.13.0 (01.11): Performans ekranları (idman Analitik): Hedefler, Hafta, Kontrol, Kesintisiz+KV, Rekor/CSS, Sezon+model, Bölge, Kara; ana sayfada hedef durumu satırı + geride kalan hedef uyarısı; dördüncü bağlantı idmanAnalitik. Dağıtım: yeni betik idmanAnalitik.gs + uygulama.
 
 - [x] Sürüm 13.12.1 (27.10 telefondan geri bildirim): dinlenme sayacı taşması, bölge yazısı kendi renginde, yüzerken sade kart + daha büyük saat. Dağıtım gerekmez; tekrar/set kutularındaki sarı alt çizgi kaldırıldı. Test: 'sporRef beklenmeyen cevap' senaryosu 13.12'den beri ~%35 düşüyordu (ilk açılıştaki getRef cevabı önbelleği silmeden sonra yeniden yazıyordu); önbelleğin yazılması beklenerek giderildi (8 koşuda 0 hata).

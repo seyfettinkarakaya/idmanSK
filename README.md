@@ -372,6 +372,12 @@ Hata kodları: `AUTH`, `LOCKED`, `DUPLICATE`, `SAME_DAY`, `NOT_FOUND`, `PLAN_MIS
 3. Telefonda yeni yerel anahtarlar: `ysk.hazir` (hazır olma kontrolleri, 60 gün), `ysk.hareketNot` (harekete sabit not);
    ayarlar: `yer` (Salon/Ev/Otel), `bildirim`. Ayarlar → Yedek indir: anahtarlar hariç JSON.
 
+## Sürüm 13.13.1'de neler var (dağıtım: idman.gs yeni sürüm + uygulama)
+
+- **Seans saati artık telefondaki saat:** tablo yanlış saat diliminde (ör. America/Los_Angeles) olsa da Tarih hücresinde telefondaki duvar saati görünür
+  (uygulama `baslangicYerel` yollar, betik tablonun diliminde ayrıştırır). Eskiden akşam idmanı sabah gibi (08:47), Türkiye'de sabah idmanı ise saatsiz (00:00:00) yazılıyordu.
+- Not: Sheets tarih-saati yazıldığı anki saat dilimine göre saklar; saat dilimi sonradan değişirse eski satırlar düzelmez (elle düzeltilir).
+
 ## Sürüm 13.13.0'da neler var (dağıtım: yeni betik idmanAnalitik.gs + uygulama)
 
 - **Performans (rapor takibi):** Drive'daki "idman Analitik" tablosu uygulamada okunur. Ana sayfada "Performans" satırı

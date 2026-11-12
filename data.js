@@ -362,8 +362,20 @@ function markHistory(tarih, status, tur = 'yuzme') {
 // Seans kaydı ve kuyruk
 // ---------------------------------------------------------------------------
 
+/**
+ * 13.13.1: başlangıç anının telefondaki duvar saati ("2026-11-10 19:47:08"). Betik Tarih hücresini bu yazıyı tablonun saat
+ * diliminde ayrıştırarak yazar; tablo yanlış bir saat diliminde olsa bile hücrede telefondaki saat görünür.
+ */
+export function yerelSaat(ms) {
+  const n = Number(ms);
+  if (!isFinite(n) || n <= 0) return '';
+  const d = new Date(n); const p = (x) => String(x).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+}
+
 export function finishSession(payload) {
-  return call('finishSession', payload);
+  const y = yerelSaat(payload && payload.baslangic);
+  return call('finishSession', y ? { ...payload, baslangicYerel: y } : payload);
 }
 
 export function getQueue() {
@@ -559,7 +571,8 @@ export function getCachedSalon() {
 }
 
 export function saveSalon(payload) {
-  return call('saveSalon', payload, 'salon');
+  const y = yerelSaat(payload && payload.seans && payload.seans.baslangic);
+  return call('saveSalon', y ? { ...payload, seans: { ...payload.seans, baslangicYerel: y } } : payload, 'salon');
 }
 
 /** Salon programı (sürüm 13): bir günün planını SalonTakip "plan" sayfasına yazar (boş liste = günü siler). */
@@ -567,7 +580,7 @@ export function saveSalonProgram(tarih, hareketler) {
   return call('savePlan', { tarih, hareketler }, 'salon');
 }
 
-/** Salon programı: o günün salonPlan satırlarını siler (13.13.0; saveSalon da siler). */
+/** Salon programı: o günün salonPlan satırlarını siler (13.13.1; saveSalon da siler). */
 export function salonProgramYapildi(tarih) {
   return call('planYapildi', { tarih }, 'salon');
 }

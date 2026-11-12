@@ -286,7 +286,15 @@ test('13.9 karaSeans Tarih başlangıç saatiyle (karaVeri saatsiz); başlangı�
   assert.strictEqual(e.sheets.karaSeans.fmt[1][0], 'dd.mm.yyyy HH:mm:ss');
   assert.strictEqual(e.sheets.karaVeri.data[1][0].getUTCHours(), 0, 'karaVeri saatsiz');
   assert.deepStrictEqual(e.call({ action: 'getSalon' }).data.seans.map((x) => x.tarih), ['2026-10-14'], 'okurken gün');
+  // 13.13.1: telefondaki duvar saati (baslangicYerel) tablo dilimindeki güne bakılmadan aynen yazılır
+  const e2 = mk(true);
+  const t2 = Date.UTC(2026, 9, 13, 23, 0, 0);
+  const r2 = e2.call({ action: 'saveSalon', tarih: '2026-10-14', hareketler: [{ hareket: 'Dead Bug', set: 3, tekrar: 10, sure: '04:00' }], seans: { sure: '0:40:00', rpe: 6, baslangic: t2, baslangicYerel: '2026-10-14 08:05:09' } });
+  assert.ok(r2.ok, JSON.stringify(r2));
+  const c2 = e2.sheets.karaSeans.data[1][0];
+  assert.deepStrictEqual([c2.getUTCDate(), c2.getUTCHours(), c2.getUTCMinutes(), c2.getUTCSeconds()], [14, 8, 5, 9]);
 });
+
 
 test('13.4 idmanKutuphane.gs: karaHareket + karaEtki (A1 boş → A sütunu hareket), karaKas okunmaz; eski adlar da tanınır; token ve bilinmeyen işlem', () => {
   const e = makeEnv({
